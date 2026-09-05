@@ -7,7 +7,7 @@ import {
   type CompositePath,
 } from '@/lib/sources/engines/composite';
 import { parseWalmartResponse, createWalmartAdapter } from '@/lib/sources/walmart';
-import { parseWordPressPosts, createCostcoAdapter } from '@/lib/sources/costco';
+import { createCostcoAdapter } from '@/lib/sources/costco';
 import type { RawDeal } from '@/lib/sources/types';
 
 /**
@@ -273,52 +273,6 @@ describe('the Walmart payload', () => {
   it('returns nothing for a shape it does not recognise', () => {
     expect(parseWalmartResponse({ unexpected: true })).toEqual([]);
     expect(parseWalmartResponse(null)).toEqual([]);
-  });
-});
-
-describe('the Costco blog path', () => {
-  const posts = [
-    {
-      id: 101,
-      link: 'https://cocowest.ca/2026/03/deal/',
-      title: { rendered: 'Kirkland Olive Oil $12.99 (was $19.99)' },
-      excerpt: { rendered: '<p>Sale price $12.99, regular $19.99.</p>' },
-      content: { rendered: '' },
-      date_gmt: '2026-03-01T10:00:00',
-      _embedded: { 'wp:featuredmedia': [{ source_url: 'https://cocowest.ca/img.jpg' }] },
-    },
-    {
-      id: 102,
-      link: 'https://cocowest.ca/2026/03/article/',
-      title: { rendered: 'What is new at Costco this week' },
-      excerpt: { rendered: '<p>A roundup with no prices at all.</p>' },
-      content: { rendered: '' },
-    },
-  ];
-
-  it('emits a post that states both prices', () => {
-    const deals = parseWordPressPosts(posts);
-
-    expect(deals).toHaveLength(1);
-    expect(deals[0]?.price).toBe(12.99);
-    expect(deals[0]?.priceWas).toBe(19.99);
-  });
-
-  it('skips an article with no prices rather than listing it priceless', () => {
-    const titles = parseWordPressPosts(posts).map((d) => d.title);
-    expect(titles).not.toContain('What is new at Costco this week');
-  });
-
-  it('says warehouse pricing is regional, because a wrong price at the till is worse than none', () => {
-    expect(parseWordPressPosts(posts)[0]?.stockNote).toContain('varies by region');
-  });
-
-  it('strips markup and entities from the title', () => {
-    expect(parseWordPressPosts(posts)[0]?.title).not.toContain('<');
-  });
-
-  it('returns nothing for a non-array payload', () => {
-    expect(parseWordPressPosts({ posts: [] })).toEqual([]);
   });
 });
 

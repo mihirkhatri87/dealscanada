@@ -8,6 +8,7 @@ import {
   type CompositePathResult,
 } from './engines/composite';
 import { parseProductPage } from './engines/jsonld';
+import { parseWordPressPosts } from './engines/wordpress';
 
 /**
  * Costco Canada.
@@ -74,7 +75,21 @@ export function blogPath(feeds: string[]): CompositePath {
       for (const feed of feeds) {
         try {
           const response = await context.http.fetchJson<unknown>(feed, { skipRobots: true });
-          deals.push(...parseWordPressPosts(response.data));
+          // The shared WordPress engine, not a second copy of it: these blogs
+          // are ordinary WordPress sites and the only Costco-specific part is
+          // the note below.
+          deals.push(
+            ...parseWordPressPosts(response.data, {
+              merchantDomain: 'costco.ca',
+              merchantName: 'Costco Canada',
+            }).map((deal) => ({
+              ...deal,
+              // Warehouse pricing is regional and time-boxed. Saying so is the
+              // difference between a useful tip and a broken promise at the till.
+              stockNote:
+                'In-warehouse price reported by a Costco blog — varies by region and week.',
+            })),
+          );
         } catch (error) {
           failures.push(error instanceof Error ? error.message : String(error));
         }
@@ -88,99 +103,6 @@ export function blogPath(feeds: string[]): CompositePath {
       };
     },
   };
-}
-
-/**
- * Maps WordPress posts to deals.
- *
- * These are editorial posts, not a product feed, so a post yields a deal only
- * when it actually states both prices. A post about a sale with no numbers in it
- * is an article, and listing it as a deal with no price would be worse than
- * omitting it.
- */
-export function parseWordPressPosts(payload: unknown): RawDeal[] {
-  if (!Array.isArray(payload)) return [];
-
-  const deals: RawDeal[] = [];
-
-  for (const entry of payload) {
-    if (entry === null || typeof entry !== 'object') continue;
-    const post = entry as Record<string, unknown>;
-
-    const id = post['id'];
-    const title = rendered(post['title']);
-    const link = typeof post['link'] === 'string' ? post['link'] : null;
-    if (id === undefined || !title || !link) continue;
-
-    const body = `${title} ${rendered(post['excerpt']) ?? ''} ${rendered(post['content']) ?? ''}`;
-    const prices = extractPrices(body);
-    if (prices.length < 2) continue;
-
-    // The highest number is the before price and the lowest the after; a post
-    // may quote several, and the pair that matters is the widest spread.
-    const price = Math.min(...prices);
-    const was = Math.max(...prices);
-    if (was <= price) continue;
-
-    deals.push({
-      sourceId: `costco-blog:${String(id)}`,
-      title,
-      url: link,
-      description: rendered(post['excerpt']),
-      imageUrl: featuredImage(post),
-      price,
-      priceWas: was,
-      currency: 'CAD',
-      merchantDomain: 'costco.ca',
-      merchantName: 'Costco Canada',
-      // Warehouse pricing is regional and time-boxed. Saying so on the card is
-      // the difference between a useful tip and a broken promise at the till.
-      stockNote: 'In-warehouse price reported by a Costco blog — varies by region and week.',
-      postedAt: typeof post['date_gmt'] === 'string' ? `${post['date_gmt']}Z` : null,
-    });
-  }
-
-  return deals;
-}
-
-function extractPrices(text: string): number[] {
-  const found: number[] = [];
-  for (const match of text.matchAll(/\$\s?(\d{1,4}(?:[.,]\d{2})?)/g)) {
-    const parsed = Number((match[1] ?? '').replace(',', '.'));
-    if (Number.isFinite(parsed) && parsed > 0) found.push(parsed);
-  }
-  return found;
-}
-
-function rendered(value: unknown): string | null {
-  if (value === null || typeof value !== 'object') return null;
-  const text = (value as Record<string, unknown>)['rendered'];
-  if (typeof text !== 'string') return null;
-
-  const stripped = text
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&#8217;|&#039;/g, "'")
-    .replace(/&amp;/g, '&')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  return stripped === '' ? null : stripped;
-}
-
-function featuredImage(post: Record<string, unknown>): string | null {
-  const embedded = post['_embedded'];
-  if (embedded === null || typeof embedded !== 'object') return null;
-
-  const media = (embedded as Record<string, unknown>)['wp:featuredmedia'];
-  if (!Array.isArray(media)) return null;
-
-  for (const item of media) {
-    if (item === null || typeof item !== 'object') continue;
-    const url = (item as Record<string, unknown>)['source_url'];
-    if (typeof url === 'string' && url.trim() !== '') return url;
-  }
-  return null;
 }
 
 const BLOG_FEEDS = [

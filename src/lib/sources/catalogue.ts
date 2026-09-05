@@ -11,7 +11,15 @@ import { z } from 'zod';
  * what actually works from a Canadian IP rather than what we hoped would.
  */
 
-export const ENGINES = ['shopify', 'sfcc', 'hybris', 'gapinc', 'magento', 'jsonld'] as const;
+export const ENGINES = [
+  'shopify',
+  'sfcc',
+  'hybris',
+  'gapinc',
+  'magento',
+  'wordpress',
+  'jsonld',
+] as const;
 export type Engine = (typeof ENGINES)[number];
 
 export const retailerConfigSchema = z.object({
@@ -67,6 +75,15 @@ export const retailerConfigSchema = z.object({
   hybrisApiBase: z.string().url().nullish(),
   /** The banner's baseStoreId on the shared platform. Defaults to the entry id. */
   hybrisBanner: z.string().nullish(),
+
+  /**
+   * For blogs: the retailer a publication writes about.
+   *
+   * A deal blog is the source, not the merchant. Filing its posts under its own
+   * domain would put "Costco West Fan Blog" on a card about a Costco sale.
+   */
+  subjectDomain: z.string().nullish(),
+  subjectName: z.string().nullish(),
 
   /** Per-retailer politeness override. */
   rateLimitRps: z.number().positive().nullish(),

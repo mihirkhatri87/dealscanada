@@ -279,6 +279,32 @@ the item shape changed.
 
 ---
 
+### WordPress engine — the Canadian deal blogs
+
+**Endpoint:** `/wp-json/wp/v2/posts?per_page=&_embed=1`
+**Fixture:** exercised in `tests/sources/wordpress.test.ts`
+
+Smart Canucks, CoCo West and Costco East are editorial sites, not storefronts.
+All three run WordPress, whose REST API is public and uniform, so adding another
+blog is a catalogue entry.
+
+Two decisions shape it. **A post is an article, and only some articles are
+deals** — one that names fewer than two prices is a roundup, and a card for it
+would make a claim the post does not support, so it is skipped. And **the blog is
+the source, not the merchant**: `subjectDomain` files a CoCo West post under
+Costco, or the merchant page for a blog fills with other retailers' deals and a
+card about a Costco sale says "Costco West Fan Blog" as the store.
+
+`_embed=1` is not decoration — it returns the featured image in the same
+response, saving one request per post.
+
+**Drift looks like:** a 404 on `/wp-json/` → the site disabled the REST API.
+There is no useful fallback: RSS carries neither prices nor images, which are the
+two things this engine needs, and the reason string says so rather than
+pretending otherwise.
+
+---
+
 ### Amazon — two adapters, neither of which touches amazon.ca
 
 Amazon is the retailer people most want on a Canadian deal site and the one we
@@ -326,7 +352,7 @@ account's actual sales, so a new account hits it constantly. That is not a bug.
 ## Not built yet
 
 These are designed and specified in the PRD but **not in the repository**. Listed
-here so `npm run health` showing 68 sources rather than 101 is not a mystery.
+here so `npm run health` showing 71 sources rather than 101 is not a mystery.
 
 | Planned | Story | Why it is not here yet |
 |---|---|---|

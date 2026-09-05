@@ -18,6 +18,7 @@ import { createShopifyAdapter } from './engines/shopify';
 import { createJsonLdAdapter } from './engines/jsonld';
 import { createSfccAdapter } from './engines/sfcc';
 import { createGapIncAdapter } from './engines/gapinc';
+import { createWordPressAdapter } from './engines/wordpress';
 import { createHybrisAdapter } from './engines/hybris';
 import { buildStocktrackAdapter, type StocktrackStore } from './stocktrack';
 import { RETAILER_CATALOGUE } from './catalogue-data';
@@ -59,6 +60,9 @@ for (const retailer of runnableRetailers(RETAILER_CATALOGUE)) {
       break;
     case 'gapinc':
       register(createGapIncAdapter(retailer));
+      break;
+    case 'wordpress':
+      register(createWordPressAdapter(retailer));
       break;
     case 'hybris':
       register(createHybrisAdapter(retailer));
