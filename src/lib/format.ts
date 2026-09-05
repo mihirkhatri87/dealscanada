@@ -42,6 +42,19 @@ export function presentEvidence(evidence: EvidenceLevel): string {
 }
 
 /**
+ * How confidently the discount badge should be styled.
+ *
+ * A corroborated saving earns the deal colour. An uncorroborated one is still
+ * shown - it is what the retailer claims and hiding it would be its own
+ * distortion - but in a neutral tone, because dressing an unchecked claim in the
+ * same green as a verified one is exactly the visual sleight of hand this
+ * product exists to stop.
+ */
+export function discountConfidence(deal: DealWithRelations): 'verified' | 'claimed' {
+  return deal.marketDiscountPct !== null && deal.marketDiscountPct > 0 ? 'verified' : 'claimed';
+}
+
+/**
  * The percentage the card should lead with.
  *
  * Prefers the market-corroborated figure, and returns null for a flagged anchor

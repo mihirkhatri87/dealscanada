@@ -4,6 +4,7 @@ import {
   categoryLabel,
   departmentLabel,
   expiryLabel,
+  discountConfidence,
   formatCents,
   headlineDiscount,
   isExpiringSoon,
@@ -67,7 +68,18 @@ export function DealCard({ deal, now }: { deal: DealWithRelations; now?: Date })
         )}
 
         {discount !== null && (
-          <span className="absolute left-2 top-2 rounded-sm bg-deal px-1.5 py-0.5 font-mono text-xs font-bold text-deal-fg">
+          <span
+            className={`absolute left-2 top-2 rounded-sm px-1.5 py-0.5 font-mono text-xs font-bold ${
+              discountConfidence(deal) === 'verified'
+                ? 'bg-deal text-deal-fg'
+                : 'bg-bg/85 text-fg-muted backdrop-blur'
+            }`}
+            title={
+              discountConfidence(deal) === 'verified'
+                ? 'Verified against other stores'
+                : 'Discount as claimed by the retailer'
+            }
+          >
             −{discount}%
           </span>
         )}

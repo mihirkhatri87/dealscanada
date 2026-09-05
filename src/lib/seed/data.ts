@@ -342,6 +342,15 @@ export function buildSeedDeals(
           observedAt: new Date(now.getTime() - daysAgo * 86_400_000).toISOString(),
         });
       }
+
+      // Today's price is itself an observation, and a chart that stops above the
+      // price shown beside it just looks broken. Verification still reasons over
+      // PRIOR points only - it is handed the series without this entry.
+      priceHistory.push({
+        dealId: id,
+        price: spec.price,
+        observedAt: now.toISOString(),
+      });
     }
   }
 
@@ -368,6 +377,8 @@ function applyVerification(
   for (const point of priceHistory) {
     const deal = dealsById.get(point.dealId);
     if (!deal?.productKey) continue;
+    // Skip today's observation: assessDealQuality is defined over prior prices.
+    if (point.price === deal.priceNow && point.observedAt === now.toISOString()) continue;
 
     const bucket = historyByProductKey.get(deal.productKey) ?? [];
     bucket.push({
