@@ -4,7 +4,7 @@ import type { Category, Department } from '../db/types';
 import type { RawDeal } from '../sources/types';
 import { computeDiscount, parsePriceToCents } from '../util/money';
 import { canonicalizeUrl, extractAsin, extractDomain } from '../util/url';
-import { classifyCategory, classifyDepartment } from './classify';
+import { classifyCategory, classifyDepartment, extractBrand } from './classify';
 import { resolveProductIdentity } from './product-key';
 import { extractCouponFrom } from './coupon';
 import { computeHeat } from './score';
@@ -128,14 +128,24 @@ export function normalizeDeal(raw: RawDeal, context: NormalizeContext): Normaliz
     title,
     description,
     sourceHint: raw.departmentHint ?? null,
+    // Some retailers sell to one department only, which is as strong a signal as
+    // the word "women's" would have been - and community-sourced deals often
+    // carry a merchant when they carry nothing else.
+    merchantSlug: merchant?.slug ?? null,
     category,
   });
+
+  // An engine-supplied brand is authoritative; the title is only consulted when
+  // there was no field to read, which is the case for every community-sourced
+  // deal. Brand feeds product identity, so recovering it widens the set of deals
+  // the verification pass can compare across merchants.
+  const brand = raw.brand?.trim() || extractBrand(title);
 
   // Identity for cross-merchant comparison. Resolved at ingest so the
   // verification pass can group the same product across every source.
   const identity = resolveProductIdentity({
     title,
-    brand: raw.brand ?? null,
+    brand,
     gtin: raw.gtin ?? null,
     mpn: raw.mpn ?? null,
     asin: raw.asin ?? extractAsin(canonicalUrl),
@@ -169,7 +179,7 @@ export function normalizeDeal(raw: RawDeal, context: NormalizeContext): Normaliz
       storeId: raw.storeId ?? null,
       category,
       department,
-      brand: raw.brand?.trim() || null,
+      brand,
       sizesAvailable: raw.sizesAvailable?.length ? raw.sizesAvailable : null,
       productKey: identity.key,
       productKeyStrength: identity.strength,

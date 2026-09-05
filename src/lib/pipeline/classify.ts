@@ -98,9 +98,12 @@ const RULES: Rule[] = [
     weight: 7,
     patterns: [
       /\b(jackets?|coats?|parkas?|hoodies?|sweaters?|cardigans?|fleeces?|vests?)\b/i,
-      /\b(jeans|pants|chinos|leggings|joggers|shorts|skirt|dress|blouse|shirt|tee|t-shirt)\b/i,
-      /\b(pyjamas|pajamas|underwear|socks|bra|swimsuit|activewear|outerwear)\b/i,
-      /\b(sweatshirts?|blazers?|suits?|tank top|polo)\b/i,
+      /\b(jeans|pants?|chinos|leggings|joggers|shorts|skirt|dress|blouse|shirt|tee|t-shirt)\b/i,
+      /\b(pyjamas|pajamas|nightgowns?|underwear|socks|bras?|swimsuit|activewear|outerwear)\b/i,
+      /\b(sweatshirts?|blazers?|suits?|tank top|polo|bodysuits?|overcoats?|trousers?)\b/i,
+      // Singular garment nouns the plural-only patterns above miss, plus the
+      // accessories that were landing in "other" and so never got a department.
+      /\b(sweatpants?|trackpants?|beanie|toque|scarf|mitts?|gloves?|overall|bib)\b/i,
     ],
   },
   {
@@ -265,7 +268,11 @@ export function classifyCategory(input: ClassifyInput): Category {
 const DEPARTMENT_RULES: Array<{ department: Department; patterns: RegExp[] }> = [
   {
     department: 'baby',
-    patterns: [/\b(baby|infant|newborn|0-24 months|preemie|b[eé]b[eé])\b/i],
+    patterns: [
+      /\b(baby|infant|newborn|0-24 months|preemie|b[eé]b[eé])\b/i,
+      // Gear that is unambiguously for an infant even when the word is absent.
+      /\b(car seat|crib|bassinet|stroller|playpen|swaddle|onesie|bunting bag)\b/i,
+    ],
   },
   {
     department: 'girls',
@@ -277,19 +284,48 @@ const DEPARTMENT_RULES: Array<{ department: Department; patterns: RegExp[] }> = 
   },
   {
     department: 'women',
-    patterns: [/\b(women'?s?|ladies|womens|female|maternity)\b/i],
+    patterns: [
+      /\b(women'?s?|ladies'?|womens|female|maternity)\b/i,
+      // Garments that name their own department. A "blouse" is not filed under
+      // unisex by any retailer, and leaving it there is how a shopper filtering
+      // for womenswear misses half of it.
+      /\b(blouse|bodysuit|nightgown|bra|camisole|skort|jumpsuit|romper)\b/i,
+    ],
   },
   {
     department: 'men',
-    patterns: [/\b(men'?s?|mens|male)\b/i],
+    patterns: [/\b(men'?s?|mens|male|man'?s)\b/i, /\b(necktie|cummerbund)\b/i],
   },
 ];
+
+/**
+ * Retailers that sell to exactly one department.
+ *
+ * The catalogue's `departmentHint` carries this for engines that know it, but a
+ * deal can arrive from RedFlagDeals or a blog with only a merchant slug — and
+ * "Penningtons" is as reliable a signal as the word "women's" would have been.
+ */
+const SINGLE_DEPARTMENT_MERCHANTS: Record<string, Department> = {
+  penningtons: 'women',
+  reitmans: 'women',
+  'rw-co': 'women',
+  cleo: 'women',
+  'suzy-shier': 'women',
+  rickis: 'women',
+  'northern-reflections': 'women',
+  athleta: 'women',
+  'tip-top-tailors': 'men',
+  moores: 'men',
+  bootlegger: 'men',
+};
 
 export interface DepartmentInput {
   title: string;
   description?: string | null;
   /** Department the engine itself supplied — always preferred when present. */
   sourceHint?: string | null;
+  /** Resolved merchant, for retailers that sell to one department only. */
+  merchantSlug?: string | null;
   category?: Category;
 }
 
@@ -305,9 +341,16 @@ export function classifyDepartment(input: DepartmentInput): Department {
 
   const haystack = `${input.title} ${input.description ?? ''}`;
 
+  // The title outranks the merchant: a single-department retailer can still
+  // stock a "boys" line, and the words in front of us beat an assumption.
   for (const rule of DEPARTMENT_RULES) {
     if (rule.patterns.some((pattern) => pattern.test(haystack))) return rule.department;
   }
+
+  const byMerchant = input.merchantSlug
+    ? SINGLE_DEPARTMENT_MERCHANTS[input.merchantSlug.toLowerCase()]
+    : undefined;
+  if (byMerchant) return byMerchant;
 
   // Only apparel-ish categories carry a meaningful department.
   const apparelCategories: Category[] = ['clothing', 'shoes-accessories', 'baby-kids'];
@@ -328,4 +371,111 @@ function normalizeDepartmentHint(hint: string | null | undefined): Department | 
   if (/\b(unisex|all)\b/.test(value)) return 'unisex';
 
   return null;
+}
+
+/**
+ * Brands worth recognising in a title when the engine did not supply one.
+ *
+ * Deliberately short. A long dictionary is a maintenance burden that decays, and
+ * the engines that matter (Shopify's `vendor`, Gap Inc.'s `brandName`, Hybris's
+ * `brand.label`) already supply this. These are the names that show up in
+ * community-sourced titles, where there is no field to read.
+ */
+const KNOWN_BRANDS = [
+  'Apple',
+  'Samsung',
+  'Sony',
+  'LG',
+  'Google',
+  'Bose',
+  'JBL',
+  'GoPro',
+  'Dyson',
+  'Philips',
+  'Dell',
+  'Lenovo',
+  'HP',
+  'Asus',
+  'Acer',
+  'Logitech',
+  'Corsair',
+  'Razer',
+  'Seagate',
+  'Nintendo',
+  'PlayStation',
+  'Xbox',
+  'LEGO',
+  'Hot Wheels',
+  'Paw Patrol',
+  'Barbie',
+  'Nerf',
+  'Crayola',
+  'Ravensburger',
+  'Melissa & Doug',
+  'Magna-Tiles',
+  'Squishmallows',
+  'Nike',
+  'Adidas',
+  'Under Armour',
+  'Columbia',
+  'Blundstone',
+  'Roots',
+  'Lululemon',
+  "Levi's",
+  'Carhartt',
+  'Patagonia',
+  'Canada Goose',
+  'The North Face',
+  'Uniqlo',
+  'Instant Pot',
+  'Ninja',
+  'KitchenAid',
+  'Nespresso',
+  'Keurig',
+  'Weber',
+  'Coleman',
+  'YETI',
+  'DEWALT',
+  'Makita',
+  'Milwaukee',
+  'Bosch',
+  'Mastercraft',
+  'Michelin',
+  'Bridgestone',
+  'Graco',
+  'Britax',
+  'Pampers',
+  'Huggies',
+  'CeraVe',
+  'La Roche-Posay',
+  'Olay',
+  'Kirkland',
+  'Bauer',
+  'CCM',
+  'NordicTrack',
+  'Garmin',
+  'Fitbit',
+  'Kindle',
+  'Kobo',
+  'Duracell',
+];
+
+/**
+ * Recovers a brand from a title.
+ *
+ * Only ever a fallback: an engine-supplied brand is authoritative and this is
+ * never consulted when one exists. Matching is anchored to word boundaries so
+ * "Applesauce" is not Apple, and the longest match wins so "The North Face" beats
+ * a stray "North".
+ */
+export function extractBrand(title: string): string | null {
+  let best: string | null = null;
+
+  for (const brand of KNOWN_BRANDS) {
+    const escaped = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (!new RegExp(`(^|[^\\w])${escaped}([^\\w]|$)`, 'i').test(title)) continue;
+    if (best === null || brand.length > best.length) best = brand;
+  }
+
+  return best;
 }

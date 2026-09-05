@@ -1,0 +1,393 @@
+[
+  {
+    "title": "Old Navy Girls' Frost-Free Puffer Jacket",
+    "expected": "girls"
+  },
+  {
+    "title": "Girls Rib-Knit Leggings, 2-Pack",
+    "expected": "girls"
+  },
+  {
+    "title": "Toddler Girl Fleece Hoodie",
+    "expected": "girls"
+  },
+  {
+    "title": "Junior Girls' Cropped Sweatshirt",
+    "expected": "girls"
+  },
+  {
+    "title": "Gap Girls Logo Joggers",
+    "expected": "girls"
+  },
+  {
+    "title": "Carter's Little Girls' 3-Piece Set",
+    "expected": "girls"
+  },
+  {
+    "title": "Athleta Girl Uptempo Tight",
+    "expected": "girls"
+  },
+  {
+    "title": "Kids' Girls Rain Boots, Sizes 11-4",
+    "expected": "girls"
+  },
+  {
+    "title": "Girl's Winter Parka with Faux Fur Hood",
+    "expected": "girls"
+  },
+  {
+    "title": "Children's Place Girls Uniform Polo",
+    "expected": "girls"
+  },
+  {
+    "title": "Old Navy Boys' Sherpa-Lined Hoodie",
+    "expected": "boys"
+  },
+  {
+    "title": "Boys Slim Fit Jeans",
+    "expected": "boys"
+  },
+  {
+    "title": "Toddler Boy Puffer Vest",
+    "expected": "boys"
+  },
+  {
+    "title": "Junior Boys' Hockey Jersey",
+    "expected": "boys"
+  },
+  {
+    "title": "Gap Boys Pull-On Shorts",
+    "expected": "boys"
+  },
+  {
+    "title": "Boy's Snow Pants, Waterproof",
+    "expected": "boys"
+  },
+  {
+    "title": "Nike Boys Dri-FIT Training Tee",
+    "expected": "boys"
+  },
+  {
+    "title": "Little Boys 2-Pack Thermal Long Sleeve",
+    "expected": "boys"
+  },
+  {
+    "title": "Boys' Lined Winter Gloves",
+    "expected": "boys"
+  },
+  {
+    "title": "Children's Place Boys Cargo Pant",
+    "expected": "boys"
+  },
+  {
+    "title": "Women's Merino Wool Crew Sweater",
+    "expected": "women"
+  },
+  {
+    "title": "Reitmans Women's Slim Leg Comfort Pant",
+    "expected": "women",
+    "merchant": "reitmans"
+  },
+  {
+    "title": "Ladies Quilted Vest",
+    "expected": "women"
+  },
+  {
+    "title": "RW&CO. Tailored Blazer - Navy",
+    "expected": "women",
+    "merchant": "rw-co"
+  },
+  {
+    "title": "Penningtons Plus Size Winter Parka",
+    "expected": "women",
+    "merchant": "penningtons"
+  },
+  {
+    "title": "Athleta Women's Ultimate Stash Pocket Tight",
+    "expected": "women",
+    "merchant": "athleta"
+  },
+  {
+    "title": "Maternity Ribbed Midi Dress",
+    "expected": "women"
+  },
+  {
+    "title": "Womens High-Rise Straight Jean",
+    "expected": "women"
+  },
+  {
+    "title": "Lululemon Align High-Rise Pant 25\"",
+    "expected": "women"
+  },
+  {
+    "title": "Aritzia Wilfred Free Bodysuit",
+    "expected": "women"
+  },
+  {
+    "title": "Suzy Shier Wrap Front Blouse",
+    "expected": "women",
+    "merchant": "suzy-shier"
+  },
+  {
+    "title": "Cleo Petite Ankle Pant",
+    "expected": "women",
+    "merchant": "cleo"
+  },
+  {
+    "title": "Northern Reflections Women's Cardigan",
+    "expected": "women",
+    "merchant": "northern-reflections"
+  },
+  {
+    "title": "Ricki's Faux Leather Moto Jacket",
+    "expected": "women",
+    "merchant": "rickis"
+  },
+  {
+    "title": "Bra, Wireless Comfort - 2 Pack",
+    "expected": "women"
+  },
+  {
+    "title": "Men's Vintage Soft Arch Logo Hoodie",
+    "expected": "men"
+  },
+  {
+    "title": "Mens Slim Fit Chino Pant",
+    "expected": "men"
+  },
+  {
+    "title": "Tip Top Tailors Wool Overcoat",
+    "expected": "men",
+    "merchant": "tip-top-tailors"
+  },
+  {
+    "title": "Moores Men's Dress Shirt, Non-Iron",
+    "expected": "men",
+    "merchant": "moores"
+  },
+  {
+    "title": "Bootlegger Men's Straight Leg Jean",
+    "expected": "men",
+    "merchant": "bootlegger"
+  },
+  {
+    "title": "Columbia Men's Powder Lite Insulated Jacket",
+    "expected": "men"
+  },
+  {
+    "title": "Nike Air Max 90 - Men's Sneakers",
+    "expected": "men"
+  },
+  {
+    "title": "L'\u00c9quipeur Men's Work Boot",
+    "expected": "men"
+  },
+  {
+    "title": "Man's Flannel Lined Shirt Jacket",
+    "expected": "men"
+  },
+  {
+    "title": "Under Armour Men's Training Shorts",
+    "expected": "men"
+  },
+  {
+    "title": "Pampers Baby Dry Diapers Size 4",
+    "expected": "baby"
+  },
+  {
+    "title": "Newborn Sleeper 3-Pack",
+    "expected": "baby"
+  },
+  {
+    "title": "Infant Snowsuit, 12-18 Months",
+    "expected": "baby"
+  },
+  {
+    "title": "Baby Fleece Bunting Bag",
+    "expected": "baby"
+  },
+  {
+    "title": "Graco Baby Swing",
+    "expected": "baby"
+  },
+  {
+    "title": "Britax One4Life Convertible Car Seat",
+    "expected": "baby"
+  },
+  {
+    "title": "Snuggle Bugz Infant Playmat",
+    "expected": "baby"
+  },
+  {
+    "title": "Baby Girl Ruffle Bodysuit",
+    "expected": "baby"
+  },
+  {
+    "title": "Newborn Boy Hat and Mitt Set",
+    "expected": "baby"
+  },
+  {
+    "title": "Toddler Crib Sheet, Organic Cotton",
+    "expected": "baby"
+  },
+  {
+    "title": "Roots Original Kanga Sweatpant",
+    "expected": "unisex"
+  },
+  {
+    "title": "Uniqlo Ultra Light Down Vest",
+    "expected": "unisex"
+  },
+  {
+    "title": "Blundstone 550 Chelsea Boots - Walnut",
+    "expected": "unisex"
+  },
+  {
+    "title": "Unisex Cotton Crew Socks, 6-Pack",
+    "expected": "unisex"
+  },
+  {
+    "title": "MEC Volt 20L Hiking Backpack",
+    "expected": "unisex"
+  },
+  {
+    "title": "Kit and Ace Merino Beanie",
+    "expected": "unisex"
+  },
+  {
+    "title": "Frank And Oak Recycled Wool Scarf",
+    "expected": "unisex"
+  },
+  {
+    "title": "Urban Planet Oversized Fleece Crew",
+    "expected": "unisex"
+  },
+  {
+    "title": "Canada Goose Expedition Parka",
+    "expected": "unisex"
+  },
+  {
+    "title": "SoftMoc Sherpa Slipper",
+    "expected": "unisex"
+  },
+  {
+    "title": "Samsung 65\" QN90D Neo QLED 4K Smart TV",
+    "expected": "na"
+  },
+  {
+    "title": "Ninja Foodi 6-in-1 Air Fryer",
+    "expected": "na"
+  },
+  {
+    "title": "DEWALT 20V MAX Cordless Drill Combo Kit",
+    "expected": "na"
+  },
+  {
+    "title": "Michelin X-Ice Snow Winter Tire 205/55R16",
+    "expected": "na"
+  },
+  {
+    "title": "LEGO Star Wars Millennium Falcon 75375",
+    "expected": "na"
+  },
+  {
+    "title": "Kirkland Signature Granola Bars 64 Pack",
+    "expected": "na"
+  },
+  {
+    "title": "Dyson V15 Detect Cordless Stick Vacuum",
+    "expected": "na"
+  },
+  {
+    "title": "Sony WH-1000XM5 Wireless Headphones",
+    "expected": "na"
+  },
+  {
+    "title": "IKEA MALM 6-Drawer Dresser",
+    "expected": "na"
+  },
+  {
+    "title": "Weber Spirit II E-310 Propane BBQ",
+    "expected": "na"
+  },
+  {
+    "title": "Women's and Men's Matching Pyjama Set",
+    "expected": "women"
+  },
+  {
+    "title": "Girls & Boys Reversible Winter Hat",
+    "expected": "girls"
+  },
+  {
+    "title": "Men's Big & Tall Fleece Hoodie",
+    "expected": "men"
+  },
+  {
+    "title": "Women's Petite Bootcut Trouser",
+    "expected": "women"
+  },
+  {
+    "title": "Boys' Husky Fit School Pant",
+    "expected": "boys"
+  },
+  {
+    "title": "Ladies' Nightgown, Brushed Jersey",
+    "expected": "women"
+  },
+  {
+    "title": "Baby & Toddler Fleece Onesie",
+    "expected": "baby"
+  },
+  {
+    "title": "Girls Plus Size Denim Skirt",
+    "expected": "girls"
+  },
+  {
+    "title": "Men's Tall Insulated Bib Overall",
+    "expected": "men"
+  },
+  {
+    "title": "Women's Wide Width Winter Boot",
+    "expected": "women"
+  },
+  {
+    "title": "Kids Toy Kitchen Play Set",
+    "expected": "na"
+  },
+  {
+    "title": "Magna-Tiles Clear Colors 100 Piece Set",
+    "expected": "na"
+  },
+  {
+    "title": "Paw Patrol Big Truck Pups Vehicle Set",
+    "expected": "na"
+  },
+  {
+    "title": "Hot Wheels 20-Car Gift Pack",
+    "expected": "na"
+  },
+  {
+    "title": "Ravensburger 1000 Piece Jigsaw Puzzle",
+    "expected": "na"
+  },
+  {
+    "title": "Squishmallows 16\" Plush",
+    "expected": "na"
+  },
+  {
+    "title": "Crayola Ultimate Art Case",
+    "expected": "na"
+  },
+  {
+    "title": "Melissa & Doug Wooden Blocks",
+    "expected": "na"
+  },
+  {
+    "title": "Nerf Elite 2.0 Blaster",
+    "expected": "na"
+  },
+  {
+    "title": "Barbie Dreamhouse Playset",
+    "expected": "na"
+  }
+]
