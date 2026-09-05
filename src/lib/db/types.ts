@@ -1,5 +1,10 @@
 /** Shared row and query types. Money is always integer cents. */
 
+import type { DealVerdict, EvidenceLevel } from '../pipeline/deal-quality';
+import type { IdentityStrength } from '../pipeline/product-key';
+
+export type { DealVerdict, EvidenceLevel, IdentityStrength };
+
 export type DealStatus = 'active' | 'expired' | 'dead';
 export type MerchantStatus = 'verified' | 'unverified' | 'blocked';
 export type RunOutcome = 'ok' | 'failed' | 'skipped';
@@ -74,13 +79,30 @@ export interface Deal {
   department: Department;
   brand: string | null;
   sizesAvailable: string[] | null;
+  /** Cross-merchant product identity; null when nothing reliable was available. */
+  productKey: string | null;
+  productKeyStrength: IdentityStrength | null;
+  gtin: string | null;
+  mpn: string | null;
+  asin: string | null;
   /** Integer cents. */
   priceNow: number | null;
   /** Integer cents. NULL unless a source actually supplied a before price. */
   priceWas: number | null;
   currency: string;
+  /** The RETAILER'S CLAIMED discount. Not evidence. See verdict below. */
   discountPct: number | null;
   discountAbs: number | null;
+
+  /** What we can actually corroborate — see src/lib/pipeline/deal-quality.ts. */
+  marketPrice: number | null;
+  marketDiscountPct: number | null;
+  observedLow: number | null;
+  priceRankPct: number | null;
+  verdict: DealVerdict;
+  evidence: EvidenceLevel;
+  claimSuspect: boolean;
+  qualityNote: string | null;
   couponCode: string | null;
   couponNote: string | null;
   shippingNote: string | null;
@@ -131,6 +153,8 @@ export type DealSort =
   | 'hottest'
   | 'newest'
   | 'biggest-drop'
+  /** Corroborated bargains first — see pipeline/deal-quality.ts. */
+  | 'best-verified'
   | 'price-asc'
   | 'price-desc'
   | 'expiring';
@@ -155,6 +179,11 @@ export interface DealQuery {
   minDiscountPct?: number;
   couponOnly?: boolean;
   inStockOnly?: boolean;
+  /** Only deals corroborated by cross-merchant or historical evidence. */
+  verifiedOnly?: boolean;
+  /** Exclude deals whose claimed "was" price we believe is inflated. */
+  excludeSuspect?: boolean;
+  verdicts?: DealVerdict[];
   storeIds?: string[];
   statuses?: DealStatus[];
   sort?: DealSort;

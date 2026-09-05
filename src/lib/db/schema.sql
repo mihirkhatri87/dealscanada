@@ -71,6 +71,15 @@ CREATE TABLE IF NOT EXISTS deals (
   merchant_id    TEXT REFERENCES merchants (id) ON DELETE SET NULL,
   store_id       TEXT REFERENCES stores (id) ON DELETE SET NULL,
 
+  -- Cross-merchant product identity. This is what lets us compare the same
+  -- product's price across sources instead of trusting one retailer's claim.
+  -- Deliberately never derived from a retailer SKU, which is merchant-scoped.
+  product_key    TEXT,
+  product_key_strength TEXT,
+  gtin           TEXT,
+  mpn            TEXT,
+  asin           TEXT,
+
   category       TEXT NOT NULL DEFAULT 'other',
   -- women | men | girls | boys | baby | unisex | na
   department     TEXT NOT NULL DEFAULT 'na',
@@ -83,6 +92,17 @@ CREATE TABLE IF NOT EXISTS deals (
   currency       TEXT NOT NULL DEFAULT 'CAD',
   discount_pct   REAL,
   discount_abs   INTEGER,
+
+  -- Verified deal quality. discount_pct above is the RETAILER'S CLAIM; these are
+  -- what we can actually corroborate. See src/lib/pipeline/deal-quality.ts.
+  market_price   INTEGER,          -- median price at other merchants, cents
+  market_discount_pct REAL,        -- discount against that median: the honest number
+  observed_low   INTEGER,          -- lowest price we have ever recorded
+  price_rank_pct REAL,             -- position within our observed history, 0 = cheapest
+  verdict        TEXT NOT NULL DEFAULT 'unverified',
+  evidence       TEXT NOT NULL DEFAULT 'none',
+  claim_suspect  INTEGER NOT NULL DEFAULT 0,
+  quality_note   TEXT,
 
   coupon_code    TEXT,
   coupon_note    TEXT,
@@ -119,6 +139,9 @@ CREATE INDEX IF NOT EXISTS idx_deals_merchant ON deals (status, merchant_id);
 CREATE INDEX IF NOT EXISTS idx_deals_store ON deals (status, store_id);
 CREATE INDEX IF NOT EXISTS idx_deals_canonical ON deals (canonical_url);
 CREATE INDEX IF NOT EXISTS idx_deals_coupon ON deals (status, coupon_code);
+-- Drives cross-merchant comparison: fetch every listing of one product at once.
+CREATE INDEX IF NOT EXISTS idx_deals_product_key ON deals (product_key, status);
+CREATE INDEX IF NOT EXISTS idx_deals_verdict ON deals (status, verdict);
 CREATE INDEX IF NOT EXISTS idx_deals_expires ON deals (status, expires_at);
 
 -- Secondary dedupe key: merchant + normalized title tokens + price bucket.

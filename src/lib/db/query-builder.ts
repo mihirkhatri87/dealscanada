@@ -21,7 +21,10 @@ const SORTS: Record<DealSort, string> = {
   // needing it: coalesce to a value that sorts last for the direction in use.
   hottest: 'd.heat DESC',
   newest: 'COALESCE(d.posted_at, d.first_seen_at) DESC',
-  'biggest-drop': 'COALESCE(d.discount_pct, -1) DESC',
+  // Ranks on the discount we can corroborate, falling back to the claim only
+  // where nothing contradicts it.
+  'biggest-drop': 'COALESCE(d.market_discount_pct, d.discount_pct, -1) DESC',
+  'best-verified': "CASE d.verdict WHEN 'verified-low' THEN 3 WHEN 'verified-good' THEN 2 WHEN 'market-price' THEN 1 ELSE 0 END DESC, COALESCE(d.market_discount_pct, 0) DESC",
   'price-asc': 'COALESCE(d.price_now, 999999999) ASC',
   'price-desc': 'COALESCE(d.price_now, -1) DESC',
   expiring: 'COALESCE(d.expires_at, \'9999-12-31\') ASC',
@@ -79,6 +82,18 @@ export function buildDealQuery(query: DealQuery, dialect: Dialect): BuiltQuery {
   }
   if (query.inStockOnly) {
     clauses.push(`d.in_stock = 1`);
+  }
+
+  // Verified-deal filters. These exist because a retailer's own "was" price is
+  // not evidence; see src/lib/pipeline/deal-quality.ts.
+  if (query.verifiedOnly) {
+    clauses.push(`d.verdict IN ('verified-low', 'verified-good')`);
+  }
+  if (query.excludeSuspect) {
+    clauses.push(`d.claim_suspect = 0`);
+  }
+  if (query.verdicts?.length) {
+    clauses.push(`d.verdict IN (${inList(query.verdicts)})`);
   }
 
   if (query.search?.trim()) {
