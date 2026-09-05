@@ -53,10 +53,10 @@ the Canadian Tire banner group, Gap Inc. Canada, the Reitmans group, Best Buy,
 the long tail of Canadian Shopify stores, kids and toy shops, home, sports,
 beauty and grocery. Adding a retailer is a JSON entry.
 
-Forty-one of those run today, on the Shopify and JSON-LD engines plus two bespoke
-adapters. The rest wait on four engines still to be built (SFCC, Hybris, Gap Inc.,
-Magento) — [docs/SOURCES.md](docs/SOURCES.md#not-built-yet) lists exactly what is
-and is not shipped, so `npm run health` showing 43 sources rather than 101 is not
+Forty-seven of those run today, on the Shopify, SFCC and JSON-LD engines plus two
+bespoke adapters. The rest wait on three engines still to be built (Hybris, Gap
+Inc., Magento) — [docs/SOURCES.md](docs/SOURCES.md#not-built-yet) lists exactly what is
+and is not shipped, so `npm run health` showing 50 sources rather than 101 is not
 a surprise.
 
 **Verifies** each deal rather than repeating the claim. See below.
@@ -168,7 +168,7 @@ suite against both, so that claim is tested rather than asserted.
 | `npm run stores:sync -- --postal=M5V3L9` | Nearby stores for local clearance |
 | `npm run retailer:probe -- https://store.ca` | Detect a store's platform, emit a catalogue entry |
 | `npm run assistant:eval` / `assistant:usage` | Assistant quality and spend |
-| `npm test` / `test:coverage` | 528 tests, no network |
+| `npm test` / `test:coverage` | 548 tests, no network |
 
 ---
 
@@ -190,7 +190,7 @@ failure mode worth preventing.
 ## Testing
 
 ```powershell
-npm test              # 528 tests
+npm test              # 548 tests
 npm run test:coverage # gate: 80% lines on src/lib (currently ~90%)
 ```
 

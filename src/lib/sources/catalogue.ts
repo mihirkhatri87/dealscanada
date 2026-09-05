@@ -32,6 +32,15 @@ export const retailerConfigSchema = z.object({
   /** Department all this retailer's stock belongs to, when it is single-department. */
   departmentHint: z.string().nullish(),
 
+  /**
+   * SFCC site id, e.g. the `RetailerCA` in `Sites-RetailerCA-Site`. Optional: the
+   * engine reads it off the storefront when absent, so it is a pin rather than a
+   * requirement.
+   */
+  sfccSiteId: z.string().nullish(),
+  /** SFCC locale segment, e.g. en_CA or fr_CA. Defaults to en_CA. */
+  sfccLocale: z.string().nullish(),
+
   /** Per-retailer politeness override. */
   rateLimitRps: z.number().positive().nullish(),
   /** Cap on product pages fetched per run, for engines that crawl. */

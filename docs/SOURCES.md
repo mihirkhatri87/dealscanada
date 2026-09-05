@@ -87,7 +87,7 @@ Adding a Shopify store is one JSON entry with a base URL.
 
 ---
 
-### JSON-LD engine — 77 retailers, the universal fallback
+### JSON-LD engine — the universal fallback
 
 **How it works:** fetch a listing page, extract product links with a per-retailer
 CSS selector, then parse `application/ld+json` `Product`/`Offer` from each product
@@ -103,6 +103,33 @@ field in that retailer's catalogue entry. **No TypeScript involved.**
 **Second most common:** links extracted fine, but every product page yields
 nothing → the retailer moved from JSON-LD to a client-rendered shape. The OG
 fallback usually still works; if not, that retailer needs a different engine.
+
+---
+
+### SFCC engine — 6 retailers, no client id required
+
+**Endpoint:** `/on/demandware.store/Sites-<siteId>-Site/<locale>/Search-UpdateGrid?cgid=<category>&start=&sz=`
+**Fixture:** `tests/fixtures/sfcc/search-grid.html`
+
+SFCC's OCAPI and SCAPI interfaces both need a client id issued by the merchant,
+and there is no public developer programme to obtain one. So this engine reads
+the storefront's own search-grid endpoint — the same request the site makes of
+itself when a shopper paginates a category.
+
+SFRA's default tile markup is what makes this an engine rather than six scrapers:
+list and sale price are separate elements carrying a `content` attribute with the
+raw decimal, so prices survive currency symbols and French-Canadian formatting
+without a parser guessing. Rendered text is the fallback for older storefronts.
+
+The **site id is discovered, not configured** — every SFCC page names
+`Sites-<id>-Site` somewhere. `sfccSiteId` in the catalogue pins it when discovery
+is unreliable, and `sfccLocale` selects `fr_CA`.
+
+**Drift looks like:** "could not resolve the SFCC site id" → the storefront is
+blocking the homepage fetch, or is no longer SFCC. A 200 with 0 items → the
+storefront customised its tile markup; check whether `.sales .value` and
+`.strike-through .value` still exist and add the new selectors to the arrays at
+the top of the file.
 
 ---
 
@@ -127,13 +154,12 @@ mitigation, and it is one env var.
 ## Not built yet
 
 These are designed and specified in the PRD but **not in the repository**. Listed
-here so `npm run health` showing 43 sources rather than 60 is not a mystery.
+here so `npm run health` showing 50 sources rather than 101 is not a mystery.
 
 | Planned | Story | Why it is not here yet |
 |---|---|---|
-| SFCC engine | S3.9 | Needs a live site-id probe to write against; the sandbox cannot reach one |
 | Canadian Tire family engine (9 banners) | S3.10 | Hybris platform key is not publicly obtainable; falls back to JSON-LD meanwhile |
-| Gap Inc. engine (6 brands) | S3.11 | Same reason as SFCC |
+| Gap Inc. engine (6 brands) | S3.11 | Needs a live response to write against; the sandbox cannot reach one |
 | Magento engine | S3.12 | Same |
 | `costco` / `walmart` composites | S3.4, S3.13 | Both are Akamai-protected; the fallback chain needs a live block to test against |
 | `amazon-paapi` | S3.6 | Dormant by design — needs Associates credentials that require three qualifying sales first |
@@ -158,7 +184,7 @@ sandbox this was built in gets one from nearly every host. Options, in the order
 worth trying:
 
 1. **Accept it.** A blocked retailer is reported and skipped; it never fails the
-   run or hides the other forty-two sources. Check what *did* come back first.
+   run or hides the other forty-eight sources. Check what *did* come back first.
 2. **Slow down.** `RATE_LIMIT_RPS` is already conservative; lower it for that
    domain specifically via the catalogue entry.
 3. **Apply to an affiliate network.** Rakuten, Impact, CJ and AvantLink are free

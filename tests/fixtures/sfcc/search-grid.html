@@ -1,0 +1,122 @@
+<!-- SFRA default product-grid markup, as returned by Search-UpdateGrid. -->
+<div class="container product-grid">
+  <div class="col-6 col-sm-4">
+    <div class="product" data-pid="1234567">
+      <div class="product-tile">
+        <div class="image-container">
+          <a href="/en_CA/womens-puffer-jacket/1234567.html">
+            <img class="tile-image" data-src="https://cdn.example-sfcc.ca/img/1234567.jpg" src="/placeholder.gif" alt="Women's Puffer Jacket">
+          </a>
+        </div>
+        <div class="tile-body">
+          <div class="product-brand">NorthPeak</div>
+          <div class="pdp-link">
+            <a class="link" href="/en_CA/womens-puffer-jacket/1234567.html">Women&#39;s Longline Puffer Jacket</a>
+          </div>
+          <div class="price">
+            <span class="strike-through list">
+              <span class="value" content="199.00">$199.00</span>
+            </span>
+            <span class="sales">
+              <span class="value" content="79.99">$79.99</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-sm-4">
+    <div class="product" data-pid="7654321">
+      <div class="product-tile">
+        <div class="image-container">
+          <a href="/en_CA/mens-merino-crew/7654321.html">
+            <img class="tile-image" src="https://cdn.example-sfcc.ca/img/7654321.jpg" alt="Merino Crew">
+          </a>
+        </div>
+        <div class="tile-body">
+          <div class="pdp-link">
+            <a class="link" href="/en_CA/mens-merino-crew/7654321.html">Men&#39;s Merino Crew Sweater</a>
+          </div>
+          <div class="price">
+            <span class="strike-through list"><span class="value" content="120.00">$120.00</span></span>
+            <span class="sales"><span class="value" content="59.99">$59.99</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full price: no strike-through element at all. Must not be emitted. -->
+  <div class="col-6 col-sm-4">
+    <div class="product" data-pid="1111111">
+      <div class="product-tile">
+        <div class="tile-body">
+          <div class="pdp-link"><a class="link" href="/en_CA/full-price-tee/1111111.html">Cotton Tee</a></div>
+          <div class="price"><span class="sales"><span class="value" content="29.00">$29.00</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- List price equal to sale price: SFCC's "no markdown", not a saving. -->
+  <div class="col-6 col-sm-4">
+    <div class="product" data-pid="2222222">
+      <div class="product-tile">
+        <div class="tile-body">
+          <div class="pdp-link"><a class="link" href="/en_CA/equal-price/2222222.html">Wool Scarf</a></div>
+          <div class="price">
+            <span class="strike-through list"><span class="value" content="45.00">$45.00</span></span>
+            <span class="sales"><span class="value" content="45.00">$45.00</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sold out, but genuinely discounted: emitted with inStock false. -->
+  <div class="col-6 col-sm-4">
+    <div class="product" data-pid="3333333">
+      <div class="product-tile">
+        <div class="tile-body">
+          <div class="pdp-link"><a class="link" href="/en_CA/sold-out-boot/3333333.html">Chelsea Boot</a></div>
+          <div class="price">
+            <span class="strike-through list"><span class="value" content="210.00">$210.00</span></span>
+            <span class="sales"><span class="value" content="99.00">$99.00</span></span>
+          </div>
+          <div class="availability">Out of Stock</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Older storefront: no content attribute, French formatting in the text. -->
+  <div class="col-6 col-sm-4">
+    <div class="grid-tile" data-pid="4444444">
+      <div class="tile-body">
+        <div class="product-name"><a class="name-link" href="/fr_CA/manteau/4444444.html">Manteau d&#39;hiver</a></div>
+        <div class="price">
+          <span class="price-standard"><span class="value">1 299,99 $</span></span>
+          <span class="price-sales"><span class="value">899,99 $</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Duplicate of the first product, as paginated grids sometimes repeat. -->
+  <div class="col-6 col-sm-4">
+    <div class="product" data-pid="1234567">
+      <div class="product-tile">
+        <div class="tile-body">
+          <div class="pdp-link"><a class="link" href="/en_CA/womens-puffer-jacket/1234567.html">Women&#39;s Longline Puffer Jacket</a></div>
+          <div class="price">
+            <span class="strike-through list"><span class="value" content="199.00">$199.00</span></span>
+            <span class="sales"><span class="value" content="79.99">$79.99</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form action="/on/demandware.store/Sites-ExampleCA-Site/en_CA/Search-Show" method="get"></form>
