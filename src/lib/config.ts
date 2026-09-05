@@ -47,6 +47,17 @@ const envSchema = z.object({
   /** Deals go stale quietly; the UI banner reads this. */
   STALE_AFTER_MINUTES: positiveNumber('STALE_AFTER_MINUTES').default('180'),
 
+  /**
+   * A deal no source has returned for this long is retired.
+   *
+   * Generous by default: retailers restock, and a two-day gap is more likely a
+   * blocked scrape than an ended sale. Retiring a live deal is the worse error
+   * of the two - the visitor never sees it at all.
+   */
+  DEAD_AFTER_HOURS: positiveNumber('DEAD_AFTER_HOURS').default('72'),
+  /** Price observations older than this are pruned, except each deal's newest. */
+  PRICE_HISTORY_DAYS: positiveNumber('PRICE_HISTORY_DAYS').default('180'),
+
   /** stocktrack.ca is a small independent site — easy to switch off entirely. */
   STOCKTRACK_ENABLED: booleanish.default('true'),
   STOCKTRACK_RATE_LIMIT_RPS: positiveNumber('STOCKTRACK_RATE_LIMIT_RPS').default('0.3'),
@@ -73,6 +84,11 @@ const envSchema = z.object({
   /** Hosted cron authentication. */
   CRON_SECRET: z.string().min(1).optional(),
   SCRAPE_CRON: z.string().min(1).default('*/30 * * * *'),
+  /**
+   * Wall-clock budget for a hosted scrape, under the platform's own ceiling so
+   * the run stops itself cleanly rather than being killed mid-write.
+   */
+  CRON_BUDGET_MS: positiveNumber('CRON_BUDGET_MS').default('240000'),
 });
 
 export type Env = z.infer<typeof envSchema>;

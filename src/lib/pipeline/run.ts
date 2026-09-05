@@ -10,6 +10,7 @@ import { HttpClient } from '../util/http';
 import { dedupeDeals } from './dedupe';
 import { normalizeDeal } from './normalize';
 import { verifyDeals, type PriceObservation } from './verify';
+import { reap, type ReapSummary } from './reap';
 
 /**
  * The pipeline runner.
@@ -33,6 +34,15 @@ export interface RunOptions {
   dryRun?: boolean;
   concurrency?: number;
   adapterTimeoutMs?: number;
+  /**
+   * Wall-clock budget for the adapter phase.
+   *
+   * Serverless platforms kill a function at a hard ceiling, so a hosted run has
+   * to stop itself first. Adapters not started by the deadline are reported as
+   * skipped with a reason rather than silently omitted - a partial run with an
+   * honest count is useful; a truncated one that looks complete is not.
+   */
+  deadlineMs?: number;
   verbose?: boolean;
   now?: Date;
 }
@@ -52,6 +62,7 @@ export interface SourceOutcome {
 
 export interface RunSummary {
   sources: SourceOutcome[];
+  reaped: ReapSummary | null;
   totalFound: number;
   totalNew: number;
   totalUpdated: number;
@@ -68,6 +79,7 @@ const DEFAULT_ADAPTER_TIMEOUT_MS = 120_000;
 export async function runPipeline(options: RunOptions): Promise<RunSummary> {
   const started = Date.now();
   const now = options.now ?? new Date();
+  let reapSummary: ReapSummary | null = null;
   const http = options.http ?? new HttpClient();
   const concurrency = options.concurrency ?? 4;
   const timeoutMs = options.adapterTimeoutMs ?? DEFAULT_ADAPTER_TIMEOUT_MS;
@@ -84,10 +96,28 @@ export async function runPipeline(options: RunOptions): Promise<RunSummary> {
   // Bounded concurrency: adapters are rate-limited per domain anyway, and running
   // everything at once would just queue behind the limiter while holding memory.
   const queue = [...options.adapters];
+  const deadline = options.deadlineMs === undefined ? null : started + options.deadlineMs;
   const workers = Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
     for (;;) {
       const adapter = queue.shift();
       if (!adapter) return;
+
+      // Checked before starting, never mid-adapter: interrupting a source
+      // half-parsed would write an incomplete picture of it.
+      if (deadline !== null && Date.now() >= deadline) {
+        outcomes.push({
+          source: adapter.id,
+          outcome: 'skipped',
+          itemsFound: 0,
+          itemsNew: 0,
+          itemsUpdated: 0,
+          itemsDropped: 0,
+          latencyMs: 0,
+          dropReasons: {},
+          error: 'deadline exceeded',
+        });
+        continue;
+      }
 
       const result = await runAdapter(adapter, {
         http,
@@ -127,7 +157,7 @@ export async function runPipeline(options: RunOptions): Promise<RunSummary> {
     const invented = merchantResolver.created();
     if (invented.length > 0) await options.repo.upsertMerchants(invented);
 
-    const upsert = await options.repo.upsertDeals(deduped);
+    const upsert = await options.repo.upsertDeals(deduped, now.toISOString());
     totalNew = upsert.inserted;
     totalUpdated = upsert.updated;
 
@@ -143,8 +173,22 @@ export async function runPipeline(options: RunOptions): Promise<RunSummary> {
         observedAt: now.toISOString(),
       })),
     );
+  }
 
-    await options.repo.markExpired(now.toISOString());
+  if (!options.dryRun) {
+    // Retiring what has ended is part of a run, not a separate chore: a run that
+    // adds today's deals but leaves last month's on the front page has done half
+    // its job. It runs even when nothing was ingested, because an expired deal
+    // is expired whether or not today's scrape worked.
+    //
+    // Absence is a different matter. It only counts as evidence when at least
+    // one source succeeded; otherwise a few days of blocked scrapes would retire
+    // the entire catalogue on the strength of having looked nowhere.
+    reapSummary = await reap({
+      repo: options.repo,
+      now,
+      inferAbsence: outcomes.some((outcome) => outcome.outcome === 'ok' && outcome.itemsFound > 0),
+    });
   }
 
   if (!options.dryRun) {
@@ -167,6 +211,7 @@ export async function runPipeline(options: RunOptions): Promise<RunSummary> {
 
   return {
     sources: outcomes.sort((a, b) => a.source.localeCompare(b.source)),
+    reaped: reapSummary,
     totalFound: outcomes.reduce((sum, o) => sum + o.itemsFound, 0),
     totalNew,
     totalUpdated,

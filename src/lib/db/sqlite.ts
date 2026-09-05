@@ -190,10 +190,10 @@ export class SqliteDealRepository implements DealRepository {
 
   // --- deals ---------------------------------------------------------------
 
-  async upsertDeals(deals: DealInput[]): Promise<UpsertResult> {
+  async upsertDeals(deals: DealInput[], observedAt?: string): Promise<UpsertResult> {
     if (deals.length === 0) return { inserted: 0, updated: 0, priceChanged: [] };
 
-    const now = new Date().toISOString();
+    const now = observedAt ?? new Date().toISOString();
     const existing = this.db.prepare(
       'SELECT id, price_now, first_seen_at FROM deals WHERE source = ? AND source_id = ?',
     );
@@ -399,6 +399,33 @@ export class SqliteDealRepository implements DealRepository {
          WHERE status = 'active' AND expires_at IS NOT NULL AND expires_at < ?`,
       )
       .run(now);
+    return result.changes;
+  }
+
+  async markDead(before: string): Promise<number> {
+    // Expired deals stay expired rather than being re-labelled: "this sale
+    // ended" is a more useful thing to tell a visitor than "we stopped seeing
+    // it", and only the first is something we actually know.
+    const result = this.db
+      .prepare(`UPDATE deals SET status = 'dead' WHERE status = 'active' AND last_seen_at < ?`)
+      .run(before);
+    return result.changes;
+  }
+
+  async prunePricePoints(before: string): Promise<number> {
+    const result = this.db
+      .prepare(
+        `DELETE FROM price_points
+         WHERE observed_at < ?
+           AND id NOT IN (
+             SELECT id FROM (
+               SELECT id, ROW_NUMBER() OVER (
+                 PARTITION BY deal_id ORDER BY observed_at DESC, id DESC
+               ) AS rank FROM price_points
+             ) WHERE rank = 1
+           )`,
+      )
+      .run(before);
     return result.changes;
   }
 

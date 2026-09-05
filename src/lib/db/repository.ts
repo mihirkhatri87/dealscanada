@@ -108,7 +108,13 @@ export interface DealRepository {
   getStore(id: string): Promise<Store | null>;
 
   // --- deals ---------------------------------------------------------------
-  upsertDeals(deals: DealInput[]): Promise<UpsertResult>;
+  /**
+   * @param observedAt when this batch was seen, defaulting to now. The pipeline
+   * passes its own run timestamp so every row in a run agrees, and so a
+   * backfill can write the time the data is actually from rather than the time
+   * it was imported.
+   */
+  upsertDeals(deals: DealInput[], observedAt?: string): Promise<UpsertResult>;
   queryDeals(query: DealQuery): Promise<DealQueryResult>;
   queryDealsNear(query: NearQuery): Promise<DealQueryResult>;
   getDealBySlug(slug: string): Promise<DealWithRelations | null>;
@@ -117,6 +123,23 @@ export interface DealRepository {
   facets(field: 'category' | 'department' | 'merchant' | 'family' | 'brand'): Promise<FacetValue[]>;
   updateHeat(scores: Array<{ id: string; heat: number }>): Promise<void>;
   markExpired(now: string): Promise<number>;
+  /**
+   * Retires deals no source has seen since `before`.
+   *
+   * A deal usually disappears by simply not being returned again - retailers
+   * rarely announce that a sale ended. Absence is therefore the signal, and
+   * `last_seen_at` is where it lives.
+   */
+  markDead(before: string): Promise<number>;
+  /**
+   * Deletes price observations older than `before`, except each deal's most
+   * recent one.
+   *
+   * Dropping a deal's last point would make its current price look unobserved,
+   * which is worse than keeping a stale row: the chart and the "lowest recorded"
+   * claim both read from this table.
+   */
+  prunePricePoints(before: string): Promise<number>;
 
   // --- price history -------------------------------------------------------
   appendPricePoints(points: Array<{ dealId: string; price: number; observedAt: string }>): Promise<void>;

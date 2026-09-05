@@ -100,6 +100,13 @@ async function main() {
   console.log(`  verified as genuine deals  ${summary.verified}`);
   console.log(`  inflated anchors flagged   ${summary.suspectAnchors}`);
 
+  if (summary.reaped) {
+    console.log('\nRetired:');
+    console.log(`  expired (retailer's own date)  ${summary.reaped.expired}`);
+    console.log(`  unseen since ${summary.reaped.deadBefore.slice(0, 16)}  ${summary.reaped.dead}`);
+    console.log(`  price points pruned            ${summary.reaped.prunedPricePoints}`);
+  }
+
   console.log(`\nCompleted in ${(summary.durationMs / 1000).toFixed(1)}s`);
 
   await repo.close();
