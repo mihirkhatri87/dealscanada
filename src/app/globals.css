@@ -1,0 +1,172 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens.
+ *
+ * Dark-first: the light palette is defined on bare :root so it is always present,
+ * then dark is applied both by system preference and by an explicit [data-theme]
+ * so the toggle wins in either direction. Never define a colour only inside a
+ * media query — a token with no base value renders as nothing.
+ */
+:root {
+  --bg: #ffffff;
+  --bg-subtle: #f6f7f9;
+  --bg-raised: #ffffff;
+  --bg-inset: #eef0f4;
+
+  --fg: #10131a;
+  --fg-muted: #545c6b;
+  --fg-subtle: #767e8d;
+
+  --border: #e2e5ea;
+  --border-strong: #c9ced7;
+
+  --accent: #0b6cf0;
+  --accent-fg: #ffffff;
+  --accent-subtle: #e8f1fe;
+
+  /* Deal semantics: discount depth, expiry urgency, coupon affordance. */
+  --deal: #067a4e;
+  --deal-fg: #ffffff;
+  --deal-subtle: #e3f5ec;
+
+  --hot: #d1400e;
+  --hot-fg: #ffffff;
+  --hot-subtle: #fdeae3;
+
+  --warn: #8a5a00;
+  --warn-subtle: #fdf3e0;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgb(16 19 26 / 0.06);
+  --shadow: 0 2px 8px rgb(16 19 26 / 0.08);
+  --shadow-lg: 0 8px 28px rgb(16 19 26 / 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0c0e13;
+    --bg-subtle: #121620;
+    --bg-raised: #171b26;
+    --bg-inset: #1e2330;
+
+    --fg: #f2f4f8;
+    --fg-muted: #a3acbd;
+    --fg-subtle: #7d8698;
+
+    --border: #262c3a;
+    --border-strong: #38404f;
+
+    --accent: #4d9bff;
+    --accent-fg: #06121f;
+    --accent-subtle: #12233a;
+
+    --deal: #35d18c;
+    --deal-fg: #04140d;
+    --deal-subtle: #11241c;
+
+    --hot: #ff7a4d;
+    --hot-fg: #1b0a04;
+    --hot-subtle: #2b1611;
+
+    --warn: #e8b45c;
+    --warn-subtle: #2a2112;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow: 0 2px 10px rgb(0 0 0 / 0.45);
+    --shadow-lg: 0 10px 32px rgb(0 0 0 / 0.55);
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0c0e13;
+  --bg-subtle: #121620;
+  --bg-raised: #171b26;
+  --bg-inset: #1e2330;
+
+  --fg: #f2f4f8;
+  --fg-muted: #a3acbd;
+  --fg-subtle: #7d8698;
+
+  --border: #262c3a;
+  --border-strong: #38404f;
+
+  --accent: #4d9bff;
+  --accent-fg: #06121f;
+  --accent-subtle: #12233a;
+
+  --deal: #35d18c;
+  --deal-fg: #04140d;
+  --deal-subtle: #11241c;
+
+  --hot: #ff7a4d;
+  --hot-fg: #1b0a04;
+  --hot-subtle: #2b1611;
+
+  --warn: #e8b45c;
+  --warn-subtle: #2a2112;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow: 0 2px 10px rgb(0 0 0 / 0.45);
+  --shadow-lg: 0 10px 32px rgb(0 0 0 / 0.55);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-bg-raised: var(--bg-raised);
+  --color-bg-inset: var(--bg-inset);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-deal: var(--deal);
+  --color-deal-fg: var(--deal-fg);
+  --color-deal-subtle: var(--deal-subtle);
+  --color-hot: var(--hot);
+  --color-hot-fg: var(--hot-fg);
+  --color-hot-subtle: var(--hot-subtle);
+  --color-warn: var(--warn);
+  --color-warn-subtle: var(--warn-subtle);
+  --radius-sm: var(--radius-sm);
+  --radius-DEFAULT: var(--radius);
+  --radius-lg: var(--radius-lg);
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible focus everywhere — keyboard operability is an acceptance criterion, not a nicety. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

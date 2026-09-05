@@ -1,0 +1,40 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next
+.next/
+out/
+next-env.d.ts
+
+# production
+build/
+dist/
+
+# local database and scrape cache
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+.cache/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# test output
+coverage/
+
+# editors / os
+.DS_Store
+*.pem
+.idea/
+.vscode/
+*.tsbuildinfo
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
