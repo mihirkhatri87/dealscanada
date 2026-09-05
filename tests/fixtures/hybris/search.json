@@ -1,0 +1,75 @@
+{
+  "redirectUrl": null,
+  "resultCount": 8,
+  "products": [
+    {
+      "code": "0871234P",
+      "title": "Mastercraft Socket Set, 200-pc",
+      "brand": { "label": "Mastercraft" },
+      "url": "/en/pdp/mastercraft-socket-set-200-pc-0871234p.html",
+      "images": [{ "url": "/media/product/0871234P.jpg" }],
+      "currentPrice": { "value": 89.99 },
+      "originalPrice": { "value": 199.99 },
+      "categoryPath": "Tools/Hand Tools/Socket Sets",
+      "isAvailable": true,
+      "badges": ["CLEARANCE"]
+    },
+    {
+      "code": "0761111P",
+      "title": "Michelin X-Ice Snow Winter Tire 205/55R16",
+      "brand": { "label": "Michelin" },
+      "url": "/en/pdp/michelin-x-ice-0761111p.html",
+      "images": [{ "url": "/media/product/0761111P.jpg" }],
+      "currentPrice": { "value": 159.99 },
+      "originalPrice": { "value": 219.99 },
+      "isAvailable": true
+    },
+    {
+      "code": "0339999P",
+      "title": "Motomaster Wiper Blades",
+      "url": "/en/pdp/motomaster-wipers-0339999p.html",
+      "currentPrice": { "value": 15.0 },
+      "originalPrice": { "value": 24.99 },
+      "priceMessage": [{ "label": "2 for $30" }],
+      "isAvailable": true
+    },
+    {
+      "code": "0885555P",
+      "title": "NOMA LED String Lights, 100-ct",
+      "url": "/en/pdp/noma-led-lights-0885555p.html",
+      "currentPrice": { "value": 19.99 },
+      "originalPrice": { "value": 39.99 },
+      "priceMessage": [{ "label": "Triangle Members Only" }],
+      "isMemberPrice": true,
+      "isAvailable": true
+    },
+    {
+      "code": "0447777P",
+      "title": "Yardworks Garden Hose, 50 ft",
+      "url": "/en/pdp/yardworks-hose-0447777p.html",
+      "currentPrice": { "value": 44.99 },
+      "originalPrice": { "value": 44.99 },
+      "isAvailable": true
+    },
+    {
+      "code": "0552222P",
+      "title": "Woods Winter Sleeping Bag",
+      "url": "/en/pdp/woods-sleeping-bag-0552222p.html",
+      "currentPrice": { "value": 29.99 },
+      "originalPrice": { "value": 89.99 },
+      "isAvailable": false
+    },
+    {
+      "title": "Product With No Code",
+      "currentPrice": { "value": 10.0 },
+      "originalPrice": { "value": 20.0 }
+    },
+    {
+      "code": "0871234P",
+      "title": "Mastercraft Socket Set, 200-pc",
+      "currentPrice": { "value": 89.99 },
+      "originalPrice": { "value": 199.99 },
+      "isAvailable": true
+    }
+  ]
+}

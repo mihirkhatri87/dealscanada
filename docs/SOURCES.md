@@ -173,6 +173,49 @@ item shape itself changed.
 
 ---
 
+### Canadian Tire family engine — 8 banners, and the one key you cannot get
+
+**Endpoint:** `https://apim.canadiantire.ca/v1/search/v2/search?store=&baseStoreId=&categoryCode=`
+**Fixture:** `tests/fixtures/hybris/search.json`
+
+Canadian Tire, SportChek, Mark's, Atmosphere, Sports Experts, L'Équipeur, Pro
+Hockey Life and PartSource run one Hybris platform, and their sales run across
+banners — which is what makes `/family/canadian-tire` worth having.
+
+**The key.** The platform expects an `ocp-apim-subscription-key` header and there
+is no public developer programme that issues one; the value is whatever their own
+web app ships. Supply one in `CANADIAN_TIRE_API_KEY` and these banners use the
+API. Without one they run on the **JSON-LD engine instead** — automatically, at
+registration time — so all eight work for the overwhelming majority of installs
+that will never have a key. That is why their catalogue entries carry both
+`salePaths` (platform category codes) and `jsonLdListingPaths` (real URLs): which
+one is read depends on which engine ends up running.
+
+**Pricing is the reason this needed its own engine.** Three of their four common
+price shapes produce a wrong headline if mapped naively:
+
+- **Multi-buy.** "2 for $30" is not a $15 item. Dividing through prints a price
+  nobody buying one actually pays, and that is most people. The single-unit price
+  stands and the offer is described.
+- **Member pricing.** A Triangle-member price is real but conditional. As the
+  headline it advertises a saving a non-member walking in cannot get, so it is
+  labelled, and an item whose *only* discount is member-gated does not enter the
+  feed at all.
+- **No markdown.** A current price equal to the regular one is the platform
+  saying "no sale", not a zero-percent discount.
+
+Their product codes are also **never emitted as an mpn**. The codes are
+banner-scoped, and passing one off as a manufacturer part number would let the
+verification engine match it against an unrelated retailer's part number and
+compare two different products.
+
+**Drift looks like:** 401/403 on the API → the key is missing, wrong, or rotated;
+the banner should fall back rather than fail. A 200 with 0 items on the JSON-LD
+path → the sale listing URL moved; fix `jsonLdListingPaths` and
+`productLinkSelector` in the entry.
+
+---
+
 ### `stocktrack` — in-store clearance
 
 **Config-driven** endpoint map, deliberately: this is a small independent site and
@@ -194,11 +237,10 @@ mitigation, and it is one env var.
 ## Not built yet
 
 These are designed and specified in the PRD but **not in the repository**. Listed
-here so `npm run health` showing 56 sources rather than 101 is not a mystery.
+here so `npm run health` showing 64 sources rather than 101 is not a mystery.
 
 | Planned | Story | Why it is not here yet |
 |---|---|---|
-| Canadian Tire family engine (9 banners) | S3.10 | Hybris platform key is not publicly obtainable; falls back to JSON-LD meanwhile |
 | Magento engine | S3.12 | Same |
 | `costco` / `walmart` composites | S3.4, S3.13 | Both are Akamai-protected; the fallback chain needs a live block to test against |
 | `amazon-paapi` | S3.6 | Dormant by design — needs Associates credentials that require three qualifying sales first |

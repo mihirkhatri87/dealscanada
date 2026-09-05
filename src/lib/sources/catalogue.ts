@@ -27,6 +27,14 @@ export const retailerConfigSchema = z.object({
 
   /** Engine-specific entry points: Shopify collection handles, listing paths. */
   salePaths: z.array(z.string()).nullish(),
+  /**
+   * Listing URLs for the JSON-LD engine, when `salePaths` holds something else.
+   *
+   * The Canadian Tire banners need both: `salePaths` carries platform category
+   * codes for the Hybris engine, which are not URLs, so the JSON-LD fallback
+   * would have nothing to fetch without this.
+   */
+  jsonLdListingPaths: z.array(z.string()).nullish(),
   /** CSS selector for product links, used by the JSON-LD engine. */
   productLinkSelector: z.string().nullish(),
   /** Department all this retailer's stock belongs to, when it is single-department. */
@@ -51,6 +59,14 @@ export const retailerConfigSchema = z.object({
    * it from a product title downstream.
    */
   salePathDepartments: z.record(z.string(), z.string()).nullish(),
+
+  /**
+   * Hybris platform API base, shared by every Canadian Tire banner. Overridable
+   * per entry so a banner that moves to its own host is a data change.
+   */
+  hybrisApiBase: z.string().url().nullish(),
+  /** The banner's baseStoreId on the shared platform. Defaults to the entry id. */
+  hybrisBanner: z.string().nullish(),
 
   /** Per-retailer politeness override. */
   rateLimitRps: z.number().positive().nullish(),

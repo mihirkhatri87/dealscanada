@@ -13,10 +13,11 @@ import { createShopifyAdapter } from './engines/shopify';
 import { createJsonLdAdapter } from './engines/jsonld';
 import { createSfccAdapter } from './engines/sfcc';
 import { createGapIncAdapter } from './engines/gapinc';
+import { createHybrisAdapter } from './engines/hybris';
 import { buildStocktrackAdapter, type StocktrackStore } from './stocktrack';
 import { RETAILER_CATALOGUE } from './catalogue-data';
 import { runnableRetailers } from './catalogue';
-import { env } from '../config';
+import { env, flags } from '../config';
 
 // Bespoke adapters: sources whose value justifies dedicated handling.
 register(redflagdealsAdapter);
@@ -25,7 +26,15 @@ register(bestbuyAdapter);
 // Catalogue-driven retailers. Each entry becomes an adapter through the engine
 // it declares, so coverage grows by editing data rather than writing code.
 for (const retailer of runnableRetailers(RETAILER_CATALOGUE)) {
-  switch (retailer.engine) {
+  // The Canadian Tire family is the one place the catalogue's declared engine is
+  // not the final word. Their platform needs a subscription key with no public
+  // way to obtain one, so a banner declaring `hybris` runs on the JSON-LD engine
+  // until a key exists - which is what keeps those nine retailers working at all
+  // for the overwhelming majority of installs that will never have one.
+  const engine =
+    retailer.engine === 'hybris' && !flags.canadianTireApiEnabled ? 'jsonld' : retailer.engine;
+
+  switch (engine) {
     case 'shopify':
       register(createShopifyAdapter(retailer));
       break;
@@ -35,12 +44,15 @@ for (const retailer of runnableRetailers(RETAILER_CATALOGUE)) {
     case 'gapinc':
       register(createGapIncAdapter(retailer));
       break;
+    case 'hybris':
+      register(createHybrisAdapter(retailer));
+      break;
     case 'jsonld':
       register(createJsonLdAdapter(retailer));
       break;
     default:
-      // Engines still to be implemented (hybris, magento) fall through
-      // deliberately rather than registering a broken adapter.
+      // The Magento engine is still to be implemented; entries declaring it fall
+      // through deliberately rather than registering a broken adapter.
       break;
   }
 }

@@ -246,6 +246,19 @@ export function extractProductLinks(html: string, baseUrl: string, selector: str
   return [...links];
 }
 
+/**
+ * The listing URLs to crawl.
+ *
+ * `jsonLdListingPaths` wins where present, because an entry may declare another
+ * engine whose `salePaths` holds something that is not a URL - the Canadian Tire
+ * banners keep platform category codes there, and fetching `/CLEARANCE` as a
+ * path would 404 on every one of them.
+ */
+function listingPaths(config: RetailerConfig): string[] {
+  const paths = config.jsonLdListingPaths?.length ? config.jsonLdListingPaths : config.salePaths;
+  return (paths ?? []).filter((path) => path.startsWith('/'));
+}
+
 export function createJsonLdAdapter(config: RetailerConfig): SourceAdapter {
   return {
     id: `jsonld:${config.id}`,
@@ -257,7 +270,7 @@ export function createJsonLdAdapter(config: RetailerConfig): SourceAdapter {
       if (!config.productLinkSelector) {
         return { enabled: false, reason: 'no productLinkSelector configured' };
       }
-      if (!config.salePaths?.length) {
+      if (listingPaths(config).length === 0) {
         return { enabled: false, reason: 'no salePaths configured' };
       }
       return { enabled: true };
@@ -274,7 +287,7 @@ export function createJsonLdAdapter(config: RetailerConfig): SourceAdapter {
 
       const links = new Set<string>();
 
-      for (const path of config.salePaths ?? []) {
+      for (const path of listingPaths(config)) {
         if (links.size >= limit) break;
 
         const listingUrl = `${base}${path.startsWith('/') ? '' : '/'}${path}`;
