@@ -65,6 +65,9 @@ export function buildDealQuery(query: DealQuery, dialect: Dialect): BuiltQuery {
   if (query.storeIds?.length) {
     clauses.push(`d.store_id IN (${inList(query.storeIds)})`);
   }
+  if (query.sources?.length) {
+    clauses.push(`d.source IN (${inList(query.sources)})`);
+  }
 
   // A deal with no known price should not be excluded by a price ceiling the user
   // set — but it must be excluded by a floor, since we cannot claim it qualifies.

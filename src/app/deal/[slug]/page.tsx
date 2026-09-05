@@ -80,6 +80,15 @@ export default async function DealPage({ params }: { params: Promise<{ slug: str
         )}
       </nav>
 
+      {deal.source === 'seed' && (
+        <p className="rounded border border-warn/40 bg-warn-subtle px-3 py-2 text-sm text-warn">
+          <strong className="font-semibold">This is sample data.</strong> It was generated to
+          demonstrate the interface and the verification engine — the price is not real and the
+          link does not lead to a live product. Run{' '}
+          <code className="font-mono text-xs">npm run scrape</code> to load actual deals.
+        </p>
+      )}
+
       <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="flex flex-col gap-5">
           <div className="relative aspect-[4/3] overflow-hidden rounded border border-border bg-bg-inset">
@@ -202,14 +211,20 @@ export default async function DealPage({ params }: { params: Promise<{ slug: str
               </div>
             )}
 
-            <a
-              href={outbound}
-              target="_blank"
-              rel="noopener nofollow sponsored"
-              className="rounded bg-accent px-4 py-2.5 text-center text-sm font-semibold text-accent-fg transition-opacity hover:opacity-90"
-            >
-              Go to {deal.merchant?.name ?? 'store'} →
-            </a>
+            {deal.source === 'seed' ? (
+              <span className="rounded border border-dashed border-border px-4 py-2.5 text-center text-sm text-fg-muted">
+                No link — sample data
+              </span>
+            ) : (
+              <a
+                href={outbound}
+                target="_blank"
+                rel="noopener nofollow sponsored"
+                className="rounded bg-accent px-4 py-2.5 text-center text-sm font-semibold text-accent-fg transition-opacity hover:opacity-90"
+              >
+                Go to {deal.merchant?.name ?? 'store'} →
+              </a>
+            )}
 
             <dl className="flex flex-col gap-1.5 text-xs text-fg-muted">
               <div className="flex justify-between gap-2">

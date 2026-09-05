@@ -185,6 +185,8 @@ export interface DealQuery {
   excludeSuspect?: boolean;
   verdicts?: DealVerdict[];
   storeIds?: string[];
+  /** Filter by ingesting source, e.g. ['seed'] to count sample rows. */
+  sources?: string[];
   statuses?: DealStatus[];
   sort?: DealSort;
   limit?: number;

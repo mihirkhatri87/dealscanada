@@ -89,6 +89,15 @@ export function DealCard({ deal, now }: { deal: DealWithRelations; now?: Date })
             Sold out
           </span>
         )}
+
+        {/* Sample data must never be mistakable for a real price. It is easy to
+            forget the database is seeded, and a fabricated price presented like
+            a scraped one is precisely the deception this project is against. */}
+        {deal.source === 'seed' && (
+          <span className="absolute bottom-2 left-2 rounded-sm bg-warn-subtle px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-warn">
+            Sample data
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-3">
