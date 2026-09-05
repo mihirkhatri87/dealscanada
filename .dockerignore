@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.github
+coverage
+data
+.cache
+*.db
+.env*
+!.env.example
+tests
+docs

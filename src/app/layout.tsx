@@ -33,9 +33,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <footer className="mx-auto max-w-7xl px-4 py-10 text-xs text-fg-subtle">
           <p className="max-w-prose">
-            Prices are observations we recorded, shown with the time we saw them — always
-            confirm on the retailer&rsquo;s own site before buying. Every deal links back to
-            its source.
+            Prices are observations we recorded, shown with the time we saw them — always confirm on
+            the retailer&rsquo;s own site before buying. Every deal links back to its source.
           </p>
         </footer>
       </body>

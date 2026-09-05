@@ -8,10 +8,7 @@ import {
 } from '@/lib/sources/stocktrack';
 import type { AdapterContext } from '@/lib/sources/types';
 
-const html = readFileSync(
-  join(process.cwd(), 'tests/fixtures/stocktrack/clearance.html'),
-  'utf8',
-);
+const html = readFileSync(join(process.cwd(), 'tests/fixtures/stocktrack/clearance.html'), 'utf8');
 
 const stores: StocktrackStore[] = [
   { id: 'store-ct-yonge', chain: 'canadian-tire', name: 'Canadian Tire — Yonge' },

@@ -137,7 +137,10 @@ export function extractCoupon(text: string | null | undefined): CouponResult {
     // A code must carry at least one letter; "1234" alone is not a promo code.
     if (!/[A-Z]/.test(code)) continue;
 
-    const cleanedText = source.replace(match[0], '').replace(/\s{2,}/g, ' ').trim();
+    const cleanedText = source
+      .replace(match[0], '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
 
     return {
       code,

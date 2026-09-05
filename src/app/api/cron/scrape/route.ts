@@ -1,12 +1,15 @@
 import { getRepository } from '@/lib/db';
 import { env, flags } from '@/lib/config';
 import { allAdapters } from '@/lib/sources/registry';
-import '@/lib/sources/all';
+import { registerStocktrack } from '@/lib/sources/all';
 import { runPipeline } from '@/lib/pipeline/run';
-import { isCronAuthorized, resolveCronBudgetMs, CRON_MAX_DURATION_S } from '@/lib/cron';
+import { isCronAuthorized, resolveCronBudgetMs } from '@/lib/cron';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = CRON_MAX_DURATION_S;
+// Next reads this at build time by static analysis, so it must be a literal -
+// an imported constant fails the build. CRON_MAX_DURATION_S in @/lib/cron mirrors
+// it, and a test asserts the two agree.
+export const maxDuration = 300;
 
 /**
  * POST /api/cron/scrape — the hosted scheduler's entry point.
@@ -39,10 +42,12 @@ export async function POST(request: Request): Promise<Response> {
 
   const url = new URL(request.url);
   const budgetMs = resolveCronBudgetMs(url.searchParams.get('budgetMs'));
-  const adapters = allAdapters();
 
   const repo = await getRepository();
   await repo.migrate();
+
+  registerStocktrack(await repo.listStores(env.STOCKTRACK_MAX_STORES));
+  const adapters = allAdapters();
 
   const started = Date.now();
   const summary = await runPipeline({

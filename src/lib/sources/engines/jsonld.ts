@@ -183,7 +183,8 @@ export function parseProductPage(html: string, options: JsonLdParseOptions): Raw
         mpn: firstString(product.mpn),
         categoryHint: options.categoryHint ?? firstString(product.category),
         departmentHint: options.departmentHint ?? null,
-        inStock: availability === '' ? true : /instock|inStock|limitedavailability/i.test(availability),
+        inStock:
+          availability === '' ? true : /instock|inStock|limitedavailability/i.test(availability),
       };
     }
   }

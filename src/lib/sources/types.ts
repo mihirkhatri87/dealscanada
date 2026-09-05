@@ -94,10 +94,7 @@ export interface SourceAdapter {
  * rather than failing the whole source. One malformed row from a retailer must
  * not cost us the other 200.
  */
-export function validateRawDeals(
-  items: unknown[],
-  onDrop?: (reason: string) => void,
-): RawDeal[] {
+export function validateRawDeals(items: unknown[], onDrop?: (reason: string) => void): RawDeal[] {
   const valid: RawDeal[] = [];
 
   for (const item of items) {

@@ -41,7 +41,11 @@ const productSchema = z
     variants: z.array(z.unknown()).nullish(),
     images: z.array(z.object({ src: z.string().nullish() }).passthrough()).nullish(),
     options: z
-      .array(z.object({ name: z.string().nullish(), values: z.array(z.string()).nullish() }).passthrough())
+      .array(
+        z
+          .object({ name: z.string().nullish(), values: z.array(z.string()).nullish() })
+          .passthrough(),
+      )
       .nullish(),
   })
   .passthrough();
@@ -49,7 +53,14 @@ const productSchema = z
 const responseSchema = z.object({ products: z.array(z.unknown()) }).passthrough();
 
 /** Collection handles that hold discounted stock on most Shopify storefronts. */
-export const SALE_COLLECTIONS = ['sale', 'clearance', 'on-sale', 'outlet', 'markdowns', 'last-chance'];
+export const SALE_COLLECTIONS = [
+  'sale',
+  'clearance',
+  'on-sale',
+  'outlet',
+  'markdowns',
+  'last-chance',
+];
 
 export interface ShopifyParseOptions {
   baseUrl: string;
@@ -60,10 +71,7 @@ export interface ShopifyParseOptions {
   departmentHint?: string;
 }
 
-export function parseShopifyProducts(
-  payload: unknown,
-  options: ShopifyParseOptions,
-): RawDeal[] {
+export function parseShopifyProducts(payload: unknown, options: ShopifyParseOptions): RawDeal[] {
   const parsed = responseSchema.safeParse(payload);
   if (!parsed.success) return [];
 
@@ -76,8 +84,8 @@ export function parseShopifyProducts(
     const product = result.data;
     const variants = (product.variants ?? [])
       .map((variant) => variantSchema.safeParse(variant))
-      .filter((parse): parse is { success: true; data: z.infer<typeof variantSchema> } =>
-        parse.success,
+      .filter(
+        (parse): parse is { success: true; data: z.infer<typeof variantSchema> } => parse.success,
       )
       .map((parse) => parse.data);
 

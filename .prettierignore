@@ -3,3 +3,7 @@ node_modules/
 coverage/
 data/
 *.md
+
+# Fixtures are recorded responses. Reformatting them would change the exact
+# bytes the parsers are tested against, which is the one thing they must not do.
+tests/fixtures/

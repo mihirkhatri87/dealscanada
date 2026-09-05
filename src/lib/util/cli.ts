@@ -74,7 +74,10 @@ export function renderTable(headers: string[], rows: string[][]): string {
   );
 
   const line = (cells: string[]) =>
-    cells.map((cell, i) => (cell ?? '').padEnd(widths[i] ?? 0)).join('  ').trimEnd();
+    cells
+      .map((cell, i) => (cell ?? '').padEnd(widths[i] ?? 0))
+      .join('  ')
+      .trimEnd();
 
   const divider = widths.map((width) => '-'.repeat(width)).join('  ');
 

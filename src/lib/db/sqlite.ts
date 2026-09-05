@@ -113,8 +113,7 @@ export class SqliteDealRepository implements DealRepository {
 
   async getMerchantBySlug(slug: string): Promise<Merchant | null> {
     const row = this.db.prepare('SELECT * FROM merchants WHERE slug = ?').get(slug) as
-      | Row
-      | undefined;
+      Row | undefined;
     return row ? mapMerchant(row) : null;
   }
 
@@ -156,11 +155,7 @@ export class SqliteDealRepository implements DealRepository {
     run(stores);
   }
 
-  async findStoresNear(
-    lat: number,
-    lng: number,
-    radiusKm: number,
-  ): Promise<StoreWithDistance[]> {
+  async findStoresNear(lat: number, lng: number, radiusKm: number): Promise<StoreWithDistance[]> {
     const box = boundingBox(lat, lng, radiusKm);
     const rows = this.db
       .prepare(
@@ -186,6 +181,13 @@ export class SqliteDealRepository implements DealRepository {
   async getStore(id: string): Promise<Store | null> {
     const row = this.db.prepare('SELECT * FROM stores WHERE id = ?').get(id) as Row | undefined;
     return row ? mapStore(row) : null;
+  }
+
+  async listStores(limit?: number): Promise<Store[]> {
+    const rows = this.db
+      .prepare(`SELECT * FROM stores ORDER BY chain, name${limit === undefined ? '' : ' LIMIT ?'}`)
+      .all(...(limit === undefined ? [] : [limit])) as Row[];
+    return rows.map(mapStore);
   }
 
   // --- deals ---------------------------------------------------------------
@@ -329,9 +331,7 @@ export class SqliteDealRepository implements DealRepository {
   async getDealsByIds(ids: string[]): Promise<DealWithRelations[]> {
     if (ids.length === 0) return [];
     const marks = ids.map(() => '?').join(', ');
-    const rows = this.db
-      .prepare(`${SELECT_DEAL} WHERE d.id IN (${marks})`)
-      .all(...ids) as Row[];
+    const rows = this.db.prepare(`${SELECT_DEAL} WHERE d.id IN (${marks})`).all(...ids) as Row[];
     return rows.map(mapDealWithRelations);
   }
 

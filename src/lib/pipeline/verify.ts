@@ -88,9 +88,7 @@ export function verifyDeals(
     }
     const competitorPrices = [...perMerchant.values()];
 
-    const history = deal.productKey
-      ? (context.historyByProductKey.get(deal.productKey) ?? [])
-      : [];
+    const history = deal.productKey ? (context.historyByProductKey.get(deal.productKey) ?? []) : [];
     // Prior observations only. The current price must NOT be folded in here: it
     // would make every deal its own minimum whenever history is sparse, so
     // everything would read "lowest ever recorded".

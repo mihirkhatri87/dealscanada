@@ -72,8 +72,7 @@ export function validateCatalogue(input: unknown): CatalogueValidation {
     const result = retailerConfigSchema.safeParse(entry);
 
     if (!result.success) {
-      const label =
-        (entry as { id?: string })?.id ?? `entry ${index}`;
+      const label = (entry as { id?: string })?.id ?? `entry ${index}`;
       for (const issue of result.error.issues) {
         errors.push(`${label}: ${issue.path.join('.')} ${issue.message}`);
       }

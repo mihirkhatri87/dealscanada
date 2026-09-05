@@ -92,7 +92,11 @@ export function parseClearancePage(
       regularPrice: text(config.selectors.regularPrice),
       quantity: text(config.selectors.quantity),
       aisle: text(config.selectors.aisle),
-      href: row.find(config.selectors.link ?? 'a').first().attr('href') ?? null,
+      href:
+        row
+          .find(config.selectors.link ?? 'a')
+          .first()
+          .attr('href') ?? null,
     });
   });
 
@@ -174,17 +178,19 @@ export function buildStocktrackAdapter(
               title: item.title,
               // Deep link to the chain where we can, otherwise back to the
               // source page - a deal must always link somewhere real.
-              url: item.href?.startsWith('http')
-                ? item.href
-                : `${config.baseUrl}${path}`,
+              url: item.href?.startsWith('http') ? item.href : `${config.baseUrl}${path}`,
               price: item.clearancePrice,
               priceWas: item.regularPrice,
               merchantDomain: domain,
               storeId: store.id,
               inStock: item.quantity ? !/^0\b/.test(item.quantity) : true,
-              stockNote: [item.quantity ? `${item.quantity} in stock` : null, item.aisle ? `Aisle ${item.aisle}` : null]
-                .filter(Boolean)
-                .join(' · ') || null,
+              stockNote:
+                [
+                  item.quantity ? `${item.quantity} in stock` : null,
+                  item.aisle ? `Aisle ${item.aisle}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ') || null,
               currency: 'CAD',
             });
           }

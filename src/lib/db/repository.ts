@@ -106,6 +106,14 @@ export interface DealRepository {
   upsertStores(stores: StoreInput[]): Promise<void>;
   findStoresNear(lat: number, lng: number, radiusKm: number): Promise<StoreWithDistance[]>;
   getStore(id: string): Promise<Store | null>;
+  /**
+   * Every store the user has synced.
+   *
+   * Stores only enter this table through `npm run stores:sync -- --postal=`, so
+   * this list *is* the user's selection - which is what keeps the stocktrack
+   * adapter store-scoped rather than crawling a whole chain.
+   */
+  listStores(limit?: number): Promise<Store[]>;
 
   // --- deals ---------------------------------------------------------------
   /**
@@ -142,7 +150,9 @@ export interface DealRepository {
   prunePricePoints(before: string): Promise<number>;
 
   // --- price history -------------------------------------------------------
-  appendPricePoints(points: Array<{ dealId: string; price: number; observedAt: string }>): Promise<void>;
+  appendPricePoints(
+    points: Array<{ dealId: string; price: number; observedAt: string }>,
+  ): Promise<void>;
   getPriceHistory(dealId: string): Promise<PricePoint[]>;
   /**
    * Price history grouped by product identity rather than by deal.

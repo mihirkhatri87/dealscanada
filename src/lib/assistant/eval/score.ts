@@ -156,8 +156,7 @@ export function scoreCase(input: ScoreInput): CaseResult {
   // failure this site exists to prevent; finding a good deal alongside it does
   // not cancel that out.
   const passed =
-    violations.length === 0 &&
-    (evalCase.kind === 'clarify' ? clarified : hitIndex >= 0);
+    violations.length === 0 && (evalCase.kind === 'clarify' ? clarified : hitIndex >= 0);
 
   return {
     caseId: evalCase.id,
@@ -190,14 +189,17 @@ export function summarize(model: string, cases: CaseResult[]): ModelReport {
   const finds = cases.filter((result) => result.kind === 'find');
   const clarifies = cases.filter((result) => result.kind === 'clarify');
   const findsTest = finds.filter((result) => result.split === 'test');
-  const priced = cases.map((result) => result.costCents).filter((cost): cost is number => cost !== null);
+  const priced = cases
+    .map((result) => result.costCents)
+    .filter((cost): cost is number => cost !== null);
 
   const rate = (subset: CaseResult[]) =>
     subset.length === 0 ? 0 : subset.filter((result) => result.passed).length / subset.length;
 
-  const totalCost = priced.length === cases.length && priced.length > 0
-    ? priced.reduce((sum, cost) => sum + cost, 0)
-    : null;
+  const totalCost =
+    priced.length === cases.length && priced.length > 0
+      ? priced.reduce((sum, cost) => sum + cost, 0)
+      : null;
 
   return {
     model,

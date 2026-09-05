@@ -21,9 +21,7 @@ describe('RobotsTxt', () => {
   });
 
   it('lets a longer Allow override a shorter Disallow', () => {
-    const robots = RobotsTxt.parse(
-      'User-agent: *\nDisallow: /products\nAllow: /products/sale',
-    );
+    const robots = RobotsTxt.parse('User-agent: *\nDisallow: /products\nAllow: /products/sale');
     expect(robots.isAllowed('/products/tv', UA)).toBe(false);
     expect(robots.isAllowed('/products/sale/tv', UA)).toBe(true);
   });

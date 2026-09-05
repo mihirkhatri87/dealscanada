@@ -20,8 +20,8 @@ export function StaleBanner({
   if (successful.length === 0) {
     return (
       <p className="rounded border border-warn/40 bg-warn-subtle px-3 py-2 text-sm text-warn">
-        No source has completed successfully yet. Run <code className="font-mono">npm run scrape</code> to
-        load live deals.
+        No source has completed successfully yet. Run{' '}
+        <code className="font-mono">npm run scrape</code> to load live deals.
       </p>
     );
   }

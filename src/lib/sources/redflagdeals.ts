@@ -206,7 +206,8 @@ export const redflagdealsAdapter: SourceAdapter = {
     return {
       deals,
       path: 'rss',
-      reason: deals.length > 0 ? 'topics API unavailable; RSS carries no price or votes' : undefined,
+      reason:
+        deals.length > 0 ? 'topics API unavailable; RSS carries no price or votes' : undefined,
     };
   },
 };

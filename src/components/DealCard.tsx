@@ -45,10 +45,7 @@ export function DealCard({ deal, now }: { deal: DealWithRelations; now?: Date })
             a URL that resolves but fails to load still shows something. Product
             images come from ~100 merchant CDNs, several of which serve broken
             links for delisted stock. */}
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          aria-hidden="true"
-        >
+        <div className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
           <span className="font-mono text-3xl font-semibold text-fg-subtle/40">
             {merchantInitials(deal.merchant?.name)}
           </span>

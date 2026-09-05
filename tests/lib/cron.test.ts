@@ -79,3 +79,17 @@ describe('the run budget', () => {
     }
   });
 });
+
+describe('the ceiling matches the route', () => {
+  it('mirrors the route’s own maxDuration literal', async () => {
+    // Next reads `maxDuration` by static analysis at build time, so the route
+    // cannot import this constant — it must be a literal. That makes drift
+    // possible, so the two are compared here rather than trusted to stay equal.
+    const { readFileSync } = await import('node:fs');
+    const source = readFileSync('src/app/api/cron/scrape/route.ts', 'utf8');
+    const declared = /export const maxDuration = (\d+);/.exec(source)?.[1];
+
+    expect(declared).toBeDefined();
+    expect(Number(declared)).toBe(CRON_MAX_DURATION_S);
+  });
+});

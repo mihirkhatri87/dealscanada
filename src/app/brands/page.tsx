@@ -64,7 +64,11 @@ export default async function BrandsPage() {
             >
               <span className="text-sm font-semibold">{familyLabel(family)}</span>
               <span className="text-xs text-fg-muted">
-                {members.length} banners · {members.map((m) => m.name).slice(0, 3).join(', ')}
+                {members.length} banners ·{' '}
+                {members
+                  .map((m) => m.name)
+                  .slice(0, 3)
+                  .join(', ')}
                 {members.length > 3 ? '…' : ''}
               </span>
             </Link>

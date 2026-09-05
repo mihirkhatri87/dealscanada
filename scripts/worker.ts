@@ -16,7 +16,7 @@
 import cron from 'node-cron';
 import { createRepository } from '../src/lib/db';
 import { allAdapters } from '../src/lib/sources/registry';
-import '../src/lib/sources/all';
+import { registerStocktrack } from '../src/lib/sources/all';
 import { runPipeline } from '../src/lib/pipeline/run';
 import { parseArgs } from '../src/lib/util/cli';
 import { env } from '../src/lib/config';
@@ -62,6 +62,10 @@ async function main() {
   const repo = await createRepository();
   await repo.migrate();
 
+  // Store-scoped in-store clearance, from whatever the user has synced. Resolved
+  // once at startup; re-run `npm run stores:sync` and restart to change it.
+  registerStocktrack(await repo.listStores(env.STOCKTRACK_MAX_STORES));
+
   const guard = new RunGuard();
   let shuttingDown = false;
 
@@ -88,9 +92,11 @@ async function main() {
   console.log('Ctrl-C to stop (finishes the run in flight first).');
 
   if (args.flags.has('now')) {
-    await guard.run(() => scrapeOnce(repo)).catch((error: unknown) => {
-      console.error('Initial run failed:', error);
-    });
+    await guard
+      .run(() => scrapeOnce(repo))
+      .catch((error: unknown) => {
+        console.error('Initial run failed:', error);
+      });
   }
 
   const shutdown = async (signal: string) => {

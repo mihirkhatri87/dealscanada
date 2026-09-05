@@ -31,7 +31,9 @@ if (postgresUrl) {
     label: 'postgres',
     create: async () => {
       const schema = `contract_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      const repo = new PostgresDealRepository(`${postgresUrl}?options=-c%20search_path%3D${schema}`);
+      const repo = new PostgresDealRepository(
+        `${postgresUrl}?options=-c%20search_path%3D${schema}`,
+      );
       return { repo, cleanup: async () => repo.close() };
     },
   });

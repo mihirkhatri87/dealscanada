@@ -58,7 +58,11 @@ export async function GET(request: Request) {
 }
 
 /** The public shape. Kept explicit so internal columns cannot leak by accident. */
-function serializeDeal(deal: Awaited<ReturnType<Awaited<ReturnType<typeof getRepository>>['queryDeals']>>['deals'][number]) {
+function serializeDeal(
+  deal: Awaited<
+    ReturnType<Awaited<ReturnType<typeof getRepository>>['queryDeals']>
+  >['deals'][number],
+) {
   return {
     id: deal.id,
     slug: deal.slug,
@@ -69,7 +73,9 @@ function serializeDeal(deal: Awaited<ReturnType<Awaited<ReturnType<typeof getRep
     merchant: deal.merchant
       ? { slug: deal.merchant.slug, name: deal.merchant.name, family: deal.merchant.family }
       : null,
-    store: deal.store ? { id: deal.store.id, name: deal.store.name, chain: deal.store.chain } : null,
+    store: deal.store
+      ? { id: deal.store.id, name: deal.store.name, chain: deal.store.chain }
+      : null,
     distanceKm: deal.distanceKm ?? null,
     category: deal.category,
     department: deal.department,

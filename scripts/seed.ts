@@ -11,7 +11,11 @@
  *   npm run seed -- --reset
  */
 import { createRepository } from '../src/lib/db';
-import { ALL_MERCHANT_SEEDS, merchantIdForDomain, seedToMerchantInput } from '../src/lib/sources/merchants';
+import {
+  ALL_MERCHANT_SEEDS,
+  merchantIdForDomain,
+  seedToMerchantInput,
+} from '../src/lib/sources/merchants';
 import { buildSeedDeals, buildSeedStores } from '../src/lib/seed/data';
 import { parseArgs } from '../src/lib/util/cli';
 

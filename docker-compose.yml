@@ -1,0 +1,38 @@
+# Runs the app against Postgres, which is the deployment shape rather than the
+# local-development one. For local work `npm run dev` on SQLite is faster and
+# needs none of this.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dealscanada
+      POSTGRES_PASSWORD: dealscanada
+      POSTGRES_DB: dealscanada
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U dealscanada']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # The only change needed to move from SQLite to Postgres (NFR-2). No
+      # application code is aware of which one it is talking to.
+      DATABASE_URL: postgres://dealscanada:dealscanada@postgres:5432/dealscanada
+      SCRAPE_USER_AGENT: ${SCRAPE_USER_AGENT:-}
+      CRON_SECRET: ${CRON_SECRET:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ASSISTANT_MODEL: ${ASSISTANT_MODEL:-claude-sonnet-5}
+    ports:
+      - '3000:3000'
+
+volumes:
+  postgres-data:

@@ -89,8 +89,8 @@ export default async function HomePage({
         ) : (
           <section className="flex flex-wrap items-center justify-between gap-3 rounded border border-dashed border-border bg-bg-raised px-4 py-3">
             <p className="text-sm text-fg-muted">
-              <span className="font-medium text-fg">Shopping in person?</span> Set your location
-              to see red-tag clearance at stores near you.
+              <span className="font-medium text-fg">Shopping in person?</span> Set your location to
+              see red-tag clearance at stores near you.
             </p>
             <Link
               href="/near-me"

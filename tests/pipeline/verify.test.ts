@@ -21,9 +21,7 @@ function history(prices: number[], daysAgoStart = 90): PriceObservation[] {
   return prices.map((price, index) => ({
     price,
     merchantId: 'm-any',
-    observedAt: new Date(
-      NOW.getTime() - (daysAgoStart - index * 10) * 86_400_000,
-    ).toISOString(),
+    observedAt: new Date(NOW.getTime() - (daysAgoStart - index * 10) * 86_400_000).toISOString(),
   }));
 }
 
@@ -125,8 +123,20 @@ describe('verifyDeals', () => {
     // Two coats with similar titles are not necessarily the same coat.
     const deals = [
       tv({ id: 'd1', merchantId: 'm-a', productKeyStrength: 'title', priceNow: 4999 }),
-      tv({ id: 'd2', sourceId: 's2', merchantId: 'm-b', productKeyStrength: 'title', priceNow: 9999 }),
-      tv({ id: 'd3', sourceId: 's3', merchantId: 'm-c', productKeyStrength: 'title', priceNow: 9999 }),
+      tv({
+        id: 'd2',
+        sourceId: 's2',
+        merchantId: 'm-b',
+        productKeyStrength: 'title',
+        priceNow: 9999,
+      }),
+      tv({
+        id: 'd3',
+        sourceId: 's3',
+        merchantId: 'm-c',
+        productKeyStrength: 'title',
+        priceNow: 9999,
+      }),
     ];
 
     verifyDeals(deals, { historyByProductKey: new Map(), now: NOW });
@@ -162,9 +172,7 @@ describe('verifyDeals', () => {
 
   it('handles deals with no product key at all', () => {
     const deals = [tv({ productKey: null, productKeyStrength: null })];
-    expect(() =>
-      verifyDeals(deals, { historyByProductKey: new Map(), now: NOW }),
-    ).not.toThrow();
+    expect(() => verifyDeals(deals, { historyByProductKey: new Map(), now: NOW })).not.toThrow();
     expect(deals[0]?.verdict).toBe('unverified');
   });
 

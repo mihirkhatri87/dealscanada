@@ -22,7 +22,10 @@ export function cleanTitle(title: string): string {
   let cleaned = title;
   for (const pattern of TITLE_NOISE) cleaned = cleaned.replace(pattern, ' ');
 
-  return cleaned.replace(/\s{2,}/g, ' ').replace(/^[\s:—-]+|[\s:—-]+$/g, '').trim();
+  return cleaned
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^[\s:—-]+|[\s:—-]+$/g, '')
+    .trim();
 }
 
 /** Trims to a length that fits a two-line card, cutting on a word boundary. */

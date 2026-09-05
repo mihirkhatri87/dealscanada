@@ -60,7 +60,9 @@ describe('the golden set', () => {
   });
 
   it('covers every request shape the PRD names', () => {
-    const requests = GOLDEN_SET.map((evalCase) => `${evalCase.request} ${evalCase.probes}`.toLowerCase());
+    const requests = GOLDEN_SET.map((evalCase) =>
+      `${evalCase.request} ${evalCase.probes}`.toLowerCase(),
+    );
     const covered = (pattern: RegExp) => requests.some((request) => pattern.test(request));
 
     expect(covered(/budget|under \$|no more than|cannot go over/), 'budget').toBe(true);
@@ -69,7 +71,10 @@ describe('the golden set', () => {
     expect(covered(/50% off|discount/), 'discount depth').toBe(true);
     expect(covered(/coupon|promo code/), 'coupon').toBe(true);
     expect(covered(/near me|in-store|in store|clearance/), 'local').toBe(true);
-    expect(GOLDEN_SET.some((evalCase) => evalCase.kind === 'clarify'), 'vague').toBe(true);
+    expect(
+      GOLDEN_SET.some((evalCase) => evalCase.kind === 'clarify'),
+      'vague',
+    ).toBe(true);
   });
 
   it('gives every find case at least one acceptable answer, and clarify cases none', () => {
@@ -202,7 +207,10 @@ describe('scoring a clarify case', () => {
   it('passes when the assistant asks instead of guessing', () => {
     const result = scoreCase({
       evalCase: vague,
-      events: [{ type: 'text', text: 'Happy to help — who is it for, and what is your budget?' }, done()],
+      events: [
+        { type: 'text', text: 'Happy to help — who is it for, and what is your budget?' },
+        done(),
+      ],
       idBySourceId: ids,
       model: 'claude-sonnet-5',
     });

@@ -144,8 +144,8 @@ export function LocationPicker({ current }: { current: StoredLocation | null }) 
       )}
 
       <p className="text-xs text-fg-subtle">
-        Your location stays in this browser. Postal codes are matched against a list bundled
-        with the site, so nothing is sent to a mapping service.
+        Your location stays in this browser. Postal codes are matched against a list bundled with
+        the site, so nothing is sent to a mapping service.
       </p>
     </div>
   );

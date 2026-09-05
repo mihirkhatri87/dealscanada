@@ -56,7 +56,12 @@ function scriptedClient(script: Array<Record<string, unknown>>) {
 }
 
 function baseUsage() {
-  return { input_tokens: 100, output_tokens: 50, cache_read_input_tokens: 400, cache_creation_input_tokens: 0 };
+  return {
+    input_tokens: 100,
+    output_tokens: 50,
+    cache_read_input_tokens: 400,
+    cache_creation_input_tokens: 0,
+  };
 }
 
 async function collect(generator: AsyncGenerator<AssistantEvent>): Promise<AssistantEvent[]> {
@@ -94,7 +99,11 @@ describe('runAssistant', () => {
         content: [{ type: 'tool_use', id: 't1', name: 'search_deals', input: {} }],
         usage: baseUsage(),
       },
-      { stop_reason: 'end_turn', content: [{ type: 'text', text: 'Found one.' }], usage: baseUsage() },
+      {
+        stop_reason: 'end_turn',
+        content: [{ type: 'text', text: 'Found one.' }],
+        usage: baseUsage(),
+      },
     ]);
 
     const events = await collect(
@@ -164,9 +173,7 @@ describe('runAssistant', () => {
   });
 
   it('reports a refusal as a message rather than throwing', async () => {
-    const client = scriptedClient([
-      { stop_reason: 'refusal', content: [], usage: baseUsage() },
-    ]);
+    const client = scriptedClient([{ stop_reason: 'refusal', content: [], usage: baseUsage() }]);
 
     const events = await collect(
       runAssistant({

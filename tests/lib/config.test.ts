@@ -67,8 +67,7 @@ describe('config', () => {
 
     it('is on with both', () => {
       expect(
-        computeFlags({ ASSISTANT_ENABLED: 'true', ANTHROPIC_API_KEY: 'sk-ant-x' })
-          .assistantEnabled,
+        computeFlags({ ASSISTANT_ENABLED: 'true', ANTHROPIC_API_KEY: 'sk-ant-x' }).assistantEnabled,
       ).toBe(true);
     });
   });

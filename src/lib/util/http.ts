@@ -112,8 +112,7 @@ export class HttpClient {
         timeoutMs: 10000,
         headers: {},
       });
-      robots =
-        response.status === 200 ? RobotsTxt.parse(response.body) : RobotsTxt.allowAll();
+      robots = response.status === 200 ? RobotsTxt.parse(response.body) : RobotsTxt.allowAll();
     } catch {
       // A missing or unreachable robots.txt is not permission to ignore it, but it
       // is also not a prohibition. The convention is to proceed.
@@ -223,10 +222,7 @@ export class HttpClient {
     options: { timeoutMs?: number; headers?: Record<string, string>; signal?: AbortSignal },
   ): Promise<{ status: number; body: string; headers: Record<string, string> }> {
     const controller = new AbortController();
-    const timeout = setTimeout(
-      () => controller.abort(),
-      options.timeoutMs ?? env.HTTP_TIMEOUT_MS,
-    );
+    const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? env.HTTP_TIMEOUT_MS);
 
     if (options.signal) {
       options.signal.addEventListener('abort', () => controller.abort(), { once: true });

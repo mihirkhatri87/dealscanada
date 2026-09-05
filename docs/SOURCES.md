@@ -1,0 +1,214 @@
+# Sources: endpoints, failure modes, and how to fix drift
+
+Every adapter here was written against documented response shapes and verified
+against committed fixtures. **None has been run against the live web** — the
+sandbox this was built in returns 403 for every retailer host. `npm run health`
+from a Canadian IP is what closes that gap, and this document is what you use to
+act on its output.
+
+Read it as: *when health says X is red, here is what changed and where to fix it.*
+
+---
+
+## How to read `npm run health`
+
+```
+source              enabled  http  items  latency  error
+redflagdeals        yes      200   38     840ms
+bestbuy             yes      403   0      210ms    blocked
+shopify:roots       yes      200   61     1.2s
+jsonld:staples      yes      200   0      2.1s     no JSON-LD Product found
+amazon-paapi        no       -     -      -        credentials not configured
+```
+
+Four outcomes, three of which are not bugs:
+
+| Signal | Meaning | Action |
+|---|---|---|
+| `200` with items | Working | None |
+| `no` / `skipped` | Deliberately off — a flag or a missing credential | None. A half-configured integration is not a broken one |
+| `403` / `429` | Bot protection or rate limiting | See **Blocked** below. Often nothing to fix in code |
+| `200` with 0 items | **The one that means drift.** The endpoint answered and we did not understand it | Fix the selector or the shape. Start here |
+
+A `200` with zero items is the interesting failure: the site is up, we are
+allowed in, and our parser is wrong. Everything else is either fine or is
+someone else's decision.
+
+---
+
+## Adapters
+
+### `redflagdeals` — the Canadian firehose
+
+**Endpoint:** `forums.redflagdeals.com/api/topics?forum_id=9&per_page=40&page=N`
+**Fixture:** `tests/fixtures/redflagdeals/topics.json`
+
+Returns forum topics, only some of which are deals. The adapter requires an
+`offer` object on the item — that field is what separates a posted deal from a
+discussion thread, and dropping the requirement floods the site with forum chatter.
+
+**Drift looks like:** items parsed drops to near zero while HTTP stays 200 → the
+`offer` shape changed. Compare a live topic against the fixture; the mapping is
+about fifteen lines.
+
+**Fallback:** RSS, when the JSON shape fails entirely.
+
+---
+
+### `bestbuy` — the best structured before/after prices
+
+**Endpoints:** product search, then a batched offers endpoint by SKU.
+**Fixture:** `tests/fixtures/bestbuy/search.json`, `offers.json`
+
+Two calls because the search response carries the product and the offers response
+carries `regularPrice` vs `salePrice`. Items with no offer are dropped rather than
+emitted at full price.
+
+**Drift looks like:** 403 (bot protection — see below), or products with prices
+but no `priceWas`, meaning the offers call is returning a changed shape.
+
+---
+
+### Shopify engine — 24 retailers, one implementation
+
+**Endpoint:** `/products.json` and `/collections/<handle>/products.json?limit=250`
+**Fixture:** `tests/fixtures/shopify/products.json`
+
+The highest coverage-per-effort adapter in the project. `compare_at_price` vs
+`price` is a native Shopify field, so before/after prices are exact rather than
+inferred — no other engine gets prices this clean.
+
+Sale collections are auto-discovered by trying `sale`, `clearance`, `on-sale`,
+`outlet`, `markdowns`.
+
+**Drift looks like:** a 404 on `/products.json` → the store disabled the endpoint.
+That is a `blocked` status, not a failure; mark it in the catalogue and move on.
+Adding a Shopify store is one JSON entry with a base URL.
+
+---
+
+### JSON-LD engine — 77 retailers, the universal fallback
+
+**How it works:** fetch a listing page, extract product links with a per-retailer
+CSS selector, then parse `application/ld+json` `Product`/`Offer` from each product
+page. Falls back to OpenGraph tags when JSON-LD is absent.
+
+**This is where drift concentrates**, because the CSS selector is the fragile part
+and every retailer has their own.
+
+**Drift looks like:** 200 with 0 items. Almost always the listing selector. Open
+the listing page, find what wraps a product link now, and change the `selector`
+field in that retailer's catalogue entry. **No TypeScript involved.**
+
+**Second most common:** links extracted fine, but every product page yields
+nothing → the retailer moved from JSON-LD to a client-rendered shape. The OG
+fallback usually still works; if not, that retailer needs a different engine.
+
+---
+
+### `stocktrack` — in-store clearance
+
+**Config-driven** endpoint map, deliberately: this is a small independent site and
+its shape is the least certain thing in the project.
+
+Constraints that are not negotiable: **selected stores only**, never a full-chain
+crawl; a dedicated low rate limit well below the global one; response caching with
+a 240-minute TTL; and `STOCKTRACK_ENABLED=false` stops every request.
+
+**Drift looks like:** anything. Expect one selector-fix commit driven by your first
+real `health` run. The selectors live in the adapter's config object at the top of
+the file for exactly that reason.
+
+If the site's operator objects, set the flag to false. That is the whole
+mitigation, and it is one env var.
+
+---
+
+## Not built yet
+
+These are designed and specified in the PRD but **not in the repository**. Listed
+here so `npm run health` showing 43 sources rather than 60 is not a mystery.
+
+| Planned | Story | Why it is not here yet |
+|---|---|---|
+| SFCC engine | S3.9 | Needs a live site-id probe to write against; the sandbox cannot reach one |
+| Canadian Tire family engine (9 banners) | S3.10 | Hybris platform key is not publicly obtainable; falls back to JSON-LD meanwhile |
+| Gap Inc. engine (6 brands) | S3.11 | Same reason as SFCC |
+| Magento engine | S3.12 | Same |
+| `costco` / `walmart` composites | S3.4, S3.13 | Both are Akamai-protected; the fallback chain needs a live block to test against |
+| `amazon-paapi` | S3.6 | Dormant by design — needs Associates credentials that require three qualifying sales first |
+| Amazon alternatives (camelcamelcamel) | S3.5 | Next in the queue |
+
+The Canadian Tire, Gap Inc. and Reitmans retailers **are** in the catalogue and
+run today on the JSON-LD or Shopify engine. When the family engines land, those
+entries change one field.
+
+Two constraints already hold for Amazon, before any adapter exists: no request is
+ever made to an amazon.ca product path, and the PA-API adapter will report
+"skipped — credentials not configured" rather than failing a run. Scraping
+amazon.ca HTML violates their terms, and that will be enforced by a test rather
+than left to discipline.
+
+---
+
+## Blocked, and why it usually is not a bug
+
+A `403` from a large retailer is bot protection working as designed, and the
+sandbox this was built in gets one from nearly every host. Options, in the order
+worth trying:
+
+1. **Accept it.** A blocked retailer is reported and skipped; it never fails the
+   run or hides the other forty-two sources. Check what *did* come back first.
+2. **Slow down.** `RATE_LIMIT_RPS` is already conservative; lower it for that
+   domain specifically via the catalogue entry.
+3. **Apply to an affiliate network.** Rakuten, Impact, CJ and AvantLink are free
+   and their product feeds are the *permissioned* version of what scraping
+   approximates — better data, no ToS risk, and it monetizes. This is the right
+   answer for apparel retailers in particular.
+4. **An unblocker proxy**, last and only if a specific blocked source actually
+   matters to you. ~$50–70/month, and it does not make the scraping any more
+   welcome.
+
+What not to do: rotate user agents to disguise the crawler, or ignore
+`robots.txt`. The project identifies itself honestly and honours robots on every
+HTML fetch. That is a design commitment, not an oversight to route around.
+
+---
+
+## Adding a retailer
+
+```powershell
+npm run retailer:probe -- https://somestore.ca
+```
+
+Detects the platform (Shopify via `/products.json`, SFCC via
+`/on/demandware.store/`, Magento via a GraphQL probe, Hybris and Gap Inc. via
+known markers), finds sale collections, and prints a catalogue entry. Detection
+covers all six platforms even though only two engines are implemented — a
+detected SFCC store gets a valid entry that runs on the JSON-LD engine until its
+own engine lands. `--write`
+appends it; `--all` re-probes everything and refreshes each `status`.
+
+If the platform is unrecognised it says so and suggests the JSON-LD engine, which
+needs a listing URL and a CSS selector.
+
+**Adding a retailer touches one JSON file.** If you find yourself writing
+TypeScript to onboard a store, the engine is missing a capability — add it there,
+not in a per-retailer special case.
+
+---
+
+## The rate limiter and robots
+
+Both live in `src/lib/util/http.ts` and apply to every adapter without opt-in:
+
+- Per-domain token bucket, default 1 req/sec, overridable per retailer
+- `robots.txt` fetched, parsed, cached, and checked before any HTML scrape — a
+  disallowed URL throws `RobotsDisallowedError` and is never fetched
+- Retries with exponential backoff on 429 and 5xx only; a 404 is an answer, not a
+  thing to retry
+- `Retry-After` honoured when present
+- ETag / `If-Modified-Since` conditional requests, with an on-disk cache
+
+A test asserts no HTTP request is issued for a robots-disallowed URL. That one is
+worth keeping green.

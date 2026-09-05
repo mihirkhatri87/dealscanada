@@ -12,9 +12,11 @@
  *   npm run health -- --source=bestbuy
  *   npm run health -- --json
  */
+import { createRepository } from '../src/lib/db';
 import { allAdapters, getAdapter } from '../src/lib/sources/registry';
-import '../src/lib/sources/all';
+import { registerStocktrack } from '../src/lib/sources/all';
 import { HttpClient } from '../src/lib/util/http';
+import { env } from '../src/lib/config';
 import { getList, parseArgs, renderTable } from '../src/lib/util/cli';
 import type { SourceAdapter } from '../src/lib/sources/types';
 
@@ -100,6 +102,15 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const asJson = args.flags.has('json');
   const requested = getList(args, 'source');
+
+  // The in-store clearance adapter is built from the stores the user has synced,
+  // so it only exists once the database is open. Registering it even with no
+  // stores keeps it visible in the table with a stated reason, rather than
+  // silently absent.
+  const repo = await createRepository();
+  await repo.migrate();
+  registerStocktrack(await repo.listStores(env.STOCKTRACK_MAX_STORES));
+  await repo.close();
 
   let adapters = allAdapters();
   if (requested?.length) {

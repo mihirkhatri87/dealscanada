@@ -9,7 +9,7 @@
  */
 import { createRepository } from '../src/lib/db';
 import { allAdapters, getAdapter } from '../src/lib/sources/registry';
-import '../src/lib/sources/all';
+import { registerStocktrack } from '../src/lib/sources/all';
 import { runPipeline } from '../src/lib/pipeline/run';
 import { getList, getNumber, parseArgs } from '../src/lib/util/cli';
 import { env } from '../src/lib/config';
@@ -23,6 +23,13 @@ async function main() {
   const sources = getList(args, 'source');
   const families = getList(args, 'family');
   const storeIds = getList(args, 'store');
+
+  const repo = await createRepository();
+  await repo.migrate();
+
+  // In-store clearance is scoped to the stores the user synced, so the adapter
+  // can only be built once the database is open.
+  registerStocktrack(await repo.listStores(env.STOCKTRACK_MAX_STORES));
 
   let adapters = allAdapters();
 
@@ -40,9 +47,7 @@ async function main() {
   }
 
   if (families?.length) {
-    adapters = adapters.filter((adapter) =>
-      families.some((family) => adapter.id.includes(family)),
-    );
+    adapters = adapters.filter((adapter) => families.some((family) => adapter.id.includes(family)));
   }
 
   if (adapters.length === 0) {
@@ -53,9 +58,6 @@ async function main() {
   console.log(
     `Scraping ${adapters.length} source(s)${dryRun ? ' [DRY RUN - nothing will be written]' : ''}`,
   );
-
-  const repo = await createRepository();
-  await repo.migrate();
 
   const summary = await runPipeline({
     adapters,

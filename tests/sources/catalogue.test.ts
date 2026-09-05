@@ -6,8 +6,20 @@ import { allAdapters, resetRegistry } from '@/lib/sources/registry';
 describe('catalogue validation', () => {
   it('reports every problem rather than throwing on the first', () => {
     const { valid, errors } = validateCatalogue([
-      { id: 'good', name: 'Good', domain: 'good.ca', baseUrl: 'https://good.ca', engine: 'shopify' },
-      { id: 'bad-engine', name: 'Bad', domain: 'bad.ca', baseUrl: 'https://bad.ca', engine: 'nope' },
+      {
+        id: 'good',
+        name: 'Good',
+        domain: 'good.ca',
+        baseUrl: 'https://good.ca',
+        engine: 'shopify',
+      },
+      {
+        id: 'bad-engine',
+        name: 'Bad',
+        domain: 'bad.ca',
+        baseUrl: 'https://bad.ca',
+        engine: 'nope',
+      },
       { id: 'bad-url', name: 'Bad', domain: 'b2.ca', baseUrl: 'not-a-url', engine: 'shopify' },
     ]);
 
@@ -75,7 +87,15 @@ describe('the shipped catalogue', () => {
 
   it('covers every retail vertical the PRD targets', () => {
     const verticals = new Set(RETAILER_CATALOGUE.map((r) => r.vertical));
-    for (const required of ['electronics', 'apparel', 'toys', 'home', 'grocery', 'beauty', 'sports']) {
+    for (const required of [
+      'electronics',
+      'apparel',
+      'toys',
+      'home',
+      'grocery',
+      'beauty',
+      'sports',
+    ]) {
       expect(verticals).toContain(required);
     }
   });

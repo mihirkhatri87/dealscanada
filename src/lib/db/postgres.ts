@@ -142,11 +142,7 @@ export class PostgresDealRepository implements DealRepository {
     });
   }
 
-  async findStoresNear(
-    lat: number,
-    lng: number,
-    radiusKm: number,
-  ): Promise<StoreWithDistance[]> {
+  async findStoresNear(lat: number, lng: number, radiusKm: number): Promise<StoreWithDistance[]> {
     const box = boundingBox(lat, lng, radiusKm);
     const rows = await this.sql`
       SELECT * FROM stores
@@ -169,6 +165,14 @@ export class PostgresDealRepository implements DealRepository {
   async getStore(id: string): Promise<Store | null> {
     const rows = await this.sql`SELECT * FROM stores WHERE id = ${id}`;
     return rows[0] ? mapStore(rows[0] as Row) : null;
+  }
+
+  async listStores(limit?: number): Promise<Store[]> {
+    const rows =
+      limit === undefined
+        ? await this.sql`SELECT * FROM stores ORDER BY chain, name`
+        : await this.sql`SELECT * FROM stores ORDER BY chain, name LIMIT ${limit}`;
+    return rows.map((row) => mapStore(row as Row));
   }
 
   // --- deals ---------------------------------------------------------------
@@ -301,10 +305,7 @@ export class PostgresDealRepository implements DealRepository {
   async getDealsByIds(ids: string[]): Promise<DealWithRelations[]> {
     if (ids.length === 0) return [];
     const marks = ids.map((_, i) => `$${i + 1}`).join(', ');
-    const rows = await this.sql.unsafe(
-      `${SELECT_DEAL} WHERE d.id IN (${marks})`,
-      ids as never[],
-    );
+    const rows = await this.sql.unsafe(`${SELECT_DEAL} WHERE d.id IN (${marks})`, ids as never[]);
     return rows.map((row) => mapDealWithRelations(row as Row));
   }
 

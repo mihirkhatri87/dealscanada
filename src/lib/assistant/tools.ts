@@ -48,8 +48,10 @@ export function toDealQuery(input: AssistantDealQuery): DealQuery {
     merchantSlugs: input.merchantSlugs,
     families: input.families,
     brands: input.brands,
-    minPrice: input.minPriceDollars === undefined ? undefined : Math.round(input.minPriceDollars * 100),
-    maxPrice: input.maxPriceDollars === undefined ? undefined : Math.round(input.maxPriceDollars * 100),
+    minPrice:
+      input.minPriceDollars === undefined ? undefined : Math.round(input.minPriceDollars * 100),
+    maxPrice:
+      input.maxPriceDollars === undefined ? undefined : Math.round(input.maxPriceDollars * 100),
     minDiscountPct: input.minDiscountPct,
     couponOnly: input.couponOnly,
     inStockOnly: input.inStockOnly,
@@ -97,9 +99,7 @@ export function summarizeDeal(deal: DealWithRelations): DealSummary {
         ? formatCents(deal.priceWas, deal.currency)
         : null,
     discountPct:
-      deal.verdict === 'inflated-anchor'
-        ? null
-        : (deal.marketDiscountPct ?? deal.discountPct),
+      deal.verdict === 'inflated-anchor' ? null : (deal.marketDiscountPct ?? deal.discountPct),
     verdict: deal.verdict,
     verdictNote: deal.qualityNote,
     category: deal.category,
@@ -243,7 +243,8 @@ export async function executeTool(
 
     case 'get_price_history': {
       const parsed = z.object({ dealId: z.string() }).safeParse(rawInput);
-      if (!parsed.success) return { activity: 'Lookup failed', content: { error: 'Missing dealId' } };
+      if (!parsed.success)
+        return { activity: 'Lookup failed', content: { error: 'Missing dealId' } };
 
       const [deal] = await context.repo.getDealsByIds([parsed.data.dealId]);
       if (!deal) return { activity: 'Lookup failed', content: { error: 'No such deal' } };
@@ -269,7 +270,10 @@ export async function executeTool(
     case 'compare_deals': {
       const parsed = z.object({ dealIds: z.array(z.string()).min(2).max(6) }).safeParse(rawInput);
       if (!parsed.success) {
-        return { activity: 'Comparison failed', content: { error: 'Need between 2 and 6 deal ids' } };
+        return {
+          activity: 'Comparison failed',
+          content: { error: 'Need between 2 and 6 deal ids' },
+        };
       }
 
       const deals = await context.repo.getDealsByIds(parsed.data.dealIds);
@@ -310,7 +314,9 @@ export async function executeTool(
         };
       }
 
-      const parsed = z.object({ radiusKm: z.number().min(1).max(100).optional() }).safeParse(rawInput);
+      const parsed = z
+        .object({ radiusKm: z.number().min(1).max(100).optional() })
+        .safeParse(rawInput);
       const radiusKm = parsed.success ? (parsed.data.radiusKm ?? 25) : 25;
 
       const { deals, total } = await context.repo.queryDealsNear({

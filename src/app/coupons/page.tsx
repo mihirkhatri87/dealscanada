@@ -33,7 +33,8 @@ export default async function CouponsPage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-bold tracking-tight">Coupon codes</h1>
         <p className="text-sm text-fg-muted">
-          Codes we found attached to a current deal, soonest to expire first. Click a code to copy it.
+          Codes we found attached to a current deal, soonest to expire first. Click a code to copy
+          it.
         </p>
       </div>
 

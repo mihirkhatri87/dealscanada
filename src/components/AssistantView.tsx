@@ -320,9 +320,7 @@ export function AssistantView({ enabled }: { enabled: boolean }) {
 
         {deals.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded border border-dashed border-border bg-bg-raised px-6 py-16 text-center">
-            <p className="text-sm text-fg-muted">
-              Results appear here as the assistant searches.
-            </p>
+            <p className="text-sm text-fg-muted">Results appear here as the assistant searches.</p>
             <p className="max-w-sm text-xs text-fg-subtle">
               These are the same deal cards you get by browsing — the assistant filters the same
               database, it does not have a separate one.

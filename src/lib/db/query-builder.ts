@@ -24,10 +24,11 @@ const SORTS: Record<DealSort, string> = {
   // Ranks on the discount we can corroborate, falling back to the claim only
   // where nothing contradicts it.
   'biggest-drop': 'COALESCE(d.market_discount_pct, d.discount_pct, -1) DESC',
-  'best-verified': "CASE d.verdict WHEN 'verified-low' THEN 3 WHEN 'verified-good' THEN 2 WHEN 'market-price' THEN 1 ELSE 0 END DESC, COALESCE(d.market_discount_pct, 0) DESC",
+  'best-verified':
+    "CASE d.verdict WHEN 'verified-low' THEN 3 WHEN 'verified-good' THEN 2 WHEN 'market-price' THEN 1 ELSE 0 END DESC, COALESCE(d.market_discount_pct, 0) DESC",
   'price-asc': 'COALESCE(d.price_now, 999999999) ASC',
   'price-desc': 'COALESCE(d.price_now, -1) DESC',
-  expiring: 'COALESCE(d.expires_at, \'9999-12-31\') ASC',
+  expiring: "COALESCE(d.expires_at, '9999-12-31') ASC",
 };
 
 export function buildDealQuery(query: DealQuery, dialect: Dialect): BuiltQuery {
@@ -39,8 +40,7 @@ export function buildDealQuery(query: DealQuery, dialect: Dialect): BuiltQuery {
     return dialect === 'sqlite' ? '?' : `$${params.length}`;
   };
 
-  const inList = (values: readonly string[]): string =>
-    values.map((value) => ph(value)).join(', ');
+  const inList = (values: readonly string[]): string => values.map((value) => ph(value)).join(', ');
 
   // Default to active deals only. Expired deals stay reachable by direct URL but
   // must not pollute listings.
@@ -127,11 +127,7 @@ export function buildDealQuery(query: DealQuery, dialect: Dialect): BuiltQuery {
  * the caller normalizing input. Deliberately simple and dependency-free.
  */
 export function normalizeSearchTerm(term: string): string {
-  return term
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim();
+  return term.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
 /**

@@ -35,9 +35,7 @@ export default async function StorePage({ params }: { params: Promise<{ storeId:
           </p>
         </div>
         <p className="text-sm text-fg-muted">
-          {[store.address, store.city, store.province, store.postalCode]
-            .filter(Boolean)
-            .join(', ')}{' '}
+          {[store.address, store.city, store.province, store.postalCode].filter(Boolean).join(', ')}{' '}
           ·{' '}
           <a
             href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}

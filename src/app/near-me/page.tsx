@@ -44,8 +44,8 @@ export default async function NearMePage() {
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-bold tracking-tight">In-store clearance near you</h1>
           <p className="max-w-prose text-sm text-fg-muted">
-            Red-tag and clearance stock is priced per store, so this needs to know roughly
-            where you are before it can show anything useful.
+            Red-tag and clearance stock is priced per store, so this needs to know roughly where you
+            are before it can show anything useful.
           </p>
         </div>
         <LocationPicker current={null} />

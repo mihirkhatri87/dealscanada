@@ -64,9 +64,7 @@ afterEach(() => {
 describe('robots gating', () => {
   it('refuses a disallowed URL and never issues the request', async () => {
     globalThis.fetch = mockFetch(
-      new Map([
-        ['https://shop.test/robots.txt', { body: 'User-agent: *\nDisallow: /private' }],
-      ]),
+      new Map([['https://shop.test/robots.txt', { body: 'User-agent: *\nDisallow: /private' }]]),
     );
 
     const http = client();
@@ -282,9 +280,7 @@ describe('caching and conditional requests', () => {
 describe('fetchJson', () => {
   it('parses a JSON body', async () => {
     globalThis.fetch = mockFetch(
-      new Map<string, MockResponse>([
-        ['https://api.test/j', { body: '{"deals":[{"id":1}]}' }],
-      ]),
+      new Map<string, MockResponse>([['https://api.test/j', { body: '{"deals":[{"id":1}]}' }]]),
     );
 
     const response = await client().fetchJson<{ deals: Array<{ id: number }> }>(

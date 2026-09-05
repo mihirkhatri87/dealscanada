@@ -1,11 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import {
-  parseRssFeed,
-  parseTopicsResponse,
-  redflagdealsAdapter,
-} from '@/lib/sources/redflagdeals';
+import { parseRssFeed, parseTopicsResponse, redflagdealsAdapter } from '@/lib/sources/redflagdeals';
 import type { AdapterContext } from '@/lib/sources/types';
 
 const topicsFixture = JSON.parse(

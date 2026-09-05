@@ -120,3 +120,25 @@ describe('the hosted run budget', () => {
     await ctx.cleanup();
   });
 });
+
+describe('data-dependent registration', () => {
+  it('replaces rather than duplicates, so a long-lived server can re-register', async () => {
+    // A duplicate-id throw would turn the second request to the cron route into
+    // a 500 — the adapter is rebuilt from the user's stores on every call.
+    const { registerOrReplace, allAdapters, resetRegistry } =
+      await import('@/lib/sources/registry');
+
+    resetRegistry();
+    const first = slowAdapter('stocktrack', 0);
+    const second = slowAdapter('stocktrack', 0);
+
+    registerOrReplace(first);
+    registerOrReplace(second);
+
+    const registered = allAdapters().filter((adapter) => adapter.id === 'stocktrack');
+    expect(registered).toHaveLength(1);
+    expect(registered[0]).toBe(second);
+
+    resetRegistry();
+  });
+});

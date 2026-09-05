@@ -13,10 +13,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   const repo = await getRepository();
-  const [runs, activeDeals] = await Promise.all([
-    repo.getSourceHealth(),
-    repo.countDeals({}),
-  ]);
+  const [runs, activeDeals] = await Promise.all([repo.getSourceHealth(), repo.countDeals({})]);
 
   const successful = runs.filter((run) => run.outcome === 'ok');
   const latest = successful.length

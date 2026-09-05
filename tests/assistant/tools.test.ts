@@ -225,11 +225,15 @@ describe('tool behaviour', () => {
   });
 
   it('asks for a location instead of guessing one', async () => {
-    const result = await executeTool('find_deals_near_me', {}, {
-      repo,
-      seenDealIds,
-      location: null,
-    });
+    const result = await executeTool(
+      'find_deals_near_me',
+      {},
+      {
+        repo,
+        seenDealIds,
+        location: null,
+      },
+    );
 
     const content = result.content as { error: string; message: string };
     expect(content.error).toBe('no_location');

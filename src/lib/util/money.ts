@@ -121,10 +121,7 @@ export interface DiscountResult {
  * implausible discount is discarded rather than displayed. Showing a fake anchor
  * price is the single most misleading thing a deal site can do.
  */
-export function computeDiscount(
-  priceNow: number | null,
-  priceWas: number | null,
-): DiscountResult {
+export function computeDiscount(priceNow: number | null, priceWas: number | null): DiscountResult {
   if (priceNow === null || priceWas === null) {
     return { discountPct: null, discountAbs: null, priceWas: null };
   }

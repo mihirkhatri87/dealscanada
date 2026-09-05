@@ -21,7 +21,11 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { SqliteDealRepository } from '../src/lib/db/sqlite';
-import { ALL_MERCHANT_SEEDS, merchantIdForDomain, seedToMerchantInput } from '../src/lib/sources/merchants';
+import {
+  ALL_MERCHANT_SEEDS,
+  merchantIdForDomain,
+  seedToMerchantInput,
+} from '../src/lib/sources/merchants';
 import { buildSeedDeals, buildSeedStores } from '../src/lib/seed/data';
 import { runAssistant, type AssistantEvent } from '../src/lib/assistant/engine';
 import { GOLDEN_SET, type EvalCase } from '../src/lib/assistant/eval/golden';
@@ -147,9 +151,13 @@ function printReport(report: ModelReport): void {
 
   const pct = (value: number) => `${(value * 100).toFixed(1)}%`;
   console.log('');
-  console.log(`  top-6 recall (all find cases)  ${pct(report.recall)}   floor ${pct(RECALL_FLOOR)}`);
+  console.log(
+    `  top-6 recall (all find cases)  ${pct(report.recall)}   floor ${pct(RECALL_FLOOR)}`,
+  );
   console.log(`  top-6 recall (test split only) ${pct(report.recallTest)}`);
-  console.log(`  clarified when vague           ${pct(report.clarifyRate)}   floor ${pct(CLARIFY_FLOOR)}`);
+  console.log(
+    `  clarified when vague           ${pct(report.clarifyRate)}   floor ${pct(CLARIFY_FLOOR)}`,
+  );
   console.log(`  inflated anchors recommended   ${report.violations}   floor 0`);
   console.log(`  mean cost per conversation     ${formatCents(report.meanCostCents)}`);
   console.log(`  total spend                    ${formatCents(report.totalCostCents)}`);
@@ -209,7 +217,9 @@ async function main() {
   const dryRun = args.flags.has('dry-run');
 
   if (!env.ANTHROPIC_API_KEY && !dryRun) {
-    console.error('ANTHROPIC_API_KEY is not set. The eval calls the real API — it cannot run offline.');
+    console.error(
+      'ANTHROPIC_API_KEY is not set. The eval calls the real API — it cannot run offline.',
+    );
     console.error('\n  PowerShell:  $env:ANTHROPIC_API_KEY = "sk-ant-..."; npm run assistant:eval');
     process.exit(1);
   }
@@ -259,7 +269,9 @@ async function main() {
   console.log(
     `Running ${cases.length} case(s) against ${models.length} model(s) = ${runs} conversations.`,
   );
-  console.log('This calls the real API and costs real money (roughly $0.01-0.03 per conversation).\n');
+  console.log(
+    'This calls the real API and costs real money (roughly $0.01-0.03 per conversation).\n',
+  );
 
   const { repo, idBySourceId, cleanup } = await seedTempDatabase();
   const reports: ModelReport[] = [];
@@ -303,7 +315,9 @@ async function main() {
     };
     mkdirSync(dirname(BASELINE_PATH), { recursive: true });
     writeFileSync(BASELINE_PATH, `${JSON.stringify(baseline, null, 2)}\n`);
-    console.log(`\nBaseline written to ${BASELINE_PATH} — commit it so regressions show in a diff.`);
+    console.log(
+      `\nBaseline written to ${BASELINE_PATH} — commit it so regressions show in a diff.`,
+    );
   }
 
   // The floors are the gate. A run that misses one exits non-zero so CI and a

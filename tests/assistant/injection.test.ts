@@ -98,7 +98,9 @@ describe('the system prompt states the boundary', () => {
   });
 
   it('forbids describing deals from memory', () => {
-    expect(SYSTEM_PROMPT.toLowerCase()).toContain('never describe a product, price, or store from memory');
+    expect(SYSTEM_PROMPT.toLowerCase()).toContain(
+      'never describe a product, price, or store from memory',
+    );
   });
 
   it('forbids presenting an unverified deal as a confirmed saving', () => {

@@ -83,8 +83,8 @@ export default async function DealPage({ params }: { params: Promise<{ slug: str
       {deal.source === 'seed' && (
         <p className="rounded border border-warn/40 bg-warn-subtle px-3 py-2 text-sm text-warn">
           <strong className="font-semibold">This is sample data.</strong> It was generated to
-          demonstrate the interface and the verification engine — the price is not real and the
-          link does not lead to a live product. Run{' '}
+          demonstrate the interface and the verification engine — the price is not real and the link
+          does not lead to a live product. Run{' '}
           <code className="font-mono text-xs">npm run scrape</code> to load actual deals.
         </p>
       )}

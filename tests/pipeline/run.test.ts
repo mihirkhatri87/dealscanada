@@ -172,7 +172,10 @@ describe('runPipeline: persistence', () => {
     const summary = await runPipeline({
       adapters: [
         fakeAdapter('redflagdeals', 'healthy', [
-          rawDeal({ sourceId: 'rfd1', url: 'https://www.bestbuy.ca/en-ca/product/12345?utm_source=rfd' }),
+          rawDeal({
+            sourceId: 'rfd1',
+            url: 'https://www.bestbuy.ca/en-ca/product/12345?utm_source=rfd',
+          }),
         ]),
         fakeAdapter('bestbuy', 'healthy', [
           rawDeal({ sourceId: 'bb1', url: 'https://bestbuy.ca/en-ca/product/12345' }),
@@ -265,10 +268,22 @@ describe('runPipeline: verification', () => {
           }),
         ]),
         fakeAdapter('honest-a', 'healthy', [
-          rawDeal({ sourceId: 'h1', url: 'https://bestbuy.ca/p/1', price: '$499.99', priceWas: null, gtin: '4006381333931' }),
+          rawDeal({
+            sourceId: 'h1',
+            url: 'https://bestbuy.ca/p/1',
+            price: '$499.99',
+            priceWas: null,
+            gtin: '4006381333931',
+          }),
         ]),
         fakeAdapter('honest-b', 'healthy', [
-          rawDeal({ sourceId: 'h2', url: 'https://walmart.ca/p/1', price: '$519.99', priceWas: null, gtin: '4006381333931' }),
+          rawDeal({
+            sourceId: 'h2',
+            url: 'https://walmart.ca/p/1',
+            price: '$519.99',
+            priceWas: null,
+            gtin: '4006381333931',
+          }),
         ]),
       ],
       repo,

@@ -275,7 +275,8 @@ describe('createJsonLdAdapter', () => {
   });
 
   it('survives a page that fails to fetch', async () => {
-    const listing = '<a class="product-link" href="/p/1">x</a><a class="product-link" href="/p/2">y</a>';
+    const listing =
+      '<a class="product-link" href="/p/1">x</a><a class="product-link" href="/p/2">y</a>';
     const good = page(JSON.stringify({ '@type': 'Product', name: 'Good', offers: { price: '9' } }));
 
     const fetchText = vi

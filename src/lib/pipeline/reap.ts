@@ -57,5 +57,12 @@ export async function reap(options: ReapOptions): Promise<ReapSummary> {
   const dead = inferAbsence ? await options.repo.markDead(deadBefore) : 0;
   const prunedPricePoints = await options.repo.prunePricePoints(prunedBefore);
 
-  return { expired, dead, inferredAbsence: inferAbsence, prunedPricePoints, deadBefore, prunedBefore };
+  return {
+    expired,
+    dead,
+    inferredAbsence: inferAbsence,
+    prunedPricePoints,
+    deadBefore,
+    prunedBefore,
+  };
 }

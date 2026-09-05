@@ -111,8 +111,7 @@ export function assessDealQuality(input: QualityInput): QualityResult {
   const comparable = isComparableIdentity(input.identityStrength);
   const competitors = comparable ? input.competitorPrices.filter((p) => p > 0) : [];
 
-  const marketPrice =
-    competitors.length >= MIN_COMPETITORS_FOR_MARKET ? median(competitors) : null;
+  const marketPrice = competitors.length >= MIN_COMPETITORS_FOR_MARKET ? median(competitors) : null;
 
   // The cheapest a shopper could pay elsewhere today. A "lowest we've recorded"
   // claim has to survive this: our history is irrelevant if someone is selling it

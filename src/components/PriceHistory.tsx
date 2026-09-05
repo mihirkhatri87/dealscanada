@@ -27,8 +27,8 @@ export function PriceHistory({
   if (points.length === 0) {
     return (
       <p className="rounded border border-dashed border-border bg-bg-raised px-4 py-6 text-center text-sm text-fg-muted">
-        No price history recorded yet. We start tracking a product the first time we see it,
-        so a chart appears here once its price moves.
+        No price history recorded yet. We start tracking a product the first time we see it, so a
+        chart appears here once its price moves.
       </p>
     );
   }

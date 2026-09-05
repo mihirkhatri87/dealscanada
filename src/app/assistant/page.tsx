@@ -14,8 +14,8 @@ export default function AssistantPage() {
         <h1 className="text-xl font-bold tracking-tight">Shopping assistant</h1>
         <p className="max-w-prose text-sm text-fg-muted">
           Describe what you&rsquo;re after in plain language. The assistant filters the same
-          database you browse, so anything it shows you is a real listing you can also find by
-          hand — and it will tell you when a discount is only the retailer&rsquo;s claim.
+          database you browse, so anything it shows you is a real listing you can also find by hand
+          — and it will tell you when a discount is only the retailer&rsquo;s claim.
         </p>
       </div>
 
