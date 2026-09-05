@@ -12,6 +12,7 @@ import { bestbuyAdapter } from './bestbuy';
 import { createShopifyAdapter } from './engines/shopify';
 import { createJsonLdAdapter } from './engines/jsonld';
 import { createSfccAdapter } from './engines/sfcc';
+import { createGapIncAdapter } from './engines/gapinc';
 import { buildStocktrackAdapter, type StocktrackStore } from './stocktrack';
 import { RETAILER_CATALOGUE } from './catalogue-data';
 import { runnableRetailers } from './catalogue';
@@ -31,11 +32,14 @@ for (const retailer of runnableRetailers(RETAILER_CATALOGUE)) {
     case 'sfcc':
       register(createSfccAdapter(retailer));
       break;
+    case 'gapinc':
+      register(createGapIncAdapter(retailer));
+      break;
     case 'jsonld':
       register(createJsonLdAdapter(retailer));
       break;
     default:
-      // Engines still to be implemented (hybris, gapinc, magento) fall through
+      // Engines still to be implemented (hybris, magento) fall through
       // deliberately rather than registering a broken adapter.
       break;
   }

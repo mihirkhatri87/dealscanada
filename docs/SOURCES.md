@@ -133,6 +133,46 @@ the top of the file.
 
 ---
 
+### Gap Inc. engine — 6 brands, the best department data in the catalogue
+
+**Endpoint:** `/resources/productSearch/v1/search?cid=<categoryId>&globalShippingCountryCode=ca&globalShippingCurrencyCode=CAD&locale=en_CA`
+**Fixture:** `tests/fixtures/gapinc/category.json`
+
+Gap, Gap Factory, Old Navy, Banana Republic, BR Factory and Athleta run one
+platform, so this is one engine and six catalogue entries.
+
+The shipping country and currency parameters are load-bearing: without them the
+platform answers with US pricing, which would put USD numbers on the page
+labelled CAD.
+
+Department is the reason this engine exists. Gap Inc. file their catalogue under
+their own Girls / Boys / Baby / Women / Men navigation, so `salePathDepartments`
+maps a category id to a department and the answer comes from the brand rather
+than from guessing at a product title.
+
+Two pricing traps are handled explicitly, and both would otherwise invent a
+saving:
+
+- **Range prices.** "$20.00 - $60.00 regular" against "$25.00 - $45.00 sale" is
+  not a discount — the cheapest variant went *up*. Comparing a range floor to a
+  single price is refused; only like-for-like counts.
+- **Stacked promotions.** "Extra 50% off" is described, never multiplied into the
+  price. The exclusions that decide whether it applies are not in the payload, so
+  computing a final price would print a number no page shows. The listed price
+  stands, and the note says whether a code is needed.
+
+**Configuration:** category ids go in `salePaths`. A brand without them reports
+"no category ids configured" and is *skipped*, not failed — a half-configured
+entry is not a broken one, and the message names exactly what to add. Four of the
+six are in that state, awaiting ids from a live browse.
+
+**Drift looks like:** 403 → bot protection. A 200 with 0 items → the response
+wrapper moved; the engine walks to `ccList` rather than pinning the full path
+precisely so a wrapper change does not cost the retailer, so this would mean the
+item shape itself changed.
+
+---
+
 ### `stocktrack` — in-store clearance
 
 **Config-driven** endpoint map, deliberately: this is a small independent site and
@@ -154,12 +194,11 @@ mitigation, and it is one env var.
 ## Not built yet
 
 These are designed and specified in the PRD but **not in the repository**. Listed
-here so `npm run health` showing 50 sources rather than 101 is not a mystery.
+here so `npm run health` showing 56 sources rather than 101 is not a mystery.
 
 | Planned | Story | Why it is not here yet |
 |---|---|---|
 | Canadian Tire family engine (9 banners) | S3.10 | Hybris platform key is not publicly obtainable; falls back to JSON-LD meanwhile |
-| Gap Inc. engine (6 brands) | S3.11 | Needs a live response to write against; the sandbox cannot reach one |
 | Magento engine | S3.12 | Same |
 | `costco` / `walmart` composites | S3.4, S3.13 | Both are Akamai-protected; the fallback chain needs a live block to test against |
 | `amazon-paapi` | S3.6 | Dormant by design — needs Associates credentials that require three qualifying sales first |

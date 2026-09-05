@@ -41,6 +41,17 @@ export const retailerConfigSchema = z.object({
   /** SFCC locale segment, e.g. en_CA or fr_CA. Defaults to en_CA. */
   sfccLocale: z.string().nullish(),
 
+  /** Gap Inc. locale segment, e.g. en_CA or fr_CA. Defaults to en_CA. */
+  gapLocale: z.string().nullish(),
+  /**
+   * Department per sale path.
+   *
+   * Apparel departments come from the brand's own navigation - a category id is
+   * already "girls" or "men" on their side - so mapping it here beats inferring
+   * it from a product title downstream.
+   */
+  salePathDepartments: z.record(z.string(), z.string()).nullish(),
+
   /** Per-retailer politeness override. */
   rateLimitRps: z.number().positive().nullish(),
   /** Cap on product pages fetched per run, for engines that crawl. */

@@ -1,0 +1,102 @@
+{
+  "productCategoryFacetedSearch": {
+    "childCategories": [
+      {
+        "name": "Girls Jackets",
+        "ccList": [
+          {
+            "businessCatalogItemId": "000123456",
+            "name": "Girls Frost-Free Puffer Jacket",
+            "brandName": "Old Navy",
+            "productCategoryName": "Jackets & Coats",
+            "price": {
+              "regularPrice": "$79.99",
+              "salePrice": "$29.99",
+              "currentMinPrice": "$29.99",
+              "currentMaxPrice": "$29.99"
+            },
+            "styleColors": [
+              {
+                "ccId": "000123456-01",
+                "colorName": "Navy",
+                "inStock": true,
+                "productStyleColorImages": [{ "path": "/webcontent/0056/123/456/cn56123456.jpg" }],
+                "sizes": [{ "name": "XS" }, { "name": "S" }, { "name": "M" }]
+              }
+            ]
+          },
+          {
+            "businessCatalogItemId": "000222333",
+            "name": "Girls Rib-Knit Leggings",
+            "brandName": "Old Navy",
+            "price": {
+              "regularPrice": "$24.99 - $29.99",
+              "salePrice": "$9.99 - $14.99",
+              "currentMinPrice": "$9.99"
+            },
+            "styleColors": [
+              {
+                "ccId": "000222333-01",
+                "inStock": true,
+                "productStyleColorImages": [{ "path": "/webcontent/0056/222/333/cn56222333.jpg" }],
+                "sizes": [{ "name": "S" }, { "name": "L" }]
+              }
+            ]
+          },
+          {
+            "businessCatalogItemId": "000444555",
+            "name": "Girls Graphic Tee",
+            "brandName": "Old Navy",
+            "price": {
+              "regularPrice": "$16.99",
+              "salePrice": "$16.99"
+            },
+            "styleColors": [{ "ccId": "000444555-01", "inStock": true }]
+          },
+          {
+            "businessCatalogItemId": "000666777",
+            "name": "Girls Sherpa Pullover",
+            "brandName": "Old Navy",
+            "price": {
+              "regularPrice": "$44.99",
+              "salePrice": "$22.49",
+              "applicablePromo": "Extra 50% off sale styles, use code EXTRA50"
+            },
+            "styleColors": [{ "ccId": "000666777-01", "inStock": false }]
+          },
+          {
+            "businessCatalogItemId": "000888999",
+            "name": "Girls Fleece Joggers",
+            "brandName": "Old Navy",
+            "price": {
+              "regularPrice": "$34.99",
+              "salePrice": "$17.49",
+              "promoText": "Extra 40% off clearance"
+            },
+            "styleColors": [{ "ccId": "000888999-01", "inStock": true }]
+          },
+          {
+            "businessCatalogItemId": "000111000",
+            "name": "Girls Range-Priced Sweater",
+            "price": {
+              "regularPrice": "$20.00 - $60.00",
+              "salePrice": "$25.00 - $45.00"
+            },
+            "styleColors": [{ "ccId": "000111000-01", "inStock": true }]
+          },
+          {
+            "name": "Product With No Id",
+            "price": { "regularPrice": "$50.00", "salePrice": "$25.00" }
+          },
+          {
+            "businessCatalogItemId": "000123456",
+            "name": "Girls Frost-Free Puffer Jacket",
+            "brandName": "Old Navy",
+            "price": { "regularPrice": "$79.99", "salePrice": "$29.99" },
+            "styleColors": [{ "ccId": "000123456-01", "inStock": true }]
+          }
+        ]
+      }
+    ]
+  }
+}
