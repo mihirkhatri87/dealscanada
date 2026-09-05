@@ -41,9 +41,26 @@ interface SeedSpec {
   sizes?: string[];
 }
 
-/** Stable placeholder imagery: deterministic, offline-safe, no external calls. */
+/**
+ * Placeholder imagery as an inline SVG data URI.
+ *
+ * A hosted placeholder service would have made the seed dataset depend on the
+ * network, which defeats its entire purpose - the UI has to be reviewable with
+ * no connectivity at all. The hue is derived from the label so each merchant's
+ * cards stay visually distinguishable.
+ */
 function placeholder(seed: string): string {
-  return `https://placehold.co/600x450/1e2330/a3acbd?text=${encodeURIComponent(seed.slice(0, 24))}`;
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) % 360;
+
+  const label = seed.slice(0, 22).replace(/[<>&"']/g, '');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">
+<rect width="600" height="450" fill="hsl(${hash} 16% 46%)"/>
+<rect x="1" y="1" width="598" height="448" fill="none" stroke="hsl(${hash} 20% 38%)" stroke-width="2"/>
+<text x="300" y="232" text-anchor="middle" font-family="system-ui,sans-serif" font-size="30" font-weight="600" fill="hsl(${hash} 25% 92%)">${label}</text>
+</svg>`;
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
 const CROSS_MERCHANT_GTIN = '4006381333931';

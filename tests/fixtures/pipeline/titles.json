@@ -1,120 +1,469 @@
 {
   "_comment": "Labelled titles in the shape real Canadian sources produce. The classifier is held to an accuracy floor against this set, so a regression fails a test rather than quietly degrading the front page.",
   "items": [
-    { "title": "Samsung 65\" QN90D Neo QLED 4K Smart TV", "expected": "electronics" },
-    { "title": "Sony WH-1000XM5 Wireless Noise Cancelling Headphones", "expected": "electronics" },
-    { "title": "Apple AirPods Pro (2nd generation)", "expected": "electronics" },
-    { "title": "LG 27\" UltraGear Gaming Monitor 165Hz", "expected": "gaming" },
-    { "title": "Google Pixel 9 Pro 256GB Unlocked", "expected": "electronics" },
-    { "title": "Bose SoundLink Flex Bluetooth Speaker", "expected": "electronics" },
-    { "title": "GoPro HERO12 Black Action Camera", "expected": "electronics" },
-    { "title": "Kindle Paperwhite 16GB e-reader", "expected": "electronics" },
-    { "title": "Fitbit Charge 6 Fitness Smartwatch", "expected": "electronics" },
-    { "title": "Epson EcoTank ET-2850 All-in-One Printer", "expected": "computers" },
-
-    { "title": "Dell XPS 15 Laptop, Intel Core i7, 16GB RAM, 512GB SSD", "expected": "computers" },
-    { "title": "Apple MacBook Air 13\" M3 chip", "expected": "computers" },
-    { "title": "Samsung 990 PRO 2TB NVMe SSD", "expected": "computers" },
-    { "title": "Logitech MX Master 3S Wireless Mouse", "expected": "computers" },
-    { "title": "TP-Link Archer AX55 WiFi 6 Router", "expected": "computers" },
-    { "title": "Corsair Vengeance 32GB DDR5 RAM Kit", "expected": "computers" },
-    { "title": "iPad Air 11-inch Wi-Fi 128GB", "expected": "computers" },
-    { "title": "Lenovo ThinkPad X1 Carbon Gen 12", "expected": "computers" },
-
-    { "title": "PlayStation 5 Slim Digital Edition Console", "expected": "gaming" },
-    { "title": "Nintendo Switch OLED Model", "expected": "gaming" },
-    { "title": "Xbox Series X 1TB Console", "expected": "gaming" },
-    { "title": "NVIDIA GeForce RTX 4070 SUPER Graphics Card", "expected": "gaming" },
-    { "title": "Secretlab TITAN Evo Gaming Chair", "expected": "gaming" },
-    { "title": "DualSense Wireless Controller - Midnight Black", "expected": "gaming" },
-
-    { "title": "LEGO Star Wars Millennium Falcon 75375", "expected": "toys-games" },
-    { "title": "Hot Wheels 20-Car Gift Pack", "expected": "toys-games" },
-    { "title": "Paw Patrol Big Truck Pups Toy Vehicle", "expected": "toys-games" },
-    { "title": "Barbie Dreamhouse Dollhouse Playset", "expected": "toys-games" },
-    { "title": "Nerf Elite 2.0 Commander Blaster", "expected": "toys-games" },
-    { "title": "Ravensburger 1000 Piece Jigsaw Puzzle", "expected": "toys-games" },
-    { "title": "Squishmallows 16\" Plush Toy", "expected": "toys-games" },
-    { "title": "Magna-Tiles Clear Colors 100 Piece Set", "expected": "toys-games" },
-    { "title": "Pokemon Trading Card Game Booster Bundle", "expected": "toys-games" },
-
-    { "title": "Graco Modes Pramette Travel System Stroller", "expected": "baby-kids" },
-    { "title": "Britax One4Life Convertible Car Seat", "expected": "baby-kids" },
-    { "title": "Pampers Baby Dry Diapers Size 4, 174 Count", "expected": "baby-kids" },
-    { "title": "Owlet Dream Sock Baby Monitor", "expected": "baby-kids" },
-    { "title": "4moms mamaRoo Multi-Motion Baby Swing", "expected": "baby-kids" },
-    { "title": "Ingenuity Smart Clean High Chair", "expected": "baby-kids" },
-
-    { "title": "Old Navy Girls' Frost-Free Puffer Jacket", "expected": "clothing" },
-    { "title": "Gap Men's Vintage Soft Hoodie", "expected": "clothing" },
-    { "title": "Reitmans Women's Slim Leg Pants", "expected": "clothing" },
-    { "title": "Levi's 501 Original Fit Jeans", "expected": "clothing" },
-    { "title": "Roots Original Kanga Sweatpant", "expected": "clothing" },
-    { "title": "Columbia Men's Powder Lite Insulated Jacket", "expected": "clothing" },
-    { "title": "Athleta Women's Ultimate Stash Pocket Leggings", "expected": "clothing" },
-    { "title": "Banana Republic Merino Wool Sweater", "expected": "clothing" },
-    { "title": "Penningtons Plus Size Swimsuit", "expected": "clothing" },
-    { "title": "Uniqlo Ultra Light Down Vest", "expected": "clothing" },
-
-    { "title": "Nike Air Max 90 Men's Sneakers", "expected": "shoes-accessories" },
-    { "title": "Blundstone 550 Chelsea Boots", "expected": "shoes-accessories" },
-    { "title": "Birkenstock Arizona Sandals", "expected": "shoes-accessories" },
-    { "title": "Ray-Ban Aviator Classic Sunglasses", "expected": "shoes-accessories" },
-    { "title": "Herschel Little America Backpack", "expected": "shoes-accessories" },
-    { "title": "New Balance 574 Running Shoes", "expected": "shoes-accessories" },
-
-    { "title": "Ninja Foodi 6-in-1 Air Fryer", "expected": "kitchen" },
-    { "title": "Instant Pot Duo Plus 6QT Pressure Cooker", "expected": "kitchen" },
-    { "title": "Nespresso Vertuo Next Coffee Maker", "expected": "kitchen" },
-    { "title": "KitchenAid Artisan Stand Mixer 5QT", "expected": "kitchen" },
-    { "title": "Lodge 12\" Cast Iron Frying Pan", "expected": "kitchen" },
-    { "title": "Vitamix E310 Explorian Blender", "expected": "kitchen" },
-    { "title": "Henckels 15-Piece Knife Set with Block", "expected": "kitchen" },
-
-    { "title": "LG WashTower Stacked Washer and Dryer", "expected": "appliances" },
-    { "title": "Samsung Bespoke French Door Refrigerator", "expected": "appliances" },
-    { "title": "Dyson V15 Detect Cordless Vacuum", "expected": "appliances" },
-    { "title": "iRobot Roomba j7+ Robot Vacuum", "expected": "appliances" },
-    { "title": "Bosch 800 Series Dishwasher", "expected": "appliances" },
-    { "title": "Danby 12,000 BTU Portable Air Conditioner", "expected": "appliances" },
-
-    { "title": "IKEA MALM 6-Drawer Dresser", "expected": "home" },
-    { "title": "Structube Ada Fabric Sofa", "expected": "home" },
-    { "title": "Endy Original Mattress - Queen", "expected": "home" },
-    { "title": "Sferra 600 Thread Count Sheet Set", "expected": "home" },
-    { "title": "Weber Spirit II E-310 Propane BBQ", "expected": "home" },
-    { "title": "Philips Hue Smart Lamp Starter Kit", "expected": "home" },
-    { "title": "Nourison 8x10 Area Rug", "expected": "home" },
-
-    { "title": "DEWALT 20V MAX Cordless Drill Combo Kit", "expected": "tools-auto" },
-    { "title": "Milwaukee M18 FUEL Impact Driver", "expected": "tools-auto" },
-    { "title": "Mastercraft 200-Piece Socket Set", "expected": "tools-auto" },
-    { "title": "Michelin X-Ice Snow Winter Tire 205/55R16", "expected": "tools-auto" },
-    { "title": "Toro Power Max 824 Snow Blower", "expected": "tools-auto" },
-    { "title": "Ryobi 1800 PSI Electric Pressure Washer", "expected": "tools-auto" },
-
-    { "title": "Garmin Forerunner 265 GPS Running Watch", "expected": "electronics" },
-    { "title": "Bowflex SelectTech 552 Adjustable Dumbbells", "expected": "sports-outdoors" },
-    { "title": "MEC Volt 20L Hiking Backpack", "expected": "sports-outdoors" },
-    { "title": "Coleman Sundome 4-Person Camping Tent", "expected": "sports-outdoors" },
-    { "title": "Bauer Vapor X3.7 Senior Hockey Skates", "expected": "sports-outdoors" },
-    { "title": "YETI Tundra 45 Hard Cooler", "expected": "sports-outdoors" },
-    { "title": "NordicTrack Commercial 1750 Treadmill", "expected": "sports-outdoors" },
-
-    { "title": "CeraVe Moisturizing Cream 454g", "expected": "beauty-health" },
-    { "title": "Philips Sonicare 4100 Electric Toothbrush", "expected": "beauty-health" },
-    { "title": "Dyson Airwrap Multi-Styler Hair Dryer", "expected": "beauty-health" },
-    { "title": "Maybelline Sky High Mascara", "expected": "beauty-health" },
-    { "title": "Optimum Nutrition Gold Standard Protein Powder", "expected": "beauty-health" },
-    { "title": "La Roche-Posay Anthelios Sunscreen SPF 60", "expected": "beauty-health" },
-
-    { "title": "Lavazza Super Crema Whole Coffee Beans 1kg", "expected": "grocery" },
-    { "title": "Kirkland Signature Granola Bars 64 Pack", "expected": "grocery" },
-    { "title": "Barilla Pasta Variety Pack", "expected": "grocery" },
-    { "title": "Lindt Excellence Chocolate Bar 12-Pack", "expected": "grocery" },
-
-    { "title": "Samsonite Omni PC Hardside Carry-On Luggage", "expected": "travel" },
-    { "title": "All-Inclusive Resort Vacation Package to Cancun", "expected": "travel" },
-    { "title": "Air Canada Flight Sale - Toronto to Vancouver", "expected": "travel" }
+    {
+      "title": "Samsung 65\" QN90D Neo QLED 4K Smart TV",
+      "expected": "electronics"
+    },
+    {
+      "title": "Sony WH-1000XM5 Wireless Noise Cancelling Headphones",
+      "expected": "electronics"
+    },
+    {
+      "title": "Apple AirPods Pro (2nd generation)",
+      "expected": "electronics"
+    },
+    {
+      "title": "LG 27\" UltraGear Gaming Monitor 165Hz",
+      "expected": "gaming"
+    },
+    {
+      "title": "Google Pixel 9 Pro 256GB Unlocked",
+      "expected": "electronics"
+    },
+    {
+      "title": "Bose SoundLink Flex Bluetooth Speaker",
+      "expected": "electronics"
+    },
+    {
+      "title": "GoPro HERO12 Black Action Camera",
+      "expected": "electronics"
+    },
+    {
+      "title": "Kindle Paperwhite 16GB e-reader",
+      "expected": "electronics"
+    },
+    {
+      "title": "Fitbit Charge 6 Fitness Smartwatch",
+      "expected": "electronics"
+    },
+    {
+      "title": "Epson EcoTank ET-2850 All-in-One Printer",
+      "expected": "computers"
+    },
+    {
+      "title": "Dell XPS 15 Laptop, Intel Core i7, 16GB RAM, 512GB SSD",
+      "expected": "computers"
+    },
+    {
+      "title": "Apple MacBook Air 13\" M3 chip",
+      "expected": "computers"
+    },
+    {
+      "title": "Samsung 990 PRO 2TB NVMe SSD",
+      "expected": "computers"
+    },
+    {
+      "title": "Logitech MX Master 3S Wireless Mouse",
+      "expected": "computers"
+    },
+    {
+      "title": "TP-Link Archer AX55 WiFi 6 Router",
+      "expected": "computers"
+    },
+    {
+      "title": "Corsair Vengeance 32GB DDR5 RAM Kit",
+      "expected": "computers"
+    },
+    {
+      "title": "iPad Air 11-inch Wi-Fi 128GB",
+      "expected": "computers"
+    },
+    {
+      "title": "Lenovo ThinkPad X1 Carbon Gen 12",
+      "expected": "computers"
+    },
+    {
+      "title": "PlayStation 5 Slim Digital Edition Console",
+      "expected": "gaming"
+    },
+    {
+      "title": "Nintendo Switch OLED Model",
+      "expected": "gaming"
+    },
+    {
+      "title": "Xbox Series X 1TB Console",
+      "expected": "gaming"
+    },
+    {
+      "title": "NVIDIA GeForce RTX 4070 SUPER Graphics Card",
+      "expected": "gaming"
+    },
+    {
+      "title": "Secretlab TITAN Evo Gaming Chair",
+      "expected": "gaming"
+    },
+    {
+      "title": "DualSense Wireless Controller - Midnight Black",
+      "expected": "gaming"
+    },
+    {
+      "title": "LEGO Star Wars Millennium Falcon 75375",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Hot Wheels 20-Car Gift Pack",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Paw Patrol Big Truck Pups Toy Vehicle",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Barbie Dreamhouse Dollhouse Playset",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Nerf Elite 2.0 Commander Blaster",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Ravensburger 1000 Piece Jigsaw Puzzle",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Squishmallows 16\" Plush Toy",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Magna-Tiles Clear Colors 100 Piece Set",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Pokemon Trading Card Game Booster Bundle",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Graco Modes Pramette Travel System Stroller",
+      "expected": "baby-kids"
+    },
+    {
+      "title": "Britax One4Life Convertible Car Seat",
+      "expected": "baby-kids"
+    },
+    {
+      "title": "Pampers Baby Dry Diapers Size 4, 174 Count",
+      "expected": "baby-kids"
+    },
+    {
+      "title": "Owlet Dream Sock Baby Monitor",
+      "expected": "baby-kids"
+    },
+    {
+      "title": "4moms mamaRoo Multi-Motion Baby Swing",
+      "expected": "baby-kids"
+    },
+    {
+      "title": "Ingenuity Smart Clean High Chair",
+      "expected": "baby-kids"
+    },
+    {
+      "title": "Old Navy Girls' Frost-Free Puffer Jacket",
+      "expected": "clothing"
+    },
+    {
+      "title": "Gap Men's Vintage Soft Hoodie",
+      "expected": "clothing"
+    },
+    {
+      "title": "Reitmans Women's Slim Leg Pants",
+      "expected": "clothing"
+    },
+    {
+      "title": "Levi's 501 Original Fit Jeans",
+      "expected": "clothing"
+    },
+    {
+      "title": "Roots Original Kanga Sweatpant",
+      "expected": "clothing"
+    },
+    {
+      "title": "Columbia Men's Powder Lite Insulated Jacket",
+      "expected": "clothing"
+    },
+    {
+      "title": "Athleta Women's Ultimate Stash Pocket Leggings",
+      "expected": "clothing"
+    },
+    {
+      "title": "Banana Republic Merino Wool Sweater",
+      "expected": "clothing"
+    },
+    {
+      "title": "Penningtons Plus Size Swimsuit",
+      "expected": "clothing"
+    },
+    {
+      "title": "Uniqlo Ultra Light Down Vest",
+      "expected": "clothing"
+    },
+    {
+      "title": "Nike Air Max 90 Men's Sneakers",
+      "expected": "shoes-accessories"
+    },
+    {
+      "title": "Blundstone 550 Chelsea Boots",
+      "expected": "shoes-accessories"
+    },
+    {
+      "title": "Birkenstock Arizona Sandals",
+      "expected": "shoes-accessories"
+    },
+    {
+      "title": "Ray-Ban Aviator Classic Sunglasses",
+      "expected": "shoes-accessories"
+    },
+    {
+      "title": "Herschel Little America Backpack",
+      "expected": "shoes-accessories"
+    },
+    {
+      "title": "New Balance 574 Running Shoes",
+      "expected": "shoes-accessories"
+    },
+    {
+      "title": "Ninja Foodi 6-in-1 Air Fryer",
+      "expected": "kitchen"
+    },
+    {
+      "title": "Instant Pot Duo Plus 6QT Pressure Cooker",
+      "expected": "kitchen"
+    },
+    {
+      "title": "Nespresso Vertuo Next Coffee Maker",
+      "expected": "kitchen"
+    },
+    {
+      "title": "KitchenAid Artisan Stand Mixer 5QT",
+      "expected": "kitchen"
+    },
+    {
+      "title": "Lodge 12\" Cast Iron Frying Pan",
+      "expected": "kitchen"
+    },
+    {
+      "title": "Vitamix E310 Explorian Blender",
+      "expected": "kitchen"
+    },
+    {
+      "title": "Henckels 15-Piece Knife Set with Block",
+      "expected": "kitchen"
+    },
+    {
+      "title": "LG WashTower Stacked Washer and Dryer",
+      "expected": "appliances"
+    },
+    {
+      "title": "Samsung Bespoke French Door Refrigerator",
+      "expected": "appliances"
+    },
+    {
+      "title": "Dyson V15 Detect Cordless Vacuum",
+      "expected": "appliances"
+    },
+    {
+      "title": "iRobot Roomba j7+ Robot Vacuum",
+      "expected": "appliances"
+    },
+    {
+      "title": "Bosch 800 Series Dishwasher",
+      "expected": "appliances"
+    },
+    {
+      "title": "Danby 12,000 BTU Portable Air Conditioner",
+      "expected": "appliances"
+    },
+    {
+      "title": "IKEA MALM 6-Drawer Dresser",
+      "expected": "home"
+    },
+    {
+      "title": "Structube Ada Fabric Sofa",
+      "expected": "home"
+    },
+    {
+      "title": "Endy Original Mattress - Queen",
+      "expected": "home"
+    },
+    {
+      "title": "Sferra 600 Thread Count Sheet Set",
+      "expected": "home"
+    },
+    {
+      "title": "Weber Spirit II E-310 Propane BBQ",
+      "expected": "home"
+    },
+    {
+      "title": "Philips Hue Smart Lamp Starter Kit",
+      "expected": "home"
+    },
+    {
+      "title": "Nourison 8x10 Area Rug",
+      "expected": "home"
+    },
+    {
+      "title": "DEWALT 20V MAX Cordless Drill Combo Kit",
+      "expected": "tools-auto"
+    },
+    {
+      "title": "Milwaukee M18 FUEL Impact Driver",
+      "expected": "tools-auto"
+    },
+    {
+      "title": "Mastercraft 200-Piece Socket Set",
+      "expected": "tools-auto"
+    },
+    {
+      "title": "Michelin X-Ice Snow Winter Tire 205/55R16",
+      "expected": "tools-auto"
+    },
+    {
+      "title": "Toro Power Max 824 Snow Blower",
+      "expected": "tools-auto"
+    },
+    {
+      "title": "Ryobi 1800 PSI Electric Pressure Washer",
+      "expected": "tools-auto"
+    },
+    {
+      "title": "Garmin Forerunner 265 GPS Running Watch",
+      "expected": "electronics"
+    },
+    {
+      "title": "Bowflex SelectTech 552 Adjustable Dumbbells",
+      "expected": "sports-outdoors"
+    },
+    {
+      "title": "MEC Volt 20L Hiking Backpack",
+      "expected": "sports-outdoors"
+    },
+    {
+      "title": "Coleman Sundome 4-Person Camping Tent",
+      "expected": "sports-outdoors"
+    },
+    {
+      "title": "Bauer Vapor X3.7 Senior Hockey Skates",
+      "expected": "sports-outdoors"
+    },
+    {
+      "title": "YETI Tundra 45 Hard Cooler",
+      "expected": "sports-outdoors"
+    },
+    {
+      "title": "NordicTrack Commercial 1750 Treadmill",
+      "expected": "sports-outdoors"
+    },
+    {
+      "title": "CeraVe Moisturizing Cream 454g",
+      "expected": "beauty-health"
+    },
+    {
+      "title": "Philips Sonicare 4100 Electric Toothbrush",
+      "expected": "beauty-health"
+    },
+    {
+      "title": "Dyson Airwrap Multi-Styler Hair Dryer",
+      "expected": "beauty-health"
+    },
+    {
+      "title": "Maybelline Sky High Mascara",
+      "expected": "beauty-health"
+    },
+    {
+      "title": "Optimum Nutrition Gold Standard Protein Powder",
+      "expected": "beauty-health"
+    },
+    {
+      "title": "La Roche-Posay Anthelios Sunscreen SPF 60",
+      "expected": "beauty-health"
+    },
+    {
+      "title": "Lavazza Super Crema Whole Coffee Beans 1kg",
+      "expected": "grocery"
+    },
+    {
+      "title": "Kirkland Signature Granola Bars 64 Pack",
+      "expected": "grocery"
+    },
+    {
+      "title": "Barilla Pasta Variety Pack",
+      "expected": "grocery"
+    },
+    {
+      "title": "Lindt Excellence Chocolate Bar 12-Pack",
+      "expected": "grocery"
+    },
+    {
+      "title": "Samsonite Omni PC Hardside Carry-On Luggage",
+      "expected": "travel"
+    },
+    {
+      "title": "All-Inclusive Resort Vacation Package to Cancun",
+      "expected": "travel"
+    },
+    {
+      "title": "Air Canada Flight Sale - Toronto to Vancouver",
+      "expected": "travel"
+    },
+    {
+      "title": "Sony WH-1000XM5 Wireless Noise Cancelling Headphones",
+      "expected": "electronics"
+    },
+    {
+      "title": "Apple AirPods Pro (2nd generation)",
+      "expected": "electronics"
+    },
+    {
+      "title": "JBL Flip 6 Portable Bluetooth Speakers 2-Pack",
+      "expected": "electronics"
+    },
+    {
+      "title": "Anker Soundcore Wireless Earbuds",
+      "expected": "electronics"
+    },
+    {
+      "title": "Samsung 34\" Curved Gaming Monitors",
+      "expected": "gaming"
+    },
+    {
+      "title": "Levi's Men's Slim Fit Jeans 2-Pack",
+      "expected": "clothing"
+    },
+    {
+      "title": "Columbia Women's Winter Jackets",
+      "expected": "clothing"
+    },
+    {
+      "title": "Melissa & Doug Wooden Toys Bundle",
+      "expected": "toys-games"
+    },
+    {
+      "title": "Pampers Swaddlers Diapers Size 3",
+      "expected": "baby-kids"
+    },
+    {
+      "title": "DEWALT Cordless Drills Combo",
+      "expected": "tools-auto"
+    },
+    {
+      "title": "Michelin Winter Tires Set of 4",
+      "expected": "tools-auto"
+    },
+    {
+      "title": "Sealy Queen Mattresses Clearance",
+      "expected": "home"
+    },
+    {
+      "title": "Egyptian Cotton Towels 6-Piece Set",
+      "expected": "home"
+    },
+    {
+      "title": "Samsonite Hardside Suitcases 3-Piece",
+      "expected": "travel"
+    },
+    {
+      "title": "CeraVe Facial Cleansers Duo",
+      "expected": "beauty-health"
+    }
   ]
 }
