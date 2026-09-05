@@ -83,6 +83,9 @@ Every story below reflects that split.
 | M11 | Unit-test line coverage on `src/lib/` | ≥ 80% |
 | M12 | Assistant finds the intended deal in the top 6 (golden eval set) | ≥ 85% |
 | M13 | Assistant hallucinated products or prices | **0** — structurally impossible by design |
+| M16 | Deals carrying a manufacturer-grade product identity | ≥ 40% |
+| M17 | Deals with a cross-merchant or historical verdict | ≥ 30% |
+| M18 | Inflated anchors reaching the front page | **0** |
 | M14 | Assistant time-to-first-token | < 1.5 s |
 | M15 | Prompt-cache hit rate on assistant turns after the first | ≥ 90% |
 
@@ -132,6 +135,26 @@ flyer OCR; browser extension; affiliate revenue reporting; French localization
   merchant + normalized-title + price fingerprint.
 - FR-13 Every observed price change appends a `price_points` row.
 - FR-14 Heat score ranks deals; recomputed each run.
+
+**Deal verification — is it actually a deal?**
+- FR-14g A retailer's own "was" price is treated as a **claim to be checked**, never
+  as fact. `discount_pct` is stored as the claim; it is not what the UI leads with.
+- FR-14h Products are identified across merchants by manufacturer-assigned
+  identifiers (GTIN, ASIN, brand-scoped MPN) — never by a retailer SKU, which is
+  merchant-scoped and would defeat comparison.
+- FR-14i The honest anchor is the **median current price across other merchants**,
+  computed only from ≥2 *distinct* merchants; one retailer cannot corroborate itself.
+- FR-14j Our own recorded `price_points` establish an observed low, enabling a
+  "lowest we've recorded in N days" claim we can actually stand behind.
+- FR-14k Every deal carries a **verdict**: verified-low, verified-good, market-price,
+  above-market, inflated-anchor, or unverified — plus an evidence level.
+- FR-14l A claimed "was" materially above the market median is flagged as an
+  **inflated anchor**, its headline percentage suppressed, and its heat capped so it
+  cannot reach the front page as a bargain.
+- FR-14m Ranking uses the corroborated discount, not the claimed one.
+- FR-14n Where nothing corroborates a claim, the UI says so explicitly rather than
+  presenting the retailer's number as a verified saving.
+- FR-14o Filters: `verifiedOnly`, `excludeSuspect`; sort: `best-verified`.
 
 **Retail coverage**
 - FR-14a Retailers are **data, not code**: each is a catalogue entry naming an engine,
@@ -319,7 +342,11 @@ switch — `/assistant` is simply its full-screen form.
   (canadian-tire · gap-inc · reitmans · …), **vertical**, **engine**, **status**
   (verified/unverified/blocked), rate_limit_override.
 - **stores** — chain, source_store_id, name, address, city, province, postal_code, lat, lng.
-- **price_points** — deal_id, price, observed_at.
+- **price_points** — deal_id, price, observed_at. (The evidence base for
+  "lowest we've recorded"; also the input to cross-merchant history.)
+- **deals**, verification columns — product_key, product_key_strength, gtin, mpn,
+  asin, market_price, market_discount_pct, observed_low, price_rank_pct, verdict,
+  evidence, claim_suspect, quality_note.
 - **source_runs** — source, started_at, finished_at, ok, items_found, items_new,
   items_updated, latency_ms, error.
 
@@ -333,6 +360,38 @@ heat = 30·norm(log1p(votes))        // community signal
    → clamped 0..100
 ```
 Weights live in one config object so they are tunable without touching call sites.
+
+## 12a. Deal verification
+
+The hardest question this product has to answer is *is this actually a deal?* One
+platform announcing a discount is not evidence — inflated MSRP anchoring is endemic
+across Canadian retail, and a site that republishes those claims uncritically becomes
+a laundering service for fake discounts.
+
+Two evidence sources, both ours:
+
+| Evidence | How it is obtained | Claim it supports |
+|---|---|---|
+| **Cross-merchant** | The same product, identified by GTIN/ASIN/MPN, priced at ≥2 *distinct* other merchants right now | "X% below the $Y median across N stores" |
+| **Own history** | Every price change we have recorded in `price_points` | "Lowest price we've recorded in N days" |
+
+Product identity is resolved strongest-first and its strength is stored, because a
+weak match must never carry the authority of a strong one: only GTIN, ASIN and
+brand-scoped MPN license a cross-merchant claim. A title-shaped match is good enough
+to collapse duplicate listings on the front page and nothing more.
+
+**Verdicts:** `verified-low`, `verified-good`, `market-price`, `above-market`,
+`inflated-anchor`, `unverified` — each with an evidence level of strong, moderate or
+none.
+
+The `inflated-anchor` verdict is the differentiator: rather than repeating a
+suspicious claim, DealsCanada detects it and says so ("The $799 'was' price looks
+inflated: this sells for about $500 elsewhere"). Such a deal has its headline
+percentage suppressed and its heat capped, so it is visible as a warning rather than
+promoted as a bargain.
+
+Where nothing corroborates a claim, the deal is labelled unverified and the retailer's
+number is attributed to the retailer — never presented as a verified saving.
 
 ## 13. Compliance
 

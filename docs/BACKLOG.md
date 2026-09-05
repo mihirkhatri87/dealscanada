@@ -254,6 +254,48 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
+### S2.7a — Product identity for cross-merchant comparison (3 pts) — *DONE*
+*As a shopper, I want to know a discount is real, because one retailer saying "50% off"
+proves nothing.*
+
+**Tasks**
+1. Resolve identity strongest-first: validated GTIN, ASIN, brand-scoped MPN, model token.
+2. Record the identity strength; never key on a retailer SKU (merchant-scoped).
+3. Add `product_key`, `gtin`, `mpn`, `asin` to deals, indexed for per-product lookup.
+4. Surface `gtin`/`mpn`/`asin` on RawDeal so every engine can supply them.
+
+**AC**
+- A UPC-12 and its EAN-13 form resolve to the same key.
+- Only GTIN/ASIN/MPN count as comparable; a title match does not.
+- Manufacturers reusing a part number do not collide (MPN is brand-scoped).
+
+**TP** — Unit: GTIN check digits; UPC/EAN equivalence; model-token extraction rejecting
+sizes, capacities and years; a SKU-only input yields no key.
+
+---
+
+### S2.7b — Deal verification and inflated-anchor detection (5 pts) — *DONE*
+*As a shopper, I want fake "was" prices caught, not repeated.*
+
+**Tasks**
+1. Assess each deal against the cross-merchant median (≥2 distinct merchants) and our
+   own recorded price history.
+2. Emit a verdict plus evidence level; explain it in one plain sentence.
+3. Flag a claimed "was" materially above the market as an inflated anchor.
+4. Rank on the corroborated discount; cap flagged anchors so they cannot lead.
+5. Add `verifiedOnly` / `excludeSuspect` filters and a `best-verified` sort.
+
+**AC**
+- A lone retailer claim yields `unverified` with evidence `none`.
+- One merchant cannot corroborate itself — prices collapse per merchant first.
+- A flagged anchor has its headline percentage suppressed and heat capped at 25.
+- A market-verified deal outranks an unverifiable one making the same claim.
+
+**TP** — Unit: verdict matrix across market/history/identity combinations; per-merchant
+collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion asserted.
+
+---
+
 ### S2.8 — Pipeline runner (3 pts)
 
 **Tasks**
