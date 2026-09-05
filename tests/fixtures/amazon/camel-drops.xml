@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>camelcamelcamel.ca - Top Price Drops</title>
+    <link>https://ca.camelcamelcamel.com/top_drops</link>
+    <item>
+      <title>Sony WH-1000XM5 Wireless Headphones - 41% price drop</title>
+      <link>https://ca.camelcamelcamel.com/product/B09XS7JWHH</link>
+      <description><![CDATA[<img src="https://images-na.ssl-images-amazon.com/images/I/x.jpg" /> Was CDN$549.99, now CDN$328.00]]></description>
+      <pubDate>Sat, 05 Sep 2026 09:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Instant Pot Duo Plus 6QT (was $139.99)</title>
+      <link>https://www.amazon.ca/dp/B075CYMYK6?tag=ccc-20</link>
+      <description>Price dropped from $139.99 to $89.99</description>
+      <enclosure url="https://images-na.ssl-images-amazon.com/images/I/y.jpg" type="image/jpeg" />
+      <pubDate>Sat, 05 Sep 2026 08:30:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Kindle Paperwhite 16GB</title>
+      <link>https://ca.camelcamelcamel.com/product/B09TMN58KL</link>
+      <description>A great e-reader with no prices stated in this entry.</description>
+    </item>
+    <item>
+      <title>Mystery Item With No ASIN</title>
+      <link>https://ca.camelcamelcamel.com/search?q=mystery</link>
+      <description>Was $99.99, now $49.99</description>
+    </item>
+    <item>
+      <title>Sony WH-1000XM5 Wireless Headphones</title>
+      <link>https://ca.camelcamelcamel.com/product/B09XS7JWHH</link>
+      <description>Was CDN$549.99, now CDN$330.00</description>
+    </item>
+    <item>
+      <title>Price Went Up Item</title>
+      <link>https://ca.camelcamelcamel.com/product/B08XYZ1234</link>
+      <description>Now $59.99, previously $49.99</description>
+    </item>
+  </channel>
+</rss>

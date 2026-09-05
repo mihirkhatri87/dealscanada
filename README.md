@@ -54,9 +54,9 @@ the long tail of Canadian Shopify stores, kids and toy shops, home, sports,
 beauty and grocery. Adding a retailer is a JSON entry.
 
 Sixty-one of those run today, on the Shopify, SFCC, Gap Inc., Hybris and JSON-LD
-engines, plus four bespoke adapters including composite chains for Walmart and
-Costco. The rest wait on the Magento engine and the Amazon adapters — [docs/SOURCES.md](docs/SOURCES.md#not-built-yet) lists exactly what is
-and is not shipped, so `npm run health` showing 66 sources rather than 101 is not
+engines, plus six bespoke adapters including composite chains for Walmart and
+Costco and two routes to Amazon. The rest wait on the Magento engine — [docs/SOURCES.md](docs/SOURCES.md#not-built-yet) lists exactly what is
+and is not shipped, so `npm run health` showing 68 sources rather than 101 is not
 a surprise.
 
 **Verifies** each deal rather than repeating the claim. See below.
@@ -168,7 +168,7 @@ suite against both, so that claim is tested rather than asserted.
 | `npm run stores:sync -- --postal=M5V3L9` | Nearby stores for local clearance |
 | `npm run retailer:probe -- https://store.ca` | Detect a store's platform, emit a catalogue entry |
 | `npm run assistant:eval` / `assistant:usage` | Assistant quality and spend |
-| `npm test` / `test:coverage` | 623 tests, no network |
+| `npm test` / `test:coverage` | 656 tests, no network |
 
 ---
 
@@ -190,7 +190,7 @@ failure mode worth preventing.
 ## Testing
 
 ```powershell
-npm test              # 623 tests
+npm test              # 656 tests
 npm run test:coverage # gate: 80% lines on src/lib (currently ~90%)
 ```
 
@@ -207,7 +207,8 @@ one thing that cannot be verified from a sandbox.
 
 Official APIs and public feeds first. `robots.txt` fetched, cached and honoured
 before any HTML scrape. Per-domain rate limiting, stricter for small independent
-sites. **No amazon.ca HTML scraping** — PA-API or third-party sources only.
+sites. **No amazon.ca HTML scraping** — the official PA-API or third-party trackers
+only, enforced by three tests rather than by convention.
 
 Every deal links back to and credits its source. Prices are cached observations
 shown with the time we saw them, never presented as authoritative. Outbound links

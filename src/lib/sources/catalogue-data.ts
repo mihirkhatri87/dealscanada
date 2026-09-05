@@ -260,7 +260,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'general',
-    note: 'native engine not yet implemented',
+    note: 'never crawled — served by the amazon-paapi and amazon-alt adapters',
   },
   {
     id: 'giant-tiger',

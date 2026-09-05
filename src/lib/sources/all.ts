@@ -12,6 +12,8 @@ import { redflagdealsAdapter } from './redflagdeals';
 import { bestbuyAdapter } from './bestbuy';
 import { createWalmartAdapter } from './walmart';
 import { createCostcoAdapter } from './costco';
+import { amazonAltAdapter } from './amazon-alt';
+import { amazonPaapiAdapter } from './amazon-paapi';
 import { createShopifyAdapter } from './engines/shopify';
 import { createJsonLdAdapter } from './engines/jsonld';
 import { createSfccAdapter } from './engines/sfcc';
@@ -30,6 +32,12 @@ register(bestbuyAdapter);
 // collected this run rather than fetching it again - see ./in-store-pool.ts.
 register(createWalmartAdapter(inStoreDeals));
 register(createCostcoAdapter(inStoreDeals));
+
+// Amazon, two ways. The official API is dormant without credentials most people
+// cannot get; the tracker feeds work for everyone. Neither ever requests an
+// amazon.ca product page - a test enforces that across the whole project.
+register(amazonAltAdapter);
+register(amazonPaapiAdapter);
 
 // Catalogue-driven retailers. Each entry becomes an adapter through the engine
 // it declares, so coverage grows by editing data rather than writing code.

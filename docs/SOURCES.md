@@ -279,16 +279,58 @@ the item shape changed.
 
 ---
 
+### Amazon — two adapters, neither of which touches amazon.ca
+
+Amazon is the retailer people most want on a Canadian deal site and the one we
+are least able to scrape. Their terms forbid it, so **no adapter in this project
+fetches an amazon.ca page** — and that is enforced three ways rather than
+documented once:
+
+1. A test greps every source file for a fetchable amazon.ca URL.
+2. A test drives every registered adapter with a recording HTTP client and
+   asserts none of them asks for one.
+3. `validateCatalogue` refuses to *enable* an amazon.ca entry whatever engine it
+   declares. A disabled entry is one flag away from turning the crawler loose;
+   flipping that flag now fails the catalogue instead of shipping a violation.
+   The entry still exists, so `/brands` shows Amazon as covered.
+
+**`amazon-alt`** reads camelcamelcamel's Canadian top-drops feeds — a third party
+publishing its own data, which is permitted. Canonical `amazon.ca/dp/<ASIN>`
+links are *built* from the ASIN rather than followed, so the shopper gets a
+working link and we never request one. Every deal carries a note that the price
+is third-party; Amazon reprices faster than any feed refreshes, and presenting a
+tracker's snapshot as confirmed would be this site's most common lie.
+
+The feeds state prices in prose, so both numbers are read from the text — and the
+*labels* are read, not assumed. Taking the smaller number as the current price
+looks safe on a drop feed and is not: "Now $59.99, previously $49.99" would be
+inverted into an advertised saving on an item whose price went up.
+
+**`amazon-paapi`** is the official route: real list versus current price, images,
+ASINs, under terms that permit it. Dormant unless all three of
+`AMAZON_ACCESS_KEY`, `AMAZON_SECRET_KEY` and `AMAZON_PARTNER_TAG` are set, and
+most installs never will be — access needs an Associates account with three
+qualifying sales in 180 days. Without them it reports *skipped*, naming all three
+variables, and the run stays green.
+
+Its SigV4 signing is pinned to an independently computed vector, because a
+signing bug is invisible: it produces a 403 that looks exactly like a wrong
+credential.
+
+**Drift looks like:** `amazon-alt` 403 → the tracker is blocking; there is no
+second path. `amazon-paapi` reporting throttling → PA-API quota scales with an
+account's actual sales, so a new account hits it constantly. That is not a bug.
+
+---
+
 ## Not built yet
 
 These are designed and specified in the PRD but **not in the repository**. Listed
-here so `npm run health` showing 66 sources rather than 101 is not a mystery.
+here so `npm run health` showing 68 sources rather than 101 is not a mystery.
 
 | Planned | Story | Why it is not here yet |
 |---|---|---|
 | Magento engine | S3.12 | Same |
-| `amazon-paapi` | S3.6 | Dormant by design — needs Associates credentials that require three qualifying sales first |
-| Amazon alternatives (camelcamelcamel) | S3.5 | Next in the queue |
 
 The Canadian Tire, Gap Inc. and Reitmans retailers **are** in the catalogue and
 run today on the JSON-LD or Shopify engine. When the family engines land, those

@@ -17,6 +17,14 @@ export interface FetchOptions {
   cacheTtlMinutes?: number;
   /** Base delay for exponential backoff. Lowered in tests to keep them fast. */
   retryBaseMs?: number;
+  /**
+   * POST body. Its presence makes the request a POST.
+   *
+   * A request with a body is never cached and never served from cache: a signed
+   * API call carries a timestamp in its signature, so a replayed response would
+   * be answering a question nobody asked.
+   */
+  body?: string;
   signal?: AbortSignal;
 }
 
@@ -131,7 +139,8 @@ export class HttpClient {
       throw new RobotsDisallowedError(url);
     }
 
-    const ttlMinutes = options.cacheTtlMinutes ?? env.HTTP_CACHE_TTL_MINUTES;
+    // Never cache a request that carries a body - see FetchOptions.body.
+    const ttlMinutes = options.body ? 0 : (options.cacheTtlMinutes ?? env.HTTP_CACHE_TTL_MINUTES);
     const cached = ttlMinutes > 0 ? this.readCache(url) : null;
 
     if (cached && Date.now() - cached.storedAt < ttlMinutes * 60_000) {
@@ -154,6 +163,7 @@ export class HttpClient {
           timeoutMs: options.timeoutMs,
           headers: { ...conditional, ...options.headers },
           signal: options.signal,
+          ...(options.body === undefined ? {} : { body: options.body }),
         });
 
         // 304: the cached body is still current. Refresh its age and serve it.
@@ -219,7 +229,12 @@ export class HttpClient {
 
   private async rawFetch(
     url: string,
-    options: { timeoutMs?: number; headers?: Record<string, string>; signal?: AbortSignal },
+    options: {
+      timeoutMs?: number;
+      headers?: Record<string, string>;
+      signal?: AbortSignal;
+      body?: string;
+    },
   ): Promise<{ status: number; body: string; headers: Record<string, string> }> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? env.HTTP_TIMEOUT_MS);
@@ -230,11 +245,13 @@ export class HttpClient {
 
     try {
       const response = await fetch(url, {
+        method: options.body === undefined ? 'GET' : 'POST',
         headers: {
           'User-Agent': this.userAgent,
           'Accept-Language': 'en-CA,en;q=0.9,fr-CA;q=0.8',
           ...options.headers,
         },
+        ...(options.body === undefined ? {} : { body: options.body }),
         signal: controller.signal,
         redirect: 'follow',
       });

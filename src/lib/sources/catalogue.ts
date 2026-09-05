@@ -90,6 +90,20 @@ export interface CatalogueValidation {
 }
 
 /**
+ * Retailers no crawling engine may ever be pointed at.
+ *
+ * Amazon's terms forbid scraping their pages. A disabled catalogue entry is not
+ * protection - it is one `enabled: true` away from turning the JSON-LD engine
+ * loose on amazon.ca - so the prohibition lives in validation, where flipping
+ * that flag fails the catalogue instead of shipping a violation.
+ *
+ * Amazon is covered by dedicated adapters that never fetch an amazon.ca page:
+ * the official PA-API, and third-party price trackers that publish their own
+ * feeds.
+ */
+const NO_CRAWL_DOMAINS = ['amazon.ca', 'amazon.com'];
+
+/**
  * Validates a catalogue, reporting every problem rather than throwing on the
  * first. A typo in one entry must not take the other sixty offline.
  */
@@ -125,6 +139,17 @@ export function validateCatalogue(input: unknown): CatalogueValidation {
     }
     if (seenDomains.has(config.domain)) {
       errors.push(`${config.id}: duplicate domain ${config.domain}`);
+      return;
+    }
+
+    // Enabling a no-crawl retailer fails the catalogue rather than shipping a
+    // terms violation. The entry may exist - it belongs in /brands so shoppers
+    // see the retailer is covered - it just can never become a crawler.
+    if (config.enabled && NO_CRAWL_DOMAINS.includes(config.domain.toLowerCase())) {
+      errors.push(
+        `${config.id}: ${config.domain} must not be crawled — it is served by the ` +
+          'dedicated amazon-paapi and amazon-alt adapters, which never fetch its pages',
+      );
       return;
     }
 
