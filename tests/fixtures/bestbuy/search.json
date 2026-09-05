@@ -1,0 +1,97 @@
+{
+  "_comment": "Shaped after the Best Buy Canada storefront search response. Covers: a discounted product with both prices, a full-price product, a product missing salePrice, an out-of-stock item, a marketplace item, and a product with no image.",
+  "total": 1842,
+  "currentPage": 1,
+  "totalPages": 19,
+  "products": [
+    {
+      "sku": "17234567",
+      "name": "Samsung 65\" 4K UHD Neo QLED Smart TV (QN65QN90D) - 2024",
+      "salePrice": 1499.99,
+      "regularPrice": 1999.99,
+      "isOnSale": true,
+      "isAdvertised": true,
+      "thumbnailImage": "https://multimedia.bestbuy.ca/thumb/samsung-qn90d.jpg",
+      "highResImage": "https://multimedia.bestbuy.ca/high/samsung-qn90d.jpg",
+      "productUrl": "/en-ca/product/samsung-65-4k-uhd-neo-qled/17234567",
+      "brandName": "Samsung",
+      "modelNumber": "QN65QN90DAFXZC",
+      "categoryName": "Televisions",
+      "customerRating": 4.6,
+      "hasFreeShipping": true,
+      "isMarketplace": false,
+      "availability": { "onlineAvailability": "InStock", "isAvailableOnline": true }
+    },
+    {
+      "sku": "16998877",
+      "name": "Sony WH-1000XM5 Wireless Noise Cancelling Headphones - Black",
+      "salePrice": 328.00,
+      "regularPrice": 499.99,
+      "isOnSale": true,
+      "thumbnailImage": "https://multimedia.bestbuy.ca/thumb/sony-xm5.jpg",
+      "productUrl": "/en-ca/product/sony-wh-1000xm5/16998877",
+      "brandName": "Sony",
+      "modelNumber": "WH1000XM5/B",
+      "categoryName": "Headphones",
+      "hasFreeShipping": true,
+      "availability": { "onlineAvailability": "InStock", "isAvailableOnline": true }
+    },
+    {
+      "sku": "15551111",
+      "name": "Apple MacBook Air 13.6\" - Apple M3 Chip - 256GB SSD",
+      "salePrice": 1299.99,
+      "regularPrice": 1299.99,
+      "isOnSale": false,
+      "productUrl": "/en-ca/product/apple-macbook-air/15551111",
+      "brandName": "Apple",
+      "modelNumber": "MRXN3LL/A",
+      "categoryName": "Laptops",
+      "availability": { "onlineAvailability": "InStock", "isAvailableOnline": true }
+    },
+    {
+      "sku": "14442222",
+      "name": "Dyson V15 Detect Cordless Stick Vacuum",
+      "salePrice": null,
+      "regularPrice": 999.99,
+      "isOnSale": true,
+      "productUrl": "/en-ca/product/dyson-v15-detect/14442222",
+      "brandName": "Dyson",
+      "availability": { "onlineAvailability": "SoldOutOnline", "isAvailableOnline": false }
+    },
+    {
+      "sku": "13337777",
+      "name": "LEGO Star Wars Millennium Falcon 75375",
+      "salePrice": 84.99,
+      "regularPrice": 109.99,
+      "isOnSale": true,
+      "thumbnailImage": "https://multimedia.bestbuy.ca/thumb/lego-falcon.jpg",
+      "productUrl": "/en-ca/product/lego-millennium-falcon/13337777",
+      "brandName": "LEGO",
+      "modelNumber": "75375",
+      "categoryName": "Building Toys",
+      "hasFreeShipping": false,
+      "availability": { "onlineAvailability": "SoldOutOnline", "isAvailableOnline": false }
+    },
+    {
+      "sku": "12224444",
+      "name": "Third Party Seller Bluetooth Speaker",
+      "salePrice": 29.99,
+      "regularPrice": 59.99,
+      "isOnSale": true,
+      "productUrl": "/en-ca/product/third-party-speaker/12224444",
+      "isMarketplace": true,
+      "availability": { "onlineAvailability": "InStock", "isAvailableOnline": true }
+    },
+    {
+      "sku": 11119999,
+      "name": "Instant Pot Duo Plus 6QT Pressure Cooker",
+      "salePrice": 89.99,
+      "regularPrice": 149.99,
+      "isOnSale": true,
+      "brandName": "Instant Pot",
+      "modelNumber": "DUO-PLUS-6",
+      "categoryName": "Pressure Cookers",
+      "brand_new_api_field": { "nested": true }
+    }
+  ]
+}

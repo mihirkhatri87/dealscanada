@@ -1,0 +1,1199 @@
+import { validateCatalogue, type RetailerConfig } from './catalogue';
+
+/**
+ * The retailer catalogue.
+ *
+ * Data, not code. Adding a store is an entry here; the engine it declares turns
+ * it into an adapter automatically (see ./all.ts).
+ *
+ * `enabled: false` entries are recorded deliberately rather than omitted: they
+ * appear in the /brands directory with their status visible, so a shopper sees
+ * that a retailer is known-but-not-yet-working instead of silently missing.
+ *
+ * `status` is meant to be updated from real `npm run health` output - it records
+ * what actually works from a Canadian IP, not what we hoped would.
+ */
+
+const RAW_CATALOGUE = [
+  {
+    "id": "canadian-tire",
+    "name": "Canadian Tire",
+    "domain": "canadiantire.ca",
+    "baseUrl": "https://www.canadiantire.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "canadian-tire",
+    "vertical": "general",
+    "note": "hybris engine not yet implemented"
+  },
+  {
+    "id": "sportchek",
+    "name": "SportChek",
+    "domain": "sportchek.ca",
+    "baseUrl": "https://www.sportchek.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "canadian-tire",
+    "vertical": "sports",
+    "note": "hybris engine not yet implemented"
+  },
+  {
+    "id": "marks",
+    "name": "Mark's",
+    "domain": "marks.com",
+    "baseUrl": "https://www.marks.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "canadian-tire",
+    "vertical": "apparel",
+    "note": "hybris engine not yet implemented"
+  },
+  {
+    "id": "atmosphere",
+    "name": "Atmosphere",
+    "domain": "atmosphere.ca",
+    "baseUrl": "https://www.atmosphere.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "canadian-tire",
+    "vertical": "sports",
+    "note": "hybris engine not yet implemented"
+  },
+  {
+    "id": "sports-experts",
+    "name": "Sports Experts",
+    "domain": "sportsexperts.ca",
+    "baseUrl": "https://www.sportsexperts.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "canadian-tire",
+    "vertical": "sports",
+    "note": "hybris engine not yet implemented"
+  },
+  {
+    "id": "lequipeur",
+    "name": "L'Équipeur",
+    "domain": "lequipeur.com",
+    "baseUrl": "https://www.lequipeur.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "canadian-tire",
+    "vertical": "apparel",
+    "note": "hybris engine not yet implemented"
+  },
+  {
+    "id": "pro-hockey-life",
+    "name": "Pro Hockey Life",
+    "domain": "prohockeylife.com",
+    "baseUrl": "https://www.prohockeylife.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "canadian-tire",
+    "vertical": "sports",
+    "note": "hybris engine not yet implemented"
+  },
+  {
+    "id": "partsource",
+    "name": "PartSource",
+    "domain": "partsource.ca",
+    "baseUrl": "https://www.partsource.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "canadian-tire",
+    "vertical": "auto",
+    "note": "hybris engine not yet implemented"
+  },
+  {
+    "id": "party-city",
+    "name": "Party City Canada",
+    "domain": "partycity.ca",
+    "baseUrl": "https://www.partycity.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "canadian-tire",
+    "vertical": "general",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "gap",
+    "name": "Gap Canada",
+    "domain": "gapcanada.ca",
+    "baseUrl": "https://www.gapcanada.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "gap-inc",
+    "vertical": "apparel",
+    "note": "gapinc engine not yet implemented"
+  },
+  {
+    "id": "gap-factory",
+    "name": "Gap Factory",
+    "domain": "gapfactory.ca",
+    "baseUrl": "https://www.gapfactory.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "gap-inc",
+    "vertical": "apparel",
+    "note": "gapinc engine not yet implemented"
+  },
+  {
+    "id": "old-navy",
+    "name": "Old Navy Canada",
+    "domain": "oldnavy.ca",
+    "baseUrl": "https://www.oldnavy.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "gap-inc",
+    "vertical": "apparel",
+    "note": "gapinc engine not yet implemented"
+  },
+  {
+    "id": "banana-republic",
+    "name": "Banana Republic Canada",
+    "domain": "bananarepublic.ca",
+    "baseUrl": "https://www.bananarepublic.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "gap-inc",
+    "vertical": "apparel",
+    "note": "gapinc engine not yet implemented"
+  },
+  {
+    "id": "banana-republic-factory",
+    "name": "Banana Republic Factory",
+    "domain": "brfactory.ca",
+    "baseUrl": "https://www.brfactory.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "gap-inc",
+    "vertical": "apparel",
+    "note": "gapinc engine not yet implemented"
+  },
+  {
+    "id": "athleta",
+    "name": "Athleta Canada",
+    "domain": "athleta.ca",
+    "baseUrl": "https://www.athleta.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "family": "gap-inc",
+    "vertical": "apparel",
+    "note": "gapinc engine not yet implemented"
+  },
+  {
+    "id": "reitmans",
+    "name": "Reitmans",
+    "domain": "reitmans.com",
+    "baseUrl": "https://www.reitmans.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "family": "reitmans",
+    "vertical": "apparel"
+  },
+  {
+    "id": "rw-co",
+    "name": "RW&CO.",
+    "domain": "rw-co.com",
+    "baseUrl": "https://www.rw-co.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "family": "reitmans",
+    "vertical": "apparel"
+  },
+  {
+    "id": "penningtons",
+    "name": "Penningtons",
+    "domain": "penningtons.com",
+    "baseUrl": "https://www.penningtons.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "family": "reitmans",
+    "vertical": "apparel"
+  },
+  {
+    "id": "walmart",
+    "name": "Walmart Canada",
+    "domain": "walmart.ca",
+    "baseUrl": "https://www.walmart.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "general",
+    "note": "native engine not yet implemented"
+  },
+  {
+    "id": "costco",
+    "name": "Costco Canada",
+    "domain": "costco.ca",
+    "baseUrl": "https://www.costco.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "general",
+    "note": "native engine not yet implemented"
+  },
+  {
+    "id": "amazon",
+    "name": "Amazon.ca",
+    "domain": "amazon.ca",
+    "baseUrl": "https://www.amazon.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "general",
+    "note": "native engine not yet implemented"
+  },
+  {
+    "id": "giant-tiger",
+    "name": "Giant Tiger",
+    "domain": "gianttiger.com",
+    "baseUrl": "https://www.gianttiger.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "general",
+    "salePaths": [
+      "/collections/sale"
+    ],
+    "productLinkSelector": "a.product-item__link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "hudsons-bay",
+    "name": "Hudson's Bay",
+    "domain": "thebay.com",
+    "baseUrl": "https://www.thebay.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "general",
+    "note": "sfcc engine not yet implemented"
+  },
+  {
+    "id": "simons",
+    "name": "Simons",
+    "domain": "simons.ca",
+    "baseUrl": "https://www.simons.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "apparel",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "best-buy",
+    "name": "Best Buy Canada",
+    "domain": "bestbuy.ca",
+    "baseUrl": "https://www.bestbuy.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "electronics",
+    "note": "native engine not yet implemented"
+  },
+  {
+    "id": "newegg",
+    "name": "Newegg Canada",
+    "domain": "newegg.ca",
+    "baseUrl": "https://www.newegg.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "electronics",
+    "salePaths": [
+      "/todays-deals"
+    ],
+    "productLinkSelector": "a.item-title",
+    "maxProductPages": 30
+  },
+  {
+    "id": "canada-computers",
+    "name": "Canada Computers",
+    "domain": "canadacomputers.com",
+    "baseUrl": "https://www.canadacomputers.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "electronics",
+    "salePaths": [
+      "/en/promotions"
+    ],
+    "productLinkSelector": "a.product-link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "memory-express",
+    "name": "Memory Express",
+    "domain": "memoryexpress.com",
+    "baseUrl": "https://www.memoryexpress.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "electronics",
+    "salePaths": [
+      "/Category/Deals"
+    ],
+    "productLinkSelector": "a.c-shca-icon-item__body-name",
+    "maxProductPages": 30
+  },
+  {
+    "id": "staples",
+    "name": "Staples Canada",
+    "domain": "staples.ca",
+    "baseUrl": "https://www.staples.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "electronics",
+    "salePaths": [
+      "/deals"
+    ],
+    "productLinkSelector": "a.product-thumbnail__title",
+    "maxProductPages": 30
+  },
+  {
+    "id": "visions-electronics",
+    "name": "Visions Electronics",
+    "domain": "visions.ca",
+    "baseUrl": "https://www.visions.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "electronics",
+    "salePaths": [
+      "/collections/sale"
+    ],
+    "productLinkSelector": "a.product-item__link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "the-source",
+    "name": "The Source",
+    "domain": "thesource.ca",
+    "baseUrl": "https://www.thesource.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "electronics",
+    "salePaths": [
+      "/en-ca/clearance"
+    ],
+    "productLinkSelector": "a.product-tile__link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "dell",
+    "name": "Dell Canada",
+    "domain": "dell.ca",
+    "baseUrl": "https://www.dell.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "electronics",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "lenovo",
+    "name": "Lenovo Canada",
+    "domain": "lenovo.com",
+    "baseUrl": "https://www.lenovo.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "electronics",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "roots",
+    "name": "Roots",
+    "domain": "roots.com",
+    "baseUrl": "https://www.roots.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "aritzia",
+    "name": "Aritzia",
+    "domain": "aritzia.com",
+    "baseUrl": "https://www.aritzia.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "apparel",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "uniqlo",
+    "name": "Uniqlo Canada",
+    "domain": "uniqlo.com",
+    "baseUrl": "https://www.uniqlo.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "apparel",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "hm",
+    "name": "H&M Canada",
+    "domain": "hm.com",
+    "baseUrl": "https://www.hm.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "apparel",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "lululemon",
+    "name": "lululemon",
+    "domain": "lululemon.com",
+    "baseUrl": "https://www.lululemon.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "apparel",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "altitude-sports",
+    "name": "Altitude Sports",
+    "domain": "altitude-sports.com",
+    "baseUrl": "https://www.altitude-sports.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "the-last-hunt",
+    "name": "The Last Hunt",
+    "domain": "thelasthunt.com",
+    "baseUrl": "https://www.thelasthunt.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "sporting-life",
+    "name": "Sporting Life",
+    "domain": "sportinglife.ca",
+    "baseUrl": "https://www.sportinglife.ca",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "sports"
+  },
+  {
+    "id": "frank-and-oak",
+    "name": "Frank And Oak",
+    "domain": "frankandoak.com",
+    "baseUrl": "https://www.frankandoak.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "kit-and-ace",
+    "name": "Kit and Ace",
+    "domain": "kitandace.com",
+    "baseUrl": "https://www.kitandace.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "softmoc",
+    "name": "SoftMoc",
+    "domain": "softmoc.com",
+    "baseUrl": "https://www.softmoc.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "footwear"
+  },
+  {
+    "id": "dsw-canada",
+    "name": "DSW Canada",
+    "domain": "dsw.ca",
+    "baseUrl": "https://www.dsw.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "footwear",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "aldo",
+    "name": "Aldo",
+    "domain": "aldoshoes.com",
+    "baseUrl": "https://www.aldoshoes.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "footwear",
+    "note": "sfcc engine not yet implemented"
+  },
+  {
+    "id": "call-it-spring",
+    "name": "Call It Spring",
+    "domain": "callitspring.com",
+    "baseUrl": "https://www.callitspring.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "footwear",
+    "note": "sfcc engine not yet implemented"
+  },
+  {
+    "id": "little-burgundy",
+    "name": "Little Burgundy",
+    "domain": "littleburgundyshoes.com",
+    "baseUrl": "https://www.littleburgundyshoes.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "footwear",
+    "note": "sfcc engine not yet implemented"
+  },
+  {
+    "id": "browns-shoes",
+    "name": "Browns Shoes",
+    "domain": "brownsshoes.com",
+    "baseUrl": "https://www.brownsshoes.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "footwear"
+  },
+  {
+    "id": "urban-planet",
+    "name": "Urban Planet",
+    "domain": "urbanplanet.com",
+    "baseUrl": "https://www.urbanplanet.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "bootlegger",
+    "name": "Bootlegger",
+    "domain": "bootlegger.com",
+    "baseUrl": "https://www.bootlegger.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "rickis",
+    "name": "Ricki's",
+    "domain": "rickis.com",
+    "baseUrl": "https://www.rickis.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "cleo",
+    "name": "Cleo",
+    "domain": "cleo.ca",
+    "baseUrl": "https://www.cleo.ca",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "suzy-shier",
+    "name": "Suzy Shier",
+    "domain": "suzyshier.com",
+    "baseUrl": "https://www.suzyshier.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "northern-reflections",
+    "name": "Northern Reflections",
+    "domain": "northernreflections.com",
+    "baseUrl": "https://www.northernreflections.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "tip-top-tailors",
+    "name": "Tip Top Tailors",
+    "domain": "tiptop.ca",
+    "baseUrl": "https://www.tiptop.ca",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "moores",
+    "name": "Moores",
+    "domain": "mooresclothing.ca",
+    "baseUrl": "https://www.mooresclothing.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "apparel",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "toys-r-us",
+    "name": "Toys \"R\" Us Canada",
+    "domain": "toysrus.ca",
+    "baseUrl": "https://www.toysrus.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "toys",
+    "salePaths": [
+      "/en/clearance"
+    ],
+    "productLinkSelector": "a.product-tile-link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "babies-r-us",
+    "name": "Babies \"R\" Us Canada",
+    "domain": "babiesrus.ca",
+    "baseUrl": "https://www.babiesrus.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "baby",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "mastermind-toys",
+    "name": "Mastermind Toys",
+    "domain": "mastermindtoys.com",
+    "baseUrl": "https://www.mastermindtoys.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "toys"
+  },
+  {
+    "id": "lego",
+    "name": "LEGO Canada",
+    "domain": "lego.com",
+    "baseUrl": "https://www.lego.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "toys",
+    "salePaths": [
+      "/en-ca/categories/sale"
+    ],
+    "productLinkSelector": "a.ProductLeaf_wrapper__link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "shopdisney",
+    "name": "shopDisney Canada",
+    "domain": "shopdisney.ca",
+    "baseUrl": "https://www.shopdisney.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "toys",
+    "note": "sfcc engine not yet implemented"
+  },
+  {
+    "id": "carters-oshkosh",
+    "name": "Carter's OshKosh Canada",
+    "domain": "cartersoshkosh.ca",
+    "baseUrl": "https://www.cartersoshkosh.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "baby",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "childrens-place",
+    "name": "The Children's Place Canada",
+    "domain": "childrensplace.com",
+    "baseUrl": "https://www.childrensplace.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "apparel",
+    "note": "sfcc engine not yet implemented"
+  },
+  {
+    "id": "joe-fresh",
+    "name": "Joe Fresh",
+    "domain": "joefresh.com",
+    "baseUrl": "https://www.joefresh.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "apparel"
+  },
+  {
+    "id": "snuggle-bugz",
+    "name": "Snuggle Bugz",
+    "domain": "snugglebugz.ca",
+    "baseUrl": "https://www.snugglebugz.ca",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "baby"
+  },
+  {
+    "id": "west-coast-kids",
+    "name": "West Coast Kids",
+    "domain": "westcoastkids.ca",
+    "baseUrl": "https://www.westcoastkids.ca",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "baby"
+  },
+  {
+    "id": "scholars-choice",
+    "name": "Scholar's Choice",
+    "domain": "scholarschoice.ca",
+    "baseUrl": "https://www.scholarschoice.ca",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "toys"
+  },
+  {
+    "id": "indigo",
+    "name": "Indigo",
+    "domain": "indigo.ca",
+    "baseUrl": "https://www.indigo.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "books",
+    "salePaths": [
+      "/en-ca/deals/"
+    ],
+    "productLinkSelector": "a.product-list__product-link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "home-depot",
+    "name": "Home Depot Canada",
+    "domain": "homedepot.ca",
+    "baseUrl": "https://www.homedepot.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "home",
+    "salePaths": [
+      "/en/home/c/specialBuy"
+    ],
+    "productLinkSelector": "a.product-pod__title-link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "rona",
+    "name": "RONA",
+    "domain": "rona.ca",
+    "baseUrl": "https://www.rona.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "home",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "home-hardware",
+    "name": "Home Hardware",
+    "domain": "homehardware.ca",
+    "baseUrl": "https://www.homehardware.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "home",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "ikea",
+    "name": "IKEA Canada",
+    "domain": "ikea.com",
+    "baseUrl": "https://www.ikea.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "home",
+    "salePaths": [
+      "/ca/en/offers/last-chance/"
+    ],
+    "productLinkSelector": "a.plp-product__image-link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "wayfair",
+    "name": "Wayfair Canada",
+    "domain": "wayfair.ca",
+    "baseUrl": "https://www.wayfair.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "home",
+    "salePaths": [
+      "/daily-sales"
+    ],
+    "productLinkSelector": "a.ProductCard",
+    "maxProductPages": 30
+  },
+  {
+    "id": "structube",
+    "name": "Structube",
+    "domain": "structube.com",
+    "baseUrl": "https://www.structube.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "home",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "leons",
+    "name": "Leon's",
+    "domain": "leons.ca",
+    "baseUrl": "https://www.leons.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "home",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "the-brick",
+    "name": "The Brick",
+    "domain": "thebrick.com",
+    "baseUrl": "https://www.thebrick.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "home",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "linen-chest",
+    "name": "Linen Chest",
+    "domain": "linenchest.com",
+    "baseUrl": "https://www.linenchest.com",
+    "engine": "shopify",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "home"
+  },
+  {
+    "id": "mec",
+    "name": "MEC",
+    "domain": "mec.ca",
+    "baseUrl": "https://www.mec.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "sports",
+    "salePaths": [
+      "/en/deals"
+    ],
+    "productLinkSelector": "a.product-tile__link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "sail",
+    "name": "SAIL",
+    "domain": "sail.ca",
+    "baseUrl": "https://www.sail.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "sports",
+    "salePaths": [
+      "/en/promotions"
+    ],
+    "productLinkSelector": "a.product-item-link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "decathlon",
+    "name": "Decathlon Canada",
+    "domain": "decathlon.ca",
+    "baseUrl": "https://www.decathlon.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "sports",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "golf-town",
+    "name": "Golf Town",
+    "domain": "golftown.com",
+    "baseUrl": "https://www.golftown.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "sports",
+    "salePaths": [
+      "/collections/sale"
+    ],
+    "productLinkSelector": "a.product-item__link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "cabelas",
+    "name": "Cabela's Canada",
+    "domain": "cabelas.ca",
+    "baseUrl": "https://www.cabelas.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "sports",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "sephora",
+    "name": "Sephora Canada",
+    "domain": "sephora.com",
+    "baseUrl": "https://www.sephora.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "beauty",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "the-body-shop",
+    "name": "The Body Shop Canada",
+    "domain": "thebodyshop.com",
+    "baseUrl": "https://www.thebodyshop.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "beauty",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "lush",
+    "name": "Lush Canada",
+    "domain": "lush.com",
+    "baseUrl": "https://www.lush.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "beauty",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "bath-body-works",
+    "name": "Bath & Body Works Canada",
+    "domain": "bathandbodyworks.ca",
+    "baseUrl": "https://www.bathandbodyworks.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "beauty",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "well-ca",
+    "name": "Well.ca",
+    "domain": "well.ca",
+    "baseUrl": "https://www.well.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": true,
+    "vertical": "beauty",
+    "salePaths": [
+      "/deals"
+    ],
+    "productLinkSelector": "a.product-tile-link",
+    "maxProductPages": 30
+  },
+  {
+    "id": "shoppers-drug-mart",
+    "name": "Shoppers Drug Mart",
+    "domain": "shoppersdrugmart.ca",
+    "baseUrl": "https://www.shoppersdrugmart.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "beauty",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "loblaws",
+    "name": "Loblaws",
+    "domain": "loblaws.ca",
+    "baseUrl": "https://www.loblaws.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "grocery",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "real-canadian-superstore",
+    "name": "Real Canadian Superstore",
+    "domain": "realcanadiansuperstore.ca",
+    "baseUrl": "https://www.realcanadiansuperstore.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "grocery",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "no-frills",
+    "name": "No Frills",
+    "domain": "nofrills.ca",
+    "baseUrl": "https://www.nofrills.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "grocery",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "metro",
+    "name": "Metro",
+    "domain": "metro.ca",
+    "baseUrl": "https://www.metro.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "grocery",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "sobeys",
+    "name": "Sobeys",
+    "domain": "sobeys.com",
+    "baseUrl": "https://www.sobeys.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "grocery",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "london-drugs",
+    "name": "London Drugs",
+    "domain": "londondrugs.com",
+    "baseUrl": "https://www.londondrugs.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "grocery",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "rexall",
+    "name": "Rexall",
+    "domain": "rexall.ca",
+    "baseUrl": "https://www.rexall.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "grocery",
+    "note": "no sale listing path discovered yet - run retailer:probe"
+  },
+  {
+    "id": "redflagdeals",
+    "name": "RedFlagDeals",
+    "domain": "redflagdeals.com",
+    "baseUrl": "https://www.redflagdeals.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "platform",
+    "note": "platform engine not yet implemented"
+  },
+  {
+    "id": "smartcanucks",
+    "name": "Smart Canucks",
+    "domain": "smartcanucks.ca",
+    "baseUrl": "https://www.smartcanucks.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "platform",
+    "note": "platform engine not yet implemented"
+  },
+  {
+    "id": "cocowest",
+    "name": "Costco West Fan Blog",
+    "domain": "cocowest.ca",
+    "baseUrl": "https://www.cocowest.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "platform",
+    "note": "platform engine not yet implemented"
+  },
+  {
+    "id": "camelcamelcamel",
+    "name": "camelcamelcamel",
+    "domain": "camelcamelcamel.com",
+    "baseUrl": "https://www.camelcamelcamel.com",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "platform",
+    "note": "platform engine not yet implemented"
+  },
+  {
+    "id": "stocktrack",
+    "name": "stocktrack.ca",
+    "domain": "stocktrack.ca",
+    "baseUrl": "https://www.stocktrack.ca",
+    "engine": "jsonld",
+    "status": "unverified",
+    "enabled": false,
+    "vertical": "platform",
+    "note": "platform engine not yet implemented"
+  }
+];
+
+const validation = validateCatalogue(RAW_CATALOGUE);
+
+// A broken entry must not take the rest of the catalogue offline, so validation
+// reports every problem and keeps the entries that parsed. The catalogue test
+// asserts there are no errors at all.
+export const CATALOGUE_ERRORS: string[] = validation.errors;
+export const RETAILER_CATALOGUE: RetailerConfig[] = validation.valid;

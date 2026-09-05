@@ -1,0 +1,114 @@
+{
+  "_comment": "Shaped after the RedFlagDeals /api/topics response for the Hot Deals forum. Includes the cases that matter: a full offer, a missing offer, an expired flag, an expired title marker, a heavily downvoted thread, and a forum-relative path with no offer URL.",
+  "pager": { "page": 1, "per_page": 40, "total": 3184 },
+  "topics": [
+    {
+      "topic_id": 2801455,
+      "title": "[Best Buy] Samsung 65\" QN90D Neo QLED 4K Smart TV - $1499.99 (was $1999.99)",
+      "web_path": "/topics/best-buy-samsung-65-qn90d-2801455/",
+      "post_time": "2026-01-08T14:23:00+00:00",
+      "total_replies": 84,
+      "offer": {
+        "dealer_name": "Best Buy",
+        "price": "1499.99",
+        "list_price": "1999.99",
+        "discount_amount": "500.00",
+        "url": "https://www.bestbuy.ca/en-ca/product/samsung-65-qn90d/17234567",
+        "expires_at": "2026-01-15T05:00:00+00:00",
+        "expired": false
+      },
+      "votes": { "total_up": 142, "total_down": 6 }
+    },
+    {
+      "topic_id": 2801502,
+      "title": "[Old Navy] 50% off all outerwear + extra 20% with code WARM20",
+      "web_path": "/topics/old-navy-outerwear-2801502/",
+      "post_time": "2026-01-08T16:02:00+00:00",
+      "total_replies": 31,
+      "offer": {
+        "dealer_name": "Old Navy",
+        "price": null,
+        "list_price": null,
+        "url": "https://oldnavy.gapcanada.ca/browse/category.do?cid=1042708",
+        "expires_at": null,
+        "expired": false
+      },
+      "votes": { "total_up": 58, "total_down": 3 }
+    },
+    {
+      "topic_id": 2801333,
+      "title": "[Costco] Dyson V15 Detect Cordless Vacuum - $599.99",
+      "web_path": "/topics/costco-dyson-v15-2801333/",
+      "post_time": "2026-01-07T09:15:00+00:00",
+      "total_replies": 120,
+      "offer": {
+        "dealer_name": "Costco",
+        "price": 599.99,
+        "list_price": 799.99,
+        "url": "https://www.costco.ca/dyson-v15-detect.product.100812345.html",
+        "expired": false
+      },
+      "votes": { "total_up": 201, "total_down": 12 }
+    },
+    {
+      "topic_id": 2800111,
+      "title": "[EXPIRED] [Amazon.ca] Sony WH-1000XM5 - $328",
+      "web_path": "/topics/amazon-sony-xm5-2800111/",
+      "post_time": "2026-01-05T11:00:00+00:00",
+      "offer": {
+        "dealer_name": "Amazon.ca",
+        "price": "328.00",
+        "url": "https://www.amazon.ca/dp/B09XS7JWHH?tag=rfd-20",
+        "expired": false
+      },
+      "votes": { "total_up": 88, "total_down": 2 }
+    },
+    {
+      "topic_id": 2800222,
+      "title": "[Walmart] Instant Pot Duo 6QT - $59.98",
+      "web_path": "/topics/walmart-instant-pot-2800222/",
+      "post_time": "2026-01-06T08:30:00+00:00",
+      "offer": {
+        "dealer_name": "Walmart",
+        "price": "59.98",
+        "url": "https://www.walmart.ca/en/ip/instant-pot-duo-6qt/6000200123456",
+        "expired": true
+      },
+      "votes": { "total_up": 40, "total_down": 1 }
+    },
+    {
+      "topic_id": 2801600,
+      "title": "[Canadian Tire] Mastercraft 200-Piece Socket Set - $89.99",
+      "web_path": "/topics/canadian-tire-socket-set-2801600/",
+      "post_time": "2026-01-08T18:45:00+00:00",
+      "offer": {
+        "dealer_name": "Canadian Tire",
+        "price": "89.99",
+        "list_price": "199.99",
+        "url": "https://www.canadiantire.ca/en/pdp/mastercraft-200-pc-socket-set-0581234p.html",
+        "expired": false
+      },
+      "votes": { "total_up": 24, "total_down": 55 }
+    },
+    {
+      "topic_id": 2801700,
+      "title": "[Discussion] Which winter tires are people running this year?",
+      "web_path": "/topics/winter-tires-discussion-2801700/",
+      "post_time": "2026-01-08T19:00:00+00:00",
+      "votes": { "total_up": 3, "total_down": 0 }
+    },
+    {
+      "topic_id": 2801800,
+      "title": "[Sport Chek] Extra 30% off clearance, use code EXTRA30",
+      "web_path": "/topics/sportchek-clearance-2801800/",
+      "post_time": "2026-01-08T20:10:00+00:00",
+      "offer": {
+        "dealer_name": "Sport Chek",
+        "price": null,
+        "url": "https://www.sportchek.ca/categories/clearance.html",
+        "expired": false
+      },
+      "votes": { "total_up": 17, "total_down": 0 }
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "_comment": "Shaped after a Shopify /collections/sale/products.json response. Covers: a genuine markdown, compare_at_price equal to price (no real discount), compare_at_price BELOW price (bad data), an all-sold-out product, a product with size variants, and one with no variants at all.",
+  "products": [
+    {
+      "id": 7891234567890,
+      "title": "Wool Blend Peacoat",
+      "handle": "wool-blend-peacoat",
+      "body_html": "<p>A warm <strong>wool blend</strong> peacoat for winter.</p>",
+      "vendor": "Roots",
+      "product_type": "Outerwear",
+      "tags": ["womens", "outerwear", "sale"],
+      "published_at": "2025-11-02T10:00:00-04:00",
+      "options": [{ "name": "Size", "values": ["XS", "S", "M", "L"] }],
+      "images": [{ "src": "https://cdn.shopify.com/s/files/peacoat.jpg" }],
+      "variants": [
+        { "id": 1, "title": "XS", "option1": "XS", "price": "89.99", "compare_at_price": "228.00", "available": true, "barcode": "0628451234567" },
+        { "id": 2, "title": "S", "option1": "S", "price": "89.99", "compare_at_price": "228.00", "available": true, "barcode": "0628451234567" },
+        { "id": 3, "title": "M", "option1": "M", "price": "89.99", "compare_at_price": "228.00", "available": false, "barcode": "0628451234567" }
+      ]
+    },
+    {
+      "id": 7891234567891,
+      "title": "Classic Cotton Tee",
+      "handle": "classic-cotton-tee",
+      "vendor": "Roots",
+      "product_type": "T-Shirts",
+      "tags": "mens, basics",
+      "options": [{ "name": "Size", "values": ["S", "M"] }],
+      "images": [{ "src": "https://cdn.shopify.com/s/files/tee.jpg" }],
+      "variants": [
+        { "id": 4, "title": "S", "option1": "S", "price": "38.00", "compare_at_price": "38.00", "available": true }
+      ]
+    },
+    {
+      "id": 7891234567892,
+      "title": "Fleece Jogger",
+      "handle": "fleece-jogger",
+      "vendor": "Roots",
+      "product_type": "Pants",
+      "tags": ["girls"],
+      "images": [{ "src": "https://cdn.shopify.com/s/files/jogger.jpg" }],
+      "variants": [
+        { "id": 5, "title": "Default", "price": "48.00", "compare_at_price": "30.00", "available": true }
+      ]
+    },
+    {
+      "id": 7891234567893,
+      "title": "Sold Out Winter Parka",
+      "handle": "sold-out-winter-parka",
+      "vendor": "Roots",
+      "product_type": "Outerwear",
+      "tags": ["mens"],
+      "options": [{ "name": "Size", "values": ["M", "L"] }],
+      "images": [{ "src": "https://cdn.shopify.com/s/files/parka.jpg" }],
+      "variants": [
+        { "id": 6, "title": "M", "option1": "M", "price": "199.99", "compare_at_price": "449.00", "available": false },
+        { "id": 7, "title": "L", "option1": "L", "price": "199.99", "compare_at_price": "449.00", "available": false }
+      ]
+    },
+    {
+      "id": 7891234567894,
+      "title": "Cheapest Variant Test Hoodie",
+      "handle": "variant-test-hoodie",
+      "vendor": "Roots",
+      "product_type": "Hoodies",
+      "tags": ["baby"],
+      "options": [{ "name": "Size", "values": ["S", "M", "L"] }],
+      "images": [{ "src": "https://cdn.shopify.com/s/files/hoodie.jpg" }],
+      "variants": [
+        { "id": 8, "title": "S", "option1": "S", "price": "79.99", "compare_at_price": "120.00", "available": false },
+        { "id": 9, "title": "M", "option1": "M", "price": "59.99", "compare_at_price": "120.00", "available": true },
+        { "id": 10, "title": "L", "option1": "L", "price": "69.99", "compare_at_price": "120.00", "available": true }
+      ]
+    },
+    {
+      "id": 7891234567895,
+      "title": "Broken Product With No Variants",
+      "handle": "broken-no-variants",
+      "vendor": "Roots",
+      "variants": []
+    }
+  ]
+}
