@@ -9,7 +9,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ## EPIC E1 — Foundation & data layer
 
-### S1.1 — Project scaffold (3 pts)
+### ✅ S1.1 — Project scaffold (3 pts)
 *As a developer, I want a running Next.js + TypeScript + Tailwind app so every later story has a home.*
 
 **Tasks**
@@ -31,7 +31,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S1.2 — Configuration & feature flags (2 pts)
+### ✅ S1.2 — Configuration & feature flags (2 pts)
 *As an operator, I want one validated config surface so misconfiguration fails loudly at startup.*
 
 **Tasks**
@@ -55,7 +55,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S1.3 — Database schema & migrations (5 pts)
+### ✅ S1.3 — Database schema & migrations (5 pts)
 *As a developer, I want a portable schema so SQLite locally and Postgres in prod share one definition.*
 
 **Tasks**
@@ -78,7 +78,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S1.4 — Repository layer (5 pts)
+### ✅ S1.4 — Repository layer (5 pts)
 *As a developer, I want all data access behind one interface so the storage engine is swappable.*
 
 **Tasks**
@@ -106,7 +106,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ## EPIC E2 — Ingestion framework
 
-### S2.1 — Polite HTTP client (5 pts)
+### ✅ S2.1 — Polite HTTP client (5 pts)
 *As a source owner's site, I want to be crawled politely so this aggregator is not a burden.*
 
 **Tasks**
@@ -132,7 +132,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S2.2 — Adapter contract & registry (2 pts)
+### ✅ S2.2 — Adapter contract & registry (2 pts)
 *As a developer, I want a uniform adapter shape so adding a source is one file.*
 
 **Tasks**
@@ -152,7 +152,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S2.3 — Normalization & merchant resolution (3 pts)
+### ✅ S2.3 — Normalization & merchant resolution (3 pts)
 
 **Tasks**
 1. `normalize.ts` — `RawDeal → NormalizedDeal`, title cleanup (strip `[Expired]`,
@@ -174,7 +174,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S2.4 — Category classifier (2 pts)
+### ✅ S2.4 — Category classifier (2 pts)
 
 **Tasks**
 1. ~14 categories (Electronics, Computers, Gaming, Home, Kitchen, Appliances, Grocery,
@@ -194,7 +194,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S2.5 — Coupon extraction (2 pts)
+### ✅ S2.5 — Coupon extraction (2 pts)
 
 **Tasks**
 1. Regex battery: `use code X`, `promo code: X`, `coupon: X`, `code X at checkout`,
@@ -214,7 +214,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S2.6 — Deduplication (3 pts)
+### ✅ S2.6 — Deduplication (3 pts)
 
 **Tasks**
 1. Primary key: canonical URL hash.
@@ -235,7 +235,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S2.7 — Heat scoring & price history (3 pts)
+### ✅ S2.7 — Heat scoring & price history (3 pts)
 
 **Tasks**
 1. `score.ts` implementing §12 with a single exported weights object.
@@ -254,7 +254,7 @@ Points are relative (1 ≈ half a session, 8 ≈ two sessions).
 
 ---
 
-### S2.7a — Product identity for cross-merchant comparison (3 pts) — *DONE*
+### ✅ S2.7a — Product identity for cross-merchant comparison (3 pts) — *DONE*
 *As a shopper, I want to know a discount is real, because one retailer saying "50% off"
 proves nothing.*
 
@@ -274,7 +274,7 @@ sizes, capacities and years; a SKU-only input yields no key.
 
 ---
 
-### S2.7b — Deal verification and inflated-anchor detection (5 pts) — *DONE*
+### ✅ S2.7b — Deal verification and inflated-anchor detection (5 pts) — *DONE*
 *As a shopper, I want fake "was" prices caught, not repeated.*
 
 **Tasks**
@@ -296,7 +296,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
 
 ---
 
-### S2.8 — Pipeline runner (3 pts)
+### ✅ S2.8 — Pipeline runner (3 pts)
 
 **Tasks**
 1. `run.ts` — bounded-concurrency adapter execution with a per-adapter timeout.
@@ -316,7 +316,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
 
 ---
 
-### S2.9 — CLI: `scrape` & `health` (3 pts)
+### ✅ S2.9 — CLI: `scrape` & `health` (3 pts)
 
 **Tasks**
 1. `scripts/scrape.ts` — flags `--source=`, `--limit=`, `--dry-run`, `--verbose`.
@@ -346,7 +346,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
 > malformed-payload test asserting a graceful `[]` plus logged error, and a manual live
 > check via `npm run health` / `npm run scrape -- --source=<id>` on Windows.
 
-### S3.1 — RedFlagDeals adapter (5 pts) — *the CA firehose, highest value*
+### ✅ S3.1 — RedFlagDeals adapter (5 pts) — *the CA firehose, highest value*
 
 **Tasks**
 1. Paginate `forums.redflagdeals.com/api/topics?forum_id=9&per_page=40&page=N`.
@@ -366,7 +366,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
   ⇒ `[]` + logged error; expired filtering; vote mapping.
 - Manual: `npm run scrape -- --source=redflagdeals --limit=40`, then check `/`.
 
-### S3.2 — Best Buy Canada adapter (5 pts) — *best structured before/after prices*
+### ✅ S3.2 — Best Buy Canada adapter (5 pts) — *best structured before/after prices*
 
 **Tasks**
 1. Search endpoint paging with `lang=en-CA`, region param, `pageSize`.
@@ -384,7 +384,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
   a missing offer is dropped, not crashed on; pagination cap respected.
 - Manual: `npm run scrape -- --source=bestbuy --limit=50`; spot-check 3 prices on bestbuy.ca.
 
-### S3.3 — RSS / WordPress engine (3 pts) — *Smart Canucks, CoCo West, Costco East*
+### ✅ S3.3 — RSS / WordPress engine (3 pts) — *Smart Canucks, CoCo West, Costco East*
 
 **Tasks**
 1. Generic WP-REST reader (`/wp-json/wp/v2/posts?_embed`) with RSS fallback.
@@ -401,7 +401,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
 - Unit: WP-REST and RSS fixtures for the same blog produce equivalent output;
   HTML-entity and in-content `<img>` extraction; missing-image fallback.
 
-### S3.4 — Costco composite adapter (3 pts)
+### ✅ S3.4 — Costco composite adapter (3 pts)
 
 **Tasks**
 1. Attempt costco.ca search JSON with realistic headers.
@@ -417,7 +417,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
 **TP**
 - Unit: primary-403 ⇒ fallback engages; all-blocked ⇒ `[]` + reason; dedupe across paths.
 
-### S3.5 — Amazon alternative sources (3 pts)
+### ✅ S3.5 — Amazon alternative sources (3 pts)
 
 **Tasks**
 1. camelcamelcamel Canada top-drops RSS adapter (title, ASIN, drop %, prices).
@@ -434,7 +434,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
 - Unit: RSS fixture → normalized deals with ASIN + canonical URL; assert the http client is
   never called with an `amazon.ca` product path; disclaimer flag set.
 
-### S3.6 — Amazon PA-API v5 adapter, dormant (5 pts)
+### ✅ S3.6 — Amazon PA-API v5 adapter, dormant (5 pts)
 
 **Tasks**
 1. AWS SigV4 request signing for `webservices.amazon.ca`.
@@ -455,7 +455,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
   triggers backoff, not failure.
 - Manual: only if you supply keys — otherwise assert dormancy in the health output.
 
-### S3.7 — Generic JSON-LD retailer engine (5 pts)
+### ✅ S3.7 — Generic JSON-LD retailer engine (5 pts)
 *Canada Computers, Newegg CA, Staples CA, Home Depot CA, Walmart CA, Memory Express*
 
 **Tasks**
@@ -479,7 +479,7 @@ collapsing; anchor tolerance does not flag ordinary MSRP drift; heat demotion as
 
 ---
 
-### S3.8 — Shopify engine + catalogue wiring (5 pts) — *highest coverage-per-effort*
+### ✅ S3.8 — Shopify engine + catalogue wiring (5 pts) — *highest coverage-per-effort*
 *As a user, I want deals from the long tail of Canadian Shopify stores, because that is
 where most independent apparel, kids and toy retailers live.*
 
@@ -505,7 +505,7 @@ where most independent apparel, kids and toy retailers live.*
 
 ---
 
-### S3.9 — Salesforce Commerce Cloud engine (5 pts)
+### ✅ S3.9 — Salesforce Commerce Cloud engine (5 pts)
 **Tasks**
 1. Detect the SFCC site id and locale from the store config.
 2. Query the product-search endpoint with a sale/clearance refinement, paginate.
@@ -523,7 +523,7 @@ where most independent apparel, kids and toy retailers live.*
 
 ---
 
-### S3.10 — Canadian Tire family engine (5 pts) — *Canadian Tire · SportChek · Mark's · Atmosphere · Sports Experts · L'Équipeur · Pro Hockey Life · PartSource · Party City*
+### ✅ S3.10 — Canadian Tire family engine (5 pts) — *Canadian Tire · SportChek · Mark's · Atmosphere · Sports Experts · L'Équipeur · Pro Hockey Life · PartSource · Party City*
 *As a Canadian shopper, I want the whole Canadian Tire banner group in one place, since
 their sales run across banners.*
 
@@ -550,7 +550,7 @@ their sales run across banners.*
 
 ---
 
-### S3.11 — Gap Inc. Canada engine (5 pts) — *Gap · Gap Factory · Old Navy · Banana Republic · BR Factory · Athleta*
+### ✅ S3.11 — Gap Inc. Canada engine (5 pts) — *Gap · Gap Factory · Old Navy · Banana Republic · BR Factory · Athleta*
 **Tasks**
 1. Category/product JSON client for the Gap Inc. Canada brands, one config per brand,
    `family: gap-inc`.
@@ -572,7 +572,7 @@ their sales run across banners.*
 
 ---
 
-### S3.12 — Magento / Adobe Commerce engine (3 pts)
+### ⬜ S3.12 — Magento / Adobe Commerce engine (3 pts)
 **Tasks**
 1. GraphQL `products` query with a special-price filter, paginated.
 2. Map `price_range.minimum_price` regular vs final price, images, brand.
@@ -587,7 +587,7 @@ their sales run across banners.*
 
 ---
 
-### S3.13 — Walmart Canada composite adapter (5 pts)
+### ✅ S3.13 — Walmart Canada composite adapter (5 pts)
 *As a shopper, I want Walmart Canada deals even though walmart.ca is bot-protected.*
 
 **Tasks**
@@ -610,7 +610,7 @@ their sales run across banners.*
 
 ---
 
-### S3.14 — Retailer catalogue & `retailer:probe` onboarding tool (5 pts)
+### ✅ S3.14 — Retailer catalogue & `retailer:probe` onboarding tool (5 pts)
 *As the operator, I want to add a retailer in minutes without writing code, because
 coverage is the product.*
 
@@ -642,7 +642,7 @@ coverage is the product.*
 
 ---
 
-### S3.15 — Apparel & toys enrichment (3 pts)
+### ✅ S3.15 — Apparel & toys enrichment (3 pts)
 *As an apparel shopper, I want to filter by department and brand, because "50% off" means
 nothing if it's not my size or section.*
 
@@ -668,7 +668,7 @@ nothing if it's not my size or section.*
 
 ## EPIC E4 — Location & store intelligence (stocktrack.ca)
 
-### S4.1 — Geo utilities & location resolution (3 pts)
+### ✅ S4.1 — Geo utilities & location resolution (3 pts)
 *As a shopper, I want the site to know roughly where I am so it can show me local clearance.*
 
 **Tasks**
@@ -691,7 +691,7 @@ nothing if it's not my size or section.*
 - Component: mocked `navigator.geolocation` — granted, denied, unavailable.
 - Manual: set a location, hard-refresh, confirm SSR shows it immediately.
 
-### S4.2 — Stores model & `stores:sync` (3 pts)
+### ✅ S4.2 — Stores model & `stores:sync` (3 pts)
 
 **Tasks**
 1. `stores` CRUD in both repositories; `findStoresNear(lat, lng, radiusKm)`.
@@ -709,7 +709,7 @@ nothing if it's not my size or section.*
 - Integration: sync from a fixture store list; assert counts and ordering.
 - Manual: run with your postal code and verify nearby stores look right.
 
-### S4.3 — stocktrack.ca adapter (5 pts) — *the "amazing deals near you" data*
+### ✅ S4.3 — stocktrack.ca adapter (5 pts) — *the "amazing deals near you" data*
 
 **Tasks**
 1. Config-driven endpoint map (store list, per-store clearance) so shape changes are a
@@ -736,7 +736,7 @@ nothing if it's not my size or section.*
 - **Note:** endpoint shapes are unverified from this sandbox (403). Expect one selector-fix
   follow-up commit driven by your live `health` output.
 
-### S4.4 — "Near you" query API (3 pts)
+### ✅ S4.4 — "Near you" query API (3 pts)
 
 **Tasks**
 1. `queryDealsNear(lat, lng, radiusKm, filters)` joining deals→stores.
@@ -759,7 +759,7 @@ nothing if it's not my size or section.*
 
 ## EPIC E5 — Web experience
 
-### S5.1 — Design system & theming (3 pts)
+### ✅ S5.1 — Design system & theming (3 pts)
 
 **Tasks**
 1. CSS custom-property tokens: colour, spacing, radius, shadow, type scale.
@@ -778,7 +778,7 @@ nothing if it's not my size or section.*
 - Component: the theme toggle switches the root attribute and persists.
 - Manual: view in light and dark on Chrome + Edge at 100% and 200% zoom.
 
-### S5.2 — DealCard component (5 pts) — *the core visual unit*
+### ✅ S5.2 — DealCard component (5 pts) — *the core visual unit*
 
 **Tasks**
 1. 4:3 image via `next/image`, lazy loading, blur placeholder, branded fallback.
@@ -800,7 +800,7 @@ nothing if it's not my size or section.*
 - Clipboard test with a mocked `navigator.clipboard`, asserting the aria-live message.
 - Accessibility: automated axe check on the card; manual keyboard tab-through.
 
-### S5.3 — Front page (5 pts)
+### ✅ S5.3 — Front page (5 pts)
 
 **Tasks**
 1. Server-rendered: hero strip (3 hottest) + "Amazing deals near you" + national grid.
@@ -821,7 +821,7 @@ nothing if it's not my size or section.*
 - Cookie present vs absent ⇒ near-you section vs prompt.
 - Manual: Lighthouse locally, record LCP; resize sweep at the four breakpoints.
 
-### S5.4 — Filters, sort & search (5 pts)
+### ✅ S5.4 — Filters, sort & search (5 pts)
 
 **Tasks**
 1. FilterBar: category chips, merchant multiselect, min-% slider, price range,
@@ -843,7 +843,7 @@ nothing if it's not my size or section.*
   correctly; search matches partial and accented terms.
 - Manual: apply three filters, copy the URL into a new tab, confirm identical results.
 
-### S5.5 — Deal detail & price history (5 pts)
+### ✅ S5.5 — Deal detail & price history (5 pts)
 
 **Tasks**
 1. `/deal/[slug]` — hero image, full description, price block, coupon, expiry.
@@ -866,7 +866,7 @@ nothing if it's not my size or section.*
 - Integration: a seeded deal renders all sections; unknown slug ⇒ 404.
 - Accessibility: axe check; keyboard traversal of chart points.
 
-### S5.6 — Category, merchant & coupons pages (3 pts)
+### ✅ S5.6 — Category, merchant & coupons pages (3 pts)
 
 **Tasks**
 1. `/c/[category]` and `/m/[merchant]` reusing the grid + filter components.
@@ -883,7 +883,7 @@ nothing if it's not my size or section.*
 - Integration: each route with seeded data; unknown slug ⇒ 404; `/coupons` contains no
   code-less deals.
 
-### S5.7 — Near-me page & pickers (5 pts)
+### ✅ S5.7 — Near-me page & pickers (5 pts)
 
 **Tasks**
 1. `/near-me` — location picker, store multiselect with distances, local clearance grid.
@@ -903,7 +903,7 @@ nothing if it's not my size or section.*
 - Integration: seeded stores + local deals → correct grouping and distance ordering.
 - Manual: set your real postal code, sync stores, select two, scrape, view `/near-me`.
 
-### S5.8 — Loading, empty & error states (2 pts)
+### ✅ S5.8 — Loading, empty & error states (2 pts)
 
 **Tasks**
 1. Skeleton cards matching real card dimensions for every grid.
@@ -920,7 +920,7 @@ nothing if it's not my size or section.*
 - Component: skeleton dimension parity with the real card; a forced throw renders the
   boundary; image `onError` swaps to the fallback.
 
-### S5.9 — Accessibility & responsive hardening (3 pts)
+### ✅ S5.9 — Accessibility & responsive hardening (3 pts)
 
 **Tasks**
 1. Automated axe pass over every route in tests.
@@ -940,7 +940,7 @@ nothing if it's not my size or section.*
 
 ---
 
-### S5.10 — Brand directory, family pages & department facets (5 pts)
+### ✅ S5.10 — Brand directory, family pages & department facets (5 pts)
 *As a shopper, I want to browse by store and by section, because I shop "Old Navy kids",
 not "category: clothing".*
 
@@ -972,7 +972,7 @@ not "category: clothing".*
 
 ## EPIC E6 — JSON API
 
-### S6.1 — `/api/deals` (3 pts)
+### ✅ S6.1 — `/api/deals` (3 pts)
 **Tasks:** filter/sort/paginate params mirroring the UI; zod-validated query; stable
 pagination (cursor, or offset with a deterministic tiebreak); cache headers; typed response.
 
@@ -982,7 +982,7 @@ duplicates or skips a row across pages; the documented response shape is stable.
 **TP** — Unit: param validation table. Integration: paginate a 250-row seeded set end to
 end and assert the union equals the full set with no repeats.
 
-### S6.2 — `/api/deals/near` & `/api/stores` (2 pts)
+### ✅ S6.2 — `/api/deals/near` & `/api/stores` (2 pts)
 **Tasks:** radius params, validation, `distance_km` in the payload, empty-state reasons.
 
 **AC** — Missing lat/lng ⇒ 400; out-of-range radius is clamped and reported; every item
@@ -990,7 +990,7 @@ carries `distance_km`.
 
 **TP** — Integration: boundary radii; the three empty-state reasons; malformed coordinates.
 
-### S6.3 — `/api/health` (2 pts)
+### ✅ S6.3 — `/api/health` (2 pts)
 **Tasks:** per-source last run, ok flag, item counts, latency, error, overall staleness;
 JSON plus a human-readable mode.
 
@@ -1004,7 +1004,7 @@ the payload and the derived staleness flag.
 
 ## EPIC E7 — Scheduling & operations
 
-### S7.1 — Local cron worker (2 pts)
+### ✅ S7.1 — Local cron worker (2 pts)
 **Tasks:** `scripts/worker.ts` with node-cron (default `*/30 * * * *`), overlap guard,
 graceful shutdown, run logging. `npm run worker`.
 
@@ -1014,7 +1014,7 @@ configurable via env.
 **TP** — Unit: overlap guard with fake timers (a second trigger during a run is skipped).
 Manual: run the worker for one interval on Windows; confirm two logged runs.
 
-### S7.2 — Hosted cron route (2 pts)
+### ✅ S7.2 — Hosted cron route (2 pts)
 **Tasks:** `POST /api/cron/scrape` requiring `CRON_SECRET`; `vercel.json` schedule;
 execution-time guard that scrapes a subset when near the platform limit.
 
@@ -1024,7 +1024,7 @@ a run and returns the summary; a timing-out run reports partial results instead 
 **TP** — Integration: 401 paths (absent, wrong, malformed header) assert zero adapter
 invocations; the happy path returns the summary.
 
-### S7.3 — Expiry & staleness reaper (2 pts)
+### ✅ S7.3 — Expiry & staleness reaper (2 pts)
 **Tasks:** mark deals expired past `expires_at`; mark `dead` when unseen for N runs; exclude
 non-active from default queries; prune `price_points` beyond a retention window.
 
@@ -1038,7 +1038,7 @@ point. Integration: expired deals absent from `/api/deals`, present at `/deal/[s
 
 ## EPIC E8 — Quality, deployment & documentation
 
-### S8.1 — Seed dataset (3 pts)
+### ✅ S8.1 — Seed dataset (3 pts)
 **Tasks:** `data/seed/deals.seed.json` with ~120 realistic Canadian deals across all
 categories and ~20 merchants — including coupons, expiries, price histories, and ~15
 store-local clearance deals with stores; `npm run seed` (idempotent, `--reset`).
@@ -1051,7 +1051,7 @@ duplicate rows.
 counts, and that ≥10 deals have ≥3 price points. Manual: `npm run seed; npm run dev`
 offline, then click through every route.
 
-### S8.2 — Test harness, fixtures & CI (3 pts)
+### ✅ S8.2 — Test harness, fixtures & CI (3 pts)
 **Tasks:** fixture recorder helper; committed fixtures per source; coverage thresholds
 (≥80% on `src/lib/`); a lint/typecheck/test/build GitHub Actions workflow; a network guard
 that fails any test attempting a real outbound request.
@@ -1062,7 +1062,7 @@ CI; a test that tries to hit the network fails with a clear message.
 **TP** — Meta-test: a deliberately network-calling test is caught by the guard.
 CI: the workflow is green on the branch.
 
-### S8.3 — Deployment configuration (3 pts)
+### ✅ S8.3 — Deployment configuration (3 pts)
 **Tasks:** multi-stage `Dockerfile`; `docker-compose.yml` (app + Postgres); `vercel.json`
 with the cron entry; the Postgres migration path verified in CI; a documented env matrix
 for local vs hosted.
@@ -1074,7 +1074,7 @@ contract suite running against both engines).
 **TP** — Integration (CI): compose up, migrate, seed, hit `/api/health` for a 200.
 Manual (optional, Docker Desktop on Windows): the same three steps.
 
-### S8.4 — Documentation (2 pts)
+### ✅ S8.4 — Documentation (2 pts)
 **Tasks:** README with a PowerShell quickstart, architecture overview, and troubleshooting;
 `docs/PRD.md` + `docs/BACKLOG.md` (this document); `docs/SOURCES.md` (per-adapter endpoints,
 known failure modes, how to fix drift); ToS/robots posture and takedown contact.
@@ -1094,7 +1094,7 @@ fixed before the story closes.
 > integration**, and `shared/prompt-caching.md` before placing cache breakpoints. SDK
 > bindings must come from those files, never from recall.
 
-### S9.1 — Assistant tool layer (5 pts) — *the grounding mechanism*
+### ✅ S9.1 — Assistant tool layer (5 pts) — *the grounding mechanism*
 *As a user, I want the assistant's answers to be real deals from the database, because a
 shopping assistant that invents products is worse than no assistant.*
 
@@ -1124,7 +1124,7 @@ shopping assistant that invents products is worse than no assistant.*
 
 ---
 
-### S9.2 — Claude API integration (5 pts)
+### ✅ S9.2 — Claude API integration (5 pts)
 **Tasks**
 1. `/api/assistant` route: streaming `client.messages.stream` on the `ASSISTANT_MODEL` env
    var (default `claude-sonnet-5`), adaptive thinking, tools from S9.1,
@@ -1154,7 +1154,7 @@ shopping assistant that invents products is worse than no assistant.*
 
 ---
 
-### S9.3 — Assistant view shell & two-way handoff (5 pts) — *"controls rendering, doesn't replace browsing"*
+### ✅ S9.3 — Assistant view shell & two-way handoff (5 pts) — *"controls rendering, doesn't replace browsing"*
 **Tasks**
 1. Split shell: conversation rail + live results canvas; `/assistant` full-screen and an
    overlay form available from any page.
@@ -1181,7 +1181,7 @@ shopping assistant that invents products is worse than no assistant.*
 
 ---
 
-### S9.4 — Conversation UX (3 pts) — *"appears as it's communicating"*
+### ✅ S9.4 — Conversation UX (3 pts) — *"appears as it's communicating"*
 **Tasks**
 1. Token-streamed responses with a typing cursor.
 2. Tool calls surfaced as human-readable activity chips ("Searching 3,412 deals → 18 matches",
@@ -1204,7 +1204,7 @@ shopping assistant that invents products is worse than no assistant.*
 
 ---
 
-### S9.5 — Grounding & injection guardrails (5 pts)
+### ✅ S9.5 — Grounding & injection guardrails (5 pts)
 *As the operator, I want the assistant to be incapable of inventing a price, and resistant
 to instructions hidden in scraped retailer text.*
 
@@ -1234,7 +1234,7 @@ to instructions hidden in scraped retailer text.*
 
 ---
 
-### S9.6 — Cost controls, rate limiting & observability (3 pts)
+### ✅ S9.6 — Cost controls, rate limiting & observability (3 pts)
 **Tasks**
 1. Per-session and per-IP rate limits; per-conversation tool-call and token budgets.
 2. Log `usage` per turn (input, output, cache read/write) to a local table.
@@ -1259,7 +1259,7 @@ to instructions hidden in scraped retailer text.*
 
 ---
 
-### S9.7 — Assistant eval set (5 pts) — *the only way to know it actually works*
+### ✅ S9.7 — Assistant eval set (5 pts) — *the only way to know it actually works*
 *As the operator, I want a measurable "did it find the right deal" score, because assistant
 quality is invisible without one.*
 

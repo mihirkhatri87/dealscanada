@@ -238,7 +238,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'general',
-    note: 'covered by the composite adapter in src/lib/sources/walmart.ts',
+    coveredBy: 'walmart',
   },
   {
     id: 'costco',
@@ -249,7 +249,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'general',
-    note: 'covered by the composite adapter in src/lib/sources/costco.ts',
+    coveredBy: 'costco',
   },
   {
     id: 'amazon',
@@ -260,7 +260,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'general',
-    note: 'never crawled — served by the amazon-paapi and amazon-alt adapters',
+    coveredBy: 'amazon-alt, amazon-paapi',
   },
   {
     id: 'giant-tiger',
@@ -304,7 +304,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'electronics',
-    note: 'native engine not yet implemented',
+    coveredBy: 'bestbuy',
   },
   {
     id: 'newegg',
@@ -1097,7 +1097,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'platform',
-    note: 'platform engine not yet implemented',
+    coveredBy: 'redflagdeals',
   },
   {
     id: 'smartcanucks',
@@ -1139,7 +1139,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'platform',
-    note: 'platform engine not yet implemented',
+    coveredBy: 'amazon-alt',
   },
   {
     id: 'stocktrack',
@@ -1150,7 +1150,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'platform',
-    note: 'platform engine not yet implemented',
+    coveredBy: 'stocktrack',
   },
 ];
 

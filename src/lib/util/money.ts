@@ -99,10 +99,13 @@ export function formatCents(cents: number | null | undefined, currency = 'CAD'):
   if (cents === null || cents === undefined) return '—';
   if (cents === 0) return 'Free';
 
+  // Always two decimals, including on whole dollars. A price block showing "$328"
+  // struck through against "$499.99" misaligns the two numbers a shopper is there
+  // to compare, and comparing them is the card's entire job.
   return new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency,
-    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
+    minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(cents / 100);
 }

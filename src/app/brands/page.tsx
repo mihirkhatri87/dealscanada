@@ -19,6 +19,34 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 /**
+ * How a retailer's coverage should read to a shopper.
+ *
+ * Three things can be true and the flag alone distinguishes none of them: the
+ * catalogue engine runs it, a bespoke adapter runs it, or nothing does. Deals in
+ * the database settle it either way - a retailer whose deals are on screen is
+ * live whatever any flag says, and calling it "not yet live" next to its own
+ * count is a contradiction the reader has to resolve for us.
+ */
+function describeCoverage(
+  retailer: (typeof RETAILER_CATALOGUE)[number],
+  dealCount: number,
+): { label: string; tone: string; title?: string } {
+  if (dealCount > 0) return { label: 'Live', tone: 'verified' };
+
+  if (retailer.coveredBy) {
+    return {
+      label: 'Dedicated adapter',
+      tone: 'unverified',
+      title: `Collected by the ${retailer.coveredBy} adapter rather than a catalogue engine`,
+    };
+  }
+
+  if (!retailer.enabled) return { label: 'Not yet live', tone: 'blocked' };
+
+  return { label: STATUS_LABEL[retailer.status] ?? 'Unknown', tone: retailer.status };
+}
+
+/**
  * The store directory.
  *
  * Retailers we cannot currently collect from are listed too, with their status
@@ -84,6 +112,7 @@ export default async function BrandsPage() {
             <ul className="grid gap-px overflow-hidden rounded border border-border bg-border sm:grid-cols-2">
               {retailers.map((retailer) => {
                 const count = countBySlug.get(retailer.id) ?? 0;
+                const coverage = describeCoverage(retailer, count);
                 return (
                   <li
                     key={retailer.id}
@@ -99,11 +128,10 @@ export default async function BrandsPage() {
                         </span>
                       )}
                       <span
-                        className={`rounded-sm px-1.5 py-0.5 text-[11px] ${
-                          STATUS_TONE[retailer.enabled ? retailer.status : 'blocked']
-                        }`}
+                        className={`rounded-sm px-1.5 py-0.5 text-[11px] ${STATUS_TONE[coverage.tone]}`}
+                        {...(coverage.title ? { title: coverage.title } : {})}
                       >
-                        {retailer.enabled ? STATUS_LABEL[retailer.status] : 'Not yet live'}
+                        {coverage.label}
                       </span>
                     </span>
                   </li>

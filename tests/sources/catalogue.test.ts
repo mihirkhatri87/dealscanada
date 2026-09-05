@@ -105,7 +105,23 @@ describe('the shipped catalogue', () => {
     // silently find it missing from the store directory.
     const disabled = RETAILER_CATALOGUE.filter((r) => !r.enabled);
     expect(disabled.length).toBeGreaterThan(0);
-    expect(disabled.every((r) => Boolean(r.note))).toBe(true);
+
+    // Every disabled entry states a reason, one way or the other: `coveredBy`
+    // when a bespoke adapter serves it, `note` when nothing does. An entry with
+    // neither is a retailer silently switched off and nobody can say why.
+    const unexplained = disabled.filter((r) => !r.note && !r.coveredBy);
+    expect(unexplained.map((r) => r.id)).toEqual([]);
+  });
+
+  it('never marks a bespoke-served retailer as merely disabled', () => {
+    // Best Buy, Walmart, Costco and Amazon are disabled *because* dedicated
+    // adapters handle them. Without coveredBy the store directory reads that as
+    // "not yet live", which is the opposite of the truth.
+    for (const id of ['best-buy', 'walmart', 'costco', 'amazon']) {
+      const entry = RETAILER_CATALOGUE.find((r) => r.id === id);
+      expect(entry, id).toBeDefined();
+      expect(entry?.coveredBy, id).toBeTruthy();
+    }
   });
 
   it('excludes disabled and blocked retailers from a run', () => {

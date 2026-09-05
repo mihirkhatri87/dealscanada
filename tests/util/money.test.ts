@@ -80,8 +80,10 @@ describe('formatCents', () => {
     expect(formatCents(129999)).toBe('$1,299.99');
   });
 
-  it('drops trailing zeroes only when the amount is whole dollars', () => {
-    expect(formatCents(5000)).toBe('$50');
+  it('keeps two decimals on whole dollars, so a price pair lines up', () => {
+    // "$50" struck through against "$49.99" makes the two numbers a shopper is
+    // comparing sit at different widths.
+    expect(formatCents(5000)).toBe('$50.00');
     expect(formatCents(4999)).toBe('$49.99');
   });
 

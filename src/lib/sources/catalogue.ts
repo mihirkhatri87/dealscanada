@@ -93,6 +93,17 @@ export const retailerConfigSchema = z.object({
   /** verified | unverified | blocked — set from real health output. */
   status: z.enum(['verified', 'unverified', 'blocked']).default('unverified'),
   enabled: z.boolean().default(true),
+  /**
+   * The bespoke adapter that serves this retailer instead of a catalogue engine.
+   *
+   * Some retailers are worth dedicated handling - Best Buy's offers endpoint,
+   * Walmart's and Costco's fallback chains, Amazon's two permitted routes. Their
+   * entries stay in the catalogue so /brands lists them, but are not registered
+   * from here; without this field the directory reads that as "not yet live",
+   * which is the opposite of the truth.
+   */
+  coveredBy: z.string().nullish(),
+
   /** Why a retailer is disabled or blocked, so the decision is auditable. */
   note: z.string().nullish(),
 });
