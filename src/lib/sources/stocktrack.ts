@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import { env, flags } from '../config';
 import type { AdapterContext, AdapterResult, RawDeal, SourceAdapter } from './types';
+import { addInStoreDeals } from './in-store-pool';
 
 /**
  * stocktrack.ca — in-store clearance near you.
@@ -128,6 +129,8 @@ export function buildStocktrackAdapter(
     id: 'stocktrack',
     name: 'stocktrack.ca in-store clearance',
     weight: 0.7,
+    // Runs before the composites, which read the clearance it publishes.
+    priority: 10,
 
     enabled: () => {
       if (!flags.stocktrackEnabled) {
@@ -214,6 +217,10 @@ export function buildStocktrackAdapter(
               : `reached ${scoped.length - failures} store page(s) but parsed no items — selectors may have drifted`,
         };
       }
+
+      // Published for the composite adapters' in-store path, so Walmart and
+      // Costco reuse these rows instead of re-fetching the same store pages.
+      addInStoreDeals(deals);
 
       return { deals, path: 'clearance' };
     },

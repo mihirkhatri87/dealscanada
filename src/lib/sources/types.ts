@@ -78,6 +78,15 @@ export interface SourceAdapter {
   readonly name: string;
   /** Per-source trust, feeding the heat score. */
   readonly weight?: number;
+  /**
+   * Run order. Higher runs first; the default is 0.
+   *
+   * Only matters where one adapter's output feeds another's - the store-level
+   * source publishes in-store clearance that the composite adapters read, and
+   * with equal priority the pipeline's bounded concurrency could run the
+   * composites first and find an empty pool.
+   */
+  readonly priority?: number;
 
   /**
    * Whether this adapter can run. A missing credential or a disabled flag returns

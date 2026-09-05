@@ -238,7 +238,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'general',
-    note: 'native engine not yet implemented',
+    note: 'covered by the composite adapter in src/lib/sources/walmart.ts',
   },
   {
     id: 'costco',
@@ -249,7 +249,7 @@ const RAW_CATALOGUE = [
     status: 'unverified',
     enabled: false,
     vertical: 'general',
-    note: 'native engine not yet implemented',
+    note: 'covered by the composite adapter in src/lib/sources/costco.ts',
   },
   {
     id: 'amazon',

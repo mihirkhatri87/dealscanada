@@ -7,8 +7,11 @@
  * so onboarding the next store touches no code at all.
  */
 import { register, registerOrReplace } from './registry';
+import { inStoreDeals } from './in-store-pool';
 import { redflagdealsAdapter } from './redflagdeals';
 import { bestbuyAdapter } from './bestbuy';
+import { createWalmartAdapter } from './walmart';
+import { createCostcoAdapter } from './costco';
 import { createShopifyAdapter } from './engines/shopify';
 import { createJsonLdAdapter } from './engines/jsonld';
 import { createSfccAdapter } from './engines/sfcc';
@@ -22,6 +25,11 @@ import { env, flags } from '../config';
 // Bespoke adapters: sources whose value justifies dedicated handling.
 register(redflagdealsAdapter);
 register(bestbuyAdapter);
+
+// Walmart and Costco read the in-store clearance the store-level source
+// collected this run rather than fetching it again - see ./in-store-pool.ts.
+register(createWalmartAdapter(inStoreDeals));
+register(createCostcoAdapter(inStoreDeals));
 
 // Catalogue-driven retailers. Each entry becomes an adapter through the engine
 // it declares, so coverage grows by editing data rather than writing code.

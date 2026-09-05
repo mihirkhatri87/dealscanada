@@ -142,3 +142,37 @@ describe('data-dependent registration', () => {
     resetRegistry();
   });
 });
+
+describe('adapter run order', () => {
+  it('runs a higher-priority adapter before the ones that read its output', async () => {
+    // The store-level source publishes in-store clearance that the composite
+    // adapters read. With equal priority, bounded concurrency could run the
+    // composites first and hand them an empty pool — a silent wrong answer,
+    // since an empty pool looks exactly like "no local clearance today".
+    const ctx = tempSqliteRepo();
+    await ctx.repo.migrate();
+
+    const order: string[] = [];
+    const recording = (id: string, priority?: number): SourceAdapter => ({
+      id,
+      name: id,
+      weight: 1,
+      ...(priority === undefined ? {} : { priority }),
+      enabled: () => ({ enabled: true }),
+      fetch: async () => {
+        order.push(id);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        return { deals: [] };
+      },
+    });
+
+    await runPipeline({
+      adapters: [recording('reader-a'), recording('reader-b'), recording('provider', 10)],
+      repo: ctx.repo,
+      concurrency: 1,
+    });
+
+    expect(order[0]).toBe('provider');
+    await ctx.cleanup();
+  });
+});

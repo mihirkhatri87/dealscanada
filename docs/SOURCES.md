@@ -234,15 +234,59 @@ mitigation, and it is one env var.
 
 ---
 
+### Composite adapters — `walmart`, `costco`
+
+**Fixtures:** exercised in `tests/sources/composite.test.ts`
+
+Walmart Canada and Costco both sit behind bot protection, so neither is one
+adapter — each is a chain of paths tried in order, and every deal records which
+path produced it.
+
+| Retailer | Chain |
+|---|---|
+| `walmart` | its own clearance API → RedFlagDeals threads → in-store clearance |
+| `costco` | costco.ca search → CoCo West / Costco East → RedFlagDeals → in-store |
+
+Three decisions are worth knowing when reading health output:
+
+**Every path runs; the chain does not stop at the first success.** Stopping early
+would let the retailer's own feed hide in-store clearance only the store-level
+source knows about. Chain order is a quality ranking, so when two paths surface
+the same product the earlier one wins — the retailer's own price beats a poster's
+report of it.
+
+**A total block is an outcome, not a failure.** Zero deals with a reason naming
+every path that was tried, and a green run. The distinction that matters is
+"Costco has no deals" versus "we could not look", and the reason string is what
+carries it.
+
+**Costco's blogs are not a fallback.** A large share of what people want from
+Costco is warehouse-only pricing that never appears online at all, so CoCo West
+and Costco East are the *only* route to those numbers. Deals from that path carry
+a note saying the price is regional and weekly — a wrong price at the till is
+worse than no price.
+
+The in-store path reads clearance the `stocktrack` adapter already collected this
+run rather than fetching it again, so adding a composite retailer costs no extra
+traffic to a small independent site. That is what the adapter `priority` field is
+for: stocktrack runs first, and the pool is cleared at the start of every run so
+yesterday's clearance can never be presented as today's.
+
+**Drift looks like:** every path 403 → expected on a blocked IP, and the reason
+lists each. `walmart-api` returning 200 with 0 items → their offer payload moved;
+the parser walks to the product array rather than pinning a path, so this means
+the item shape changed.
+
+---
+
 ## Not built yet
 
 These are designed and specified in the PRD but **not in the repository**. Listed
-here so `npm run health` showing 64 sources rather than 101 is not a mystery.
+here so `npm run health` showing 66 sources rather than 101 is not a mystery.
 
 | Planned | Story | Why it is not here yet |
 |---|---|---|
 | Magento engine | S3.12 | Same |
-| `costco` / `walmart` composites | S3.4, S3.13 | Both are Akamai-protected; the fallback chain needs a live block to test against |
 | `amazon-paapi` | S3.6 | Dormant by design — needs Associates credentials that require three qualifying sales first |
 | Amazon alternatives (camelcamelcamel) | S3.5 | Next in the queue |
 

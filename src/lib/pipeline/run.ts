@@ -11,6 +11,7 @@ import { dedupeDeals } from './dedupe';
 import { normalizeDeal } from './normalize';
 import { verifyDeals, type PriceObservation } from './verify';
 import { reap, type ReapSummary } from './reap';
+import { clearInStorePool } from '../sources/in-store-pool';
 
 /**
  * The pipeline runner.
@@ -93,9 +94,16 @@ export async function runPipeline(options: RunOptions): Promise<RunSummary> {
   const outcomes: SourceOutcome[] = [];
   const allDeals: DealInput[] = [];
 
+  // Run-scoped, so a composite can never present the previous run's in-store
+  // clearance as today's.
+  clearInStorePool();
+
   // Bounded concurrency: adapters are rate-limited per domain anyway, and running
   // everything at once would just queue behind the limiter while holding memory.
-  const queue = [...options.adapters];
+  // Higher priority first: an adapter whose output another one reads has to
+  // finish before that one starts, and bounded concurrency alone would not
+  // guarantee it.
+  const queue = [...options.adapters].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   const deadline = options.deadlineMs === undefined ? null : started + options.deadlineMs;
   const workers = Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
     for (;;) {
