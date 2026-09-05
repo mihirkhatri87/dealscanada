@@ -36,7 +36,14 @@ export interface QualityInput {
   identityStrength: IdentityStrength;
   /** Current prices for the same product at OTHER merchants, in cents. */
   competitorPrices: number[];
-  /** Every price we have observed for this product, in cents, any merchant. */
+  /**
+   * Prices observed for this product BEFORE now, in cents, at any merchant.
+   *
+   * The current price is deliberately NOT included. Including it would make the
+   * deal its own minimum whenever history is sparse or higher, so every listing
+   * would read "lowest ever recorded" - a claim that is technically true and
+   * completely worthless.
+   */
   observedHistory: number[];
   /** Days of history behind observedHistory, used to grade evidence strength. */
   historyDays: number;
@@ -107,20 +114,28 @@ export function assessDealQuality(input: QualityInput): QualityResult {
   const marketPrice =
     competitors.length >= MIN_COMPETITORS_FOR_MARKET ? median(competitors) : null;
 
+  // The cheapest a shopper could pay elsewhere today. A "lowest we've recorded"
+  // claim has to survive this: our history is irrelevant if someone is selling it
+  // for less right now.
+  const bestCompetitorPrice = competitors.length > 0 ? Math.min(...competitors) : null;
+
   const marketDiscountPct =
     marketPrice && marketPrice > 0
       ? Math.round(((marketPrice - priceNow) / marketPrice) * 1000) / 10
       : null;
 
-  const history = input.observedHistory.filter((p) => p > 0);
-  const observedLow = history.length >= MIN_HISTORY_POINTS ? Math.min(...history) : null;
+  const prior = input.observedHistory.filter((p) => p > 0);
+  const hasHistory = prior.length >= MIN_HISTORY_POINTS;
 
-  const priceRankPct =
-    history.length >= MIN_HISTORY_POINTS
-      ? Math.round(
-          (history.filter((p) => p < priceNow).length / history.length) * 1000,
-        ) / 10
-      : null;
+  // The low a "lowest we've recorded" claim is measured against comes from prior
+  // observations only. What we report as observedLow includes the current price,
+  // since that is genuinely the lowest we have on record once today counts.
+  const priorLow = hasHistory ? Math.min(...prior) : null;
+  const observedLow = hasHistory ? Math.min(priorLow as number, priceNow) : null;
+
+  const priceRankPct = hasHistory
+    ? Math.round((prior.filter((p) => p < priceNow).length / prior.length) * 1000) / 10
+    : null;
 
   // Does the retailer's claimed "was" survive contact with the market?
   const claimSuspect =
@@ -139,7 +154,8 @@ export function assessDealQuality(input: QualityInput): QualityResult {
     priceNow,
     marketPrice,
     marketDiscountPct,
-    observedLow,
+    bestCompetitorPrice,
+    priorLow,
     claimSuspect,
     evidence,
   });
@@ -169,7 +185,10 @@ function decideVerdict(input: {
   priceNow: number;
   marketPrice: number | null;
   marketDiscountPct: number | null;
-  observedLow: number | null;
+  /** Cheapest current price at another merchant, or null if none is known. */
+  bestCompetitorPrice: number | null;
+  /** Low across PRIOR observations only - never including the current price. */
+  priorLow: number | null;
   claimSuspect: boolean;
   evidence: EvidenceLevel;
 }): DealVerdict {
@@ -177,13 +196,27 @@ function decideVerdict(input: {
   // genuinely decent price: the shopper needs to know the claim is misleading.
   if (input.claimSuspect) return 'inflated-anchor';
 
-  if (input.observedLow !== null && input.priceNow <= input.observedLow * (1 + NEAR_LOW_TOLERANCE)) {
-    return 'verified-low';
+  // Live market evidence beats our own history when the two disagree. Being the
+  // cheapest WE have recorded while still costing more than everyone else charges
+  // today is not a good deal, and calling it "lowest ever" would mislead.
+  if (input.marketDiscountPct !== null && input.marketDiscountPct <= -5) {
+    return 'above-market';
   }
+
+  // "Lowest we've recorded" requires two things, not one: below everything we
+  // logged before, AND not beaten by a live price elsewhere today. Without the
+  // second condition a merchant whose history happens to be expensive earns the
+  // best badge on the page while a competitor quietly sells it for less.
+  const atRecordedLow =
+    input.priorLow !== null && input.priceNow <= input.priorLow * (1 + NEAR_LOW_TOLERANCE);
+  const notBeatenToday =
+    input.bestCompetitorPrice === null ||
+    input.priceNow <= input.bestCompetitorPrice * (1 + NEAR_LOW_TOLERANCE);
+
+  if (atRecordedLow && notBeatenToday) return 'verified-low';
 
   if (input.marketDiscountPct !== null) {
     if (input.marketDiscountPct >= 5) return 'verified-good';
-    if (input.marketDiscountPct <= -5) return 'above-market';
     return 'market-price';
   }
 

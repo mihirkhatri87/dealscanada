@@ -136,12 +136,13 @@ describe('assessDealQuality', () => {
     expect(result.verdict).not.toBe('inflated-anchor');
   });
 
-  it('recognises the lowest price we have ever observed', () => {
+  it('recognises a new low against prior observations', () => {
     const result = assessDealQuality(
       input({
         priceNow: 39999,
         claimedPriceWas: null,
-        observedHistory: [59999, 54999, 49999, 44999, 39999],
+        // Prior observations only - the current price is not one of them.
+        observedHistory: [59999, 54999, 49999, 44999],
         historyDays: 90,
       }),
     );
@@ -209,7 +210,7 @@ describe('assessDealQuality', () => {
     ).toBe('strong');
   });
 
-  it('reports where the price sits within observed history', () => {
+  it('reports where the price sits within prior observations', () => {
     const result = assessDealQuality(
       input({
         priceNow: 44999,
@@ -218,7 +219,64 @@ describe('assessDealQuality', () => {
         historyDays: 60,
       }),
     );
-    expect(result.priceRankPct).toBe(20); // one of five observations was cheaper
+    expect(result.priceRankPct).toBe(20); // one of five prior prices was cheaper
+  });
+
+  describe('"lowest recorded" cannot be claimed vacuously', () => {
+    it('does not treat the current price as its own historical low', () => {
+      // Folding the current price into history would make every listing its own
+      // minimum whenever history is sparse, so everything would read
+      // "lowest ever recorded" - true, and worthless.
+      const result = assessDealQuality(
+        input({ priceNow: 9999, claimedPriceWas: null, observedHistory: [], historyDays: 0 }),
+      );
+      expect(result.verdict).not.toBe('verified-low');
+      expect(result.observedLow).toBeNull();
+    });
+
+    it('refuses the claim when a competitor sells it cheaper today', () => {
+      // Our history being expensive must not earn the best badge on the page
+      // while someone else quietly sells the same product for less right now.
+      const result = assessDealQuality(
+        input({
+          priceNow: 152999,
+          claimedPriceWas: null,
+          competitorPrices: [129999, 149999],
+          observedHistory: [169999, 179999, 189999],
+          historyDays: 90,
+        }),
+      );
+      expect(result.verdict).not.toBe('verified-low');
+      // With competitors at $1,299 and $1,499 the median is $1,399, so $1,529
+      // is genuinely above market and says so.
+      expect(result.verdict).toBe('above-market');
+    });
+
+    it('grants the claim when it is both a record low and the best price today', () => {
+      const result = assessDealQuality(
+        input({
+          priceNow: 129999,
+          claimedPriceWas: null,
+          competitorPrices: [149999, 152999],
+          observedHistory: [169999, 179999, 189999],
+          historyDays: 90,
+        }),
+      );
+      expect(result.verdict).toBe('verified-low');
+    });
+
+    it('lets a live above-market price override a favourable history', () => {
+      const result = assessDealQuality(
+        input({
+          priceNow: 59999,
+          claimedPriceWas: null,
+          competitorPrices: [39999, 41999],
+          observedHistory: [69999, 79999, 89999],
+          historyDays: 90,
+        }),
+      );
+      expect(result.verdict).toBe('above-market');
+    });
   });
 
   it('handles a missing price without throwing', () => {

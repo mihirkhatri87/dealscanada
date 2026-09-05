@@ -91,11 +91,10 @@ export function verifyDeals(
     const history = deal.productKey
       ? (context.historyByProductKey.get(deal.productKey) ?? [])
       : [];
-    // The current price is itself an observation, so it belongs in the history
-    // we reason over - otherwise "lowest we've recorded" would exclude the very
-    // price being assessed and report a stale low.
+    // Prior observations only. The current price must NOT be folded in here: it
+    // would make every deal its own minimum whenever history is sparse, so
+    // everything would read "lowest ever recorded".
     const observedHistory = history.map((point) => point.price);
-    if (deal.priceNow !== null) observedHistory.push(deal.priceNow);
     const historyDays = spanInDays(history, now);
 
     const quality = assessDealQuality({
