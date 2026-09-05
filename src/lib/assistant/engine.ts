@@ -73,6 +73,10 @@ export interface RunOptions {
   signal?: AbortSignal;
   maxToolCalls?: number;
   client?: Anthropic;
+  /** Overrides `ASSISTANT_MODEL` for one run. The bake-off (S9.7) runs the same
+   *  golden set against two models in one process, so the model cannot be read
+   *  from the environment at call time. */
+  model?: string;
 }
 
 function toolDefinitions(): Anthropic.Tool[] {
@@ -93,6 +97,7 @@ function toolDefinitions(): Anthropic.Tool[] {
 export async function* runAssistant(options: RunOptions): AsyncGenerator<AssistantEvent> {
   const client = options.client ?? new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
   const maxToolCalls = options.maxToolCalls ?? env.ASSISTANT_MAX_TOOL_CALLS;
+  const model = options.model ?? env.ASSISTANT_MODEL;
 
   const messages = [...options.messages];
   let toolCalls = 0;
@@ -113,7 +118,7 @@ export async function* runAssistant(options: RunOptions): AsyncGenerator<Assista
 
       const stream = client.messages.stream(
         {
-          model: env.ASSISTANT_MODEL,
+          model,
           max_tokens: 4096,
           // Tools and system prompt are the stable prefix and are cached; only
           // the conversation tail varies between turns. Render order is
