@@ -193,17 +193,17 @@ export async function* runAssistant(options: RunOptions): AsyncGenerator<Assista
       messages.push({ role: 'assistant', content: message.content });
 
       const results: Anthropic.ToolResultBlockParam[] = [];
+      let budgetExhausted = false;
 
       for (const toolUse of toolUses) {
-        // A budget stops a runaway loop from spending without bound, and ends
-        // the turn with an explanation rather than a silent truncation.
+        // A budget stops a runaway loop from spending without bound. Skipped
+        // calls still need a tool_result block or the transcript is malformed.
         if (toolCalls >= maxToolCalls) {
+          budgetExhausted = true;
           results.push({
             type: 'tool_result',
             tool_use_id: toolUse.id,
-            content:
-              'Tool call budget for this conversation is exhausted. Summarise what you have ' +
-              'found so far and suggest the user refine their request.',
+            content: 'Tool call budget for this conversation is exhausted.',
           });
           continue;
         }
@@ -224,6 +224,22 @@ export async function* runAssistant(options: RunOptions): AsyncGenerator<Assista
       }
 
       messages.push({ role: 'user', content: results });
+
+      // Ending the turn here is the only thing that actually bounds the loop. A
+      // model that answers a budget notice with another tool call would spin
+      // forever otherwise, which is precisely the runaway the budget exists to
+      // prevent. Say so plainly rather than truncating silently.
+      if (budgetExhausted) {
+        yield {
+          type: 'text',
+          text:
+            '\n\nI\u2019ve reached the search limit for this conversation. ' +
+            'Ask me again with a narrower request \u2014 a budget, a store, or a ' +
+            'category \u2014 and I\u2019ll pick it up from there.',
+        };
+        yield { type: 'done', usage };
+        return;
+      }
     }
   } catch (error) {
     yield { type: 'error', message: describeError(error) };

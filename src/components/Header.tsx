@@ -44,6 +44,12 @@ export function Header() {
           <Link href="/near-me" className="text-fg-muted hover:text-fg">
             Near me
           </Link>
+          <Link
+            href="/assistant"
+            className="rounded-sm border border-accent px-2 py-0.5 text-accent transition-colors hover:bg-accent-subtle"
+          >
+            Ask
+          </Link>
           <ThemeToggle />
         </nav>
       </div>
