@@ -25,8 +25,14 @@ export type DealInput = Omit<Deal, 'firstSeenAt' | 'lastSeenAt' | 'heat'> & {
 export interface UpsertResult {
   inserted: number;
   updated: number;
-  /** Ids of deals whose price changed this run — callers append price points for these. */
-  priceChangedDealIds: string[];
+  /**
+   * Deals whose price changed this run, as PERSISTED id plus the new price.
+   *
+   * The id is deliberately paired with the price here rather than returned alone:
+   * normalization mints a fresh UUID every run, so a caller holding its own id
+   * would look up the wrong row and silently record no price history at all.
+   */
+  priceChanged: Array<{ dealId: string; price: number }>;
 }
 
 export interface SourceRunInput {
@@ -115,6 +121,15 @@ export interface DealRepository {
   // --- price history -------------------------------------------------------
   appendPricePoints(points: Array<{ dealId: string; price: number; observedAt: string }>): Promise<void>;
   getPriceHistory(dealId: string): Promise<PricePoint[]>;
+  /**
+   * Price history grouped by product identity rather than by deal.
+   *
+   * This is what makes "lowest we've recorded" a cross-merchant claim: the same
+   * product sold by three retailers contributes all three price series.
+   */
+  getPriceHistoryByProductKeys(
+    productKeys: string[],
+  ): Promise<Map<string, Array<{ price: number; observedAt: string; merchantId: string | null }>>>;
 
   // --- observability -------------------------------------------------------
   recordSourceRun(run: SourceRunInput): Promise<void>;

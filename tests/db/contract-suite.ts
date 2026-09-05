@@ -104,10 +104,14 @@ export function defineContractSuite(backend: Backend): void {
       await repo.upsertDeals([deal]);
 
       const unchanged = await repo.upsertDeals([{ ...deal, priceNow: 5000 }]);
-      expect(unchanged.priceChangedDealIds).toHaveLength(0);
+      expect(unchanged.priceChanged).toHaveLength(0);
 
       const changed = await repo.upsertDeals([{ ...deal, priceNow: 4000 }]);
-      expect(changed.priceChangedDealIds).toHaveLength(1);
+      expect(changed.priceChanged).toHaveLength(1);
+      // The PERSISTED id is returned with the new price. Callers must not have to
+      // reconcile it against an id they minted themselves.
+      expect(changed.priceChanged[0]?.price).toBe(4000);
+      expect(changed.priceChanged[0]?.dealId).toBe(deal.id);
     });
 
     it('handles a 1000-deal batch inside the performance budget', async () => {

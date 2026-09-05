@@ -174,12 +174,12 @@ export class PostgresDealRepository implements DealRepository {
   // --- deals ---------------------------------------------------------------
 
   async upsertDeals(deals: DealInput[]): Promise<UpsertResult> {
-    if (deals.length === 0) return { inserted: 0, updated: 0, priceChangedDealIds: [] };
+    if (deals.length === 0) return { inserted: 0, updated: 0, priceChanged: [] };
 
     const now = new Date().toISOString();
     let inserted = 0;
     let updated = 0;
-    const priceChangedDealIds: string[] = [];
+    const priceChanged: Array<{ dealId: string; price: number }> = [];
 
     await this.sql.begin(async (tx) => {
       for (const deal of deals) {
@@ -211,7 +211,7 @@ export class PostgresDealRepository implements DealRepository {
           `;
           updated += 1;
           if (deal.priceNow !== null && Number(prior['price_now']) !== deal.priceNow) {
-            priceChangedDealIds.push(prior['id'] as string);
+            priceChanged.push({ dealId: prior['id'] as string, price: deal.priceNow });
           }
         } else {
           await tx`
@@ -231,12 +231,12 @@ export class PostgresDealRepository implements DealRepository {
               ${p.status}, ${p.locale}, ${p.alsoSeenOn}, ${p.sourcePath})
           `;
           inserted += 1;
-          if (deal.priceNow !== null) priceChangedDealIds.push(deal.id);
+          if (deal.priceNow !== null) priceChanged.push({ dealId: deal.id, price: deal.priceNow });
         }
       }
     });
 
-    return { inserted, updated, priceChangedDealIds };
+    return { inserted, updated, priceChanged };
   }
 
   async queryDeals(query: DealQuery): Promise<DealQueryResult> {
@@ -404,6 +404,39 @@ export class PostgresDealRepository implements DealRepository {
       const r = row as Row;
       return { price: Number(r['price']), observedAt: String(r['observed_at']) };
     });
+  }
+
+  async getPriceHistoryByProductKeys(
+    productKeys: string[],
+  ): Promise<Map<string, Array<{ price: number; observedAt: string; merchantId: string | null }>>> {
+    const result = new Map<
+      string,
+      Array<{ price: number; observedAt: string; merchantId: string | null }>
+    >();
+    if (productKeys.length === 0) return result;
+
+    const rows = await this.sql`
+      SELECT d.product_key AS product_key, d.merchant_id AS merchant_id,
+             p.price AS price, p.observed_at AS observed_at
+      FROM price_points p
+      JOIN deals d ON d.id = p.deal_id
+      WHERE d.product_key = ANY(${this.sql.array(productKeys)})
+      ORDER BY p.observed_at ASC
+    `;
+
+    for (const row of rows) {
+      const r = row as Row;
+      const key = String(r['product_key']);
+      const bucket = result.get(key) ?? [];
+      bucket.push({
+        price: Number(r['price']),
+        observedAt: String(r['observed_at']),
+        merchantId: (r['merchant_id'] as string | null) ?? null,
+      });
+      result.set(key, bucket);
+    }
+
+    return result;
   }
 
   // --- observability -------------------------------------------------------

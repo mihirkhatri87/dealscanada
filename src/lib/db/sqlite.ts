@@ -191,7 +191,7 @@ export class SqliteDealRepository implements DealRepository {
   // --- deals ---------------------------------------------------------------
 
   async upsertDeals(deals: DealInput[]): Promise<UpsertResult> {
-    if (deals.length === 0) return { inserted: 0, updated: 0, priceChangedDealIds: [] };
+    if (deals.length === 0) return { inserted: 0, updated: 0, priceChanged: [] };
 
     const now = new Date().toISOString();
     const existing = this.db.prepare(
@@ -240,7 +240,7 @@ export class SqliteDealRepository implements DealRepository {
 
     let inserted = 0;
     let updated = 0;
-    const priceChangedDealIds: string[] = [];
+    const priceChanged: Array<{ dealId: string; price: number }> = [];
 
     const run = this.db.transaction((rows: DealInput[]) => {
       for (const deal of rows) {
@@ -250,19 +250,19 @@ export class SqliteDealRepository implements DealRepository {
         if (prior) {
           update.run({ ...params, id: prior['id'] as string });
           updated += 1;
-          if (deal.priceNow !== null && deal.priceNow !== prior['price_now']) {
-            priceChangedDealIds.push(prior['id'] as string);
+          if (deal.priceNow !== null && Number(prior['price_now']) !== deal.priceNow) {
+            priceChanged.push({ dealId: prior['id'] as string, price: deal.priceNow });
           }
         } else {
           insert.run(params);
           inserted += 1;
-          if (deal.priceNow !== null) priceChangedDealIds.push(deal.id);
+          if (deal.priceNow !== null) priceChanged.push({ dealId: deal.id, price: deal.priceNow });
         }
       }
     });
     run(deals);
 
-    return { inserted, updated, priceChangedDealIds };
+    return { inserted, updated, priceChanged };
   }
 
   async queryDeals(query: DealQuery): Promise<DealQueryResult> {
@@ -438,6 +438,47 @@ export class SqliteDealRepository implements DealRepository {
       price: Number(row['price']),
       observedAt: String(row['observed_at']),
     }));
+  }
+
+  async getPriceHistoryByProductKeys(
+    productKeys: string[],
+  ): Promise<Map<string, Array<{ price: number; observedAt: string; merchantId: string | null }>>> {
+    const result = new Map<
+      string,
+      Array<{ price: number; observedAt: string; merchantId: string | null }>
+    >();
+    if (productKeys.length === 0) return result;
+
+    // Chunked because SQLite caps host parameters and a full run can carry
+    // thousands of distinct products.
+    const CHUNK = 400;
+    for (let i = 0; i < productKeys.length; i += CHUNK) {
+      const chunk = productKeys.slice(i, i + CHUNK);
+      const marks = chunk.map(() => '?').join(', ');
+      const rows = this.db
+        .prepare(
+          `SELECT d.product_key AS product_key, d.merchant_id AS merchant_id,
+                  p.price AS price, p.observed_at AS observed_at
+           FROM price_points p
+           JOIN deals d ON d.id = p.deal_id
+           WHERE d.product_key IN (${marks})
+           ORDER BY p.observed_at ASC`,
+        )
+        .all(...chunk) as Row[];
+
+      for (const row of rows) {
+        const key = String(row['product_key']);
+        const bucket = result.get(key) ?? [];
+        bucket.push({
+          price: Number(row['price']),
+          observedAt: String(row['observed_at']),
+          merchantId: (row['merchant_id'] as string | null) ?? null,
+        });
+        result.set(key, bucket);
+      }
+    }
+
+    return result;
   }
 
   // --- observability -------------------------------------------------------
