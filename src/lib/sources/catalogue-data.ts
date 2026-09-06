@@ -398,6 +398,14 @@ const RAW_CATALOGUE = [
   //
   // The permitted route is the feed. All three run one CJ Affiliate program
   // that advertises a daily product feed — see docs/AFFILIATE-PROGRAMS.md.
+  //
+  // The group also runs blog.shopperplus.ca, blog.123ink.ca and
+  // blog.primecables.ca on WordPress, outside the session gate, so they look
+  // like an easy way in for the wordpress engine. They are not, and they are
+  // recorded here rather than as entries so the next person does not re-probe
+  // them: blog.123ink.ca and blog.primecables.ca both Disallow /wp-json/, which
+  // is the only endpoint that engine reads, and blog.shopperplus.ca — the one
+  // whose robots.txt permits it — has published nothing since October 2024.
   {
     id: 'shopperplus',
     name: 'Shopper Plus',
