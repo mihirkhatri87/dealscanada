@@ -482,20 +482,32 @@ const RAW_CATALOGUE = [
     name: 'Altitude Sports',
     domain: 'altitude-sports.com',
     baseUrl: 'https://www.altitude-sports.com',
-    engine: 'shopify',
-    status: 'unverified',
+    // Never Shopify — /collections.json 404s. Product pages publish a
+    // schema.org ProductGroup carrying GTINs, which is better identity than
+    // most of the catalogue has.
+    engine: 'jsonld',
+    status: 'verified',
     enabled: true,
     vertical: 'apparel',
+    salePaths: ['/c/sale'],
+    productLinkSelector: 'a[href*="/p/"]',
+    maxProductPages: 30,
   },
   {
     id: 'the-last-hunt',
     name: 'The Last Hunt',
     domain: 'thelasthunt.com',
     baseUrl: 'https://www.thelasthunt.com',
-    engine: 'shopify',
-    status: 'unverified',
+    // Same platform as its sibling Altitude Sports, and the same ProductGroup
+    // markup. The seasonal path is listed first and the evergreen one second,
+    // so the entry keeps working when the season ends.
+    engine: 'jsonld',
+    status: 'verified',
     enabled: true,
     vertical: 'apparel',
+    salePaths: ['/c/end-of-season-sale', '/discovery-deals'],
+    productLinkSelector: 'a[href*="/p/"]',
+    maxProductPages: 30,
   },
   {
     id: 'sporting-life',
@@ -591,10 +603,16 @@ const RAW_CATALOGUE = [
     name: 'Browns Shoes',
     domain: 'brownsshoes.com',
     baseUrl: 'https://www.brownsshoes.com',
-    engine: 'shopify',
-    status: 'unverified',
+    // An SFCC storefront, but it never exposes Sites-<id>-Site, so the SFCC
+    // engine cannot resolve a site id and the grid endpoint is unreachable.
+    // The JSON-LD on its product pages is the route that actually works.
+    engine: 'jsonld',
+    status: 'verified',
     enabled: true,
     vertical: 'footwear',
+    salePaths: ['/en/sale'],
+    productLinkSelector: 'a[href*="/product"]',
+    maxProductPages: 30,
   },
   {
     id: 'urban-planet',
@@ -781,10 +799,16 @@ const RAW_CATALOGUE = [
     name: 'West Coast Kids',
     domain: 'westcoastkids.ca',
     baseUrl: 'https://www.westcoastkids.ca',
-    engine: 'shopify',
-    status: 'unverified',
+    // Magento, not Shopify. No Magento engine exists yet, but the sale listing
+    // is server-rendered and the product pages carry JSON-LD, so the universal
+    // engine reaches it today.
+    engine: 'jsonld',
+    status: 'verified',
     enabled: true,
     vertical: 'baby',
+    salePaths: ['/sale'],
+    productLinkSelector: 'a.product-item-link',
+    maxProductPages: 30,
   },
   {
     id: 'scholars-choice',
