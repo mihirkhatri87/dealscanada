@@ -1,0 +1,61 @@
+name: Deploy
+
+# Only after CI has actually passed on this commit.
+#
+# `workflow_run` is used rather than repeating the checks here, because a deploy
+# job with its own copy of the test commands drifts from the real ones and ends
+# up shipping what CI would have rejected.
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+  # Deploying a known-good commit by hand, without pushing an empty change.
+  workflow_dispatch:
+
+concurrency:
+  # Deploys queue rather than race: two `fly deploy` runs against one machine
+  # with one volume is a way to lose the database.
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Fly.io
+    runs-on: ubuntu-latest
+    # A failed or cancelled CI run must not reach production. `workflow_run`
+    # fires on completion, not on success, so this is the gate.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Deploy the commit CI actually tested, not whatever main has drifted
+          # to since it started.
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only
+
+      - name: Verify the deployed app is actually serving
+        # A green `fly deploy` means the machine started, not that the app works.
+        # /api/health is the same endpoint the machine's own healthcheck uses.
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS --max-time 20 "https://${APP}.fly.dev/api/health" > /dev/null; then
+              echo "Healthy."
+              exit 0
+            fi
+            echo "Not ready yet (attempt $attempt); waiting."
+            sleep 10
+          done
+          echo "::error::The deploy finished but /api/health never answered."
+          exit 1
+        env:
+          APP: dealscanada

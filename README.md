@@ -176,9 +176,22 @@ suite against both, so that claim is tested rather than asserted.
 
 ## Deployment
 
-**Vercel:** `vercel.json` schedules `POST /api/cron/scrape` every six hours. Set
-`CRON_SECRET` or the endpoint refuses every request — an open scrape endpoint is
-a way to have your own site hammer a retailer under your name.
+**Fly.io + GitHub Actions, about $2/month** — the supported path, and what the
+committed pipeline targets. One Fly machine in Toronto runs the app, the scrape
+and its SQLite database together; GitHub Actions runs CI, deploys on green, and
+schedules the scrape. Toronto is load-bearing: several retailers geo-redirect a
+US caller to a `.com` storefront or refuse it, so a machine in the wrong country
+collects the wrong catalogue and calls it a success. Full walkthrough in
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
+Set `CRON_SECRET` or the scrape endpoint refuses every request — an open scrape
+endpoint is a way to have your own site hammer a retailer under your name.
+
+**Vercel:** `vercel.json` schedules `POST /api/cron/scrape` every six hours and
+works on **Pro**. It cannot run on the free Hobby plan: Hobby caps cron at once
+per day and functions at 10 seconds, so this config fails at deploy time, and
+Hobby is non-commercial only — Vercel's fair-use policy names affiliate linking
+specifically.
 
 **Docker:** `docker compose up --build` runs the app against Postgres with
 migrations applied.
