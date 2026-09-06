@@ -297,9 +297,17 @@ const RAW_CATALOGUE = [
     name: "Hudson's Bay",
     domain: 'thebay.com',
     baseUrl: 'https://www.thebay.com',
+    // The retailer is gone, not unreachable. HBC entered CCAA protection in
+    // March 2025, closed every store by 1 June 2025, and Canadian Tire bought
+    // the trademarks and domains. thebay.com now redirects into canadiantire.ca.
+    //
+    // Health was reporting this as "probe timed out", which reads like a
+    // transient fault and invites retrying it forever.
     engine: 'sfcc',
-    status: 'unverified',
+    status: 'blocked',
+    enabled: false,
     vertical: 'general',
+    note: 'ceased trading June 2025; thebay.com redirects to Canadian Tire, which bought the brand',
   },
   {
     id: 'simons',
