@@ -21,6 +21,7 @@ import { createGapIncAdapter } from './engines/gapinc';
 import { createWordPressAdapter } from './engines/wordpress';
 import { createHybrisAdapter } from './engines/hybris';
 import { createMagentoAdapter } from './engines/magento';
+import { createFeedAdapter } from './engines/feed';
 import { buildStocktrackAdapter, type StocktrackStore } from './stocktrack';
 import { RETAILER_CATALOGUE } from './catalogue-data';
 import { runnableRetailers } from './catalogue';
@@ -67,6 +68,9 @@ for (const retailer of runnableRetailers(RETAILER_CATALOGUE)) {
       break;
     case 'hybris':
       register(createHybrisAdapter(retailer));
+      break;
+    case 'feed':
+      register(createFeedAdapter(retailer));
       break;
     case 'magento':
       register(createMagentoAdapter(retailer));

@@ -72,6 +72,17 @@ const envSchema = z.object({
    *  this; absent it, that family falls back to the JSON-LD engine. */
   CANADIAN_TIRE_API_KEY: z.string().min(1).optional(),
 
+  /**
+   * Affiliate product feeds, as JSON of retailer id to feed URL:
+   *   {"staples":"https://feeds.example/…?token=…"}
+   *
+   * These URLs embed a publisher token, so they are a secret and belong here
+   * rather than in the catalogue. One variable rather than one per retailer,
+   * because the set grows every time an application is approved and that should
+   * not need a schema change.
+   */
+  AFFILIATE_FEEDS: z.string().min(1).optional(),
+
   /** Shopping assistant. Absent key → assistant hidden, site fully functional. */
   ASSISTANT_ENABLED: booleanish.default('true'),
   ANTHROPIC_API_KEY: z.string().min(1).optional(),

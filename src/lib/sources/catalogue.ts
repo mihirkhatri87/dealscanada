@@ -19,6 +19,11 @@ export const ENGINES = [
   'magento',
   'wordpress',
   'jsonld',
+  /**
+   * An affiliate product feed. Not a platform: it is how a retailer that will
+   * not be scraped is read instead, once a publisher application is approved.
+   */
+  'feed',
 ] as const;
 export type Engine = (typeof ENGINES)[number];
 
