@@ -63,6 +63,32 @@ describe('deriveKeywords', () => {
     expect(deriveKeywords({ title: 'ODEON Wardrobe with sliding doors' })).toContain('storage');
   });
 
+  it('ignores styling advice, which is about other products by definition', () => {
+    // Marketing prose says what to wear a thing WITH. Reading it gave
+    // "Straight-Leg Jeans" the keywords dress, pants and sweater, so a search
+    // for a sweater returned jeans.
+    const keywords = deriveKeywords({
+      title: 'Straight-Leg Jeans',
+      description:
+        'Our best-selling straight-leg jeans in a mid-rise fit. Pairs perfectly ' +
+        'with an oversized sweater and ankle boots, or dress it up with heels ' +
+        'and a silk blouse for the evening.',
+    });
+
+    expect(keywords).toContain('pants');
+    expect(keywords).not.toContain('sweater');
+    expect(keywords).not.toContain('boots');
+    expect(keywords).not.toContain('dress');
+  });
+
+  it('still reads a description short enough to be a definition', () => {
+    // Structube's descriptions run 9 to 45 characters and are the only place
+    // its product type is stated at all.
+    expect(
+      deriveKeywords({ title: 'LUCAS', description: 'rectangular coffee table' }),
+    ).toContain('table');
+  });
+
   it('says nothing about a product it has no vocabulary for', () => {
     // Silence is correct here. A wrong keyword is worse than none: it puts a
     // product in front of someone who searched for something else.
