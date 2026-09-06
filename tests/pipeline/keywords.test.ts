@@ -39,6 +39,30 @@ describe('deriveKeywords', () => {
     expect(deriveKeywords({ title: 'Queen duvet cover' })).toContain('bedding');
   });
 
+  it('names accessories the listing never names', () => {
+    // The cases that made the vocabulary worth widening: neither title says
+    // what the thing is in the word a shopper would type.
+    expect(deriveKeywords({ title: 'Hoops with Sardine and Freshwater Pearls' })).toContain(
+      'earrings',
+    );
+    expect(deriveKeywords({ title: 'Raffia Tote' })).toContain('bag');
+    expect(deriveKeywords({ title: 'White Perforated Crossbody' })).toContain('bag');
+  });
+
+  it('does not mistake a flat screen for footwear, or a table runner for a shoe', () => {
+    // "flats" and "runners" are both footwear and both far more common as
+    // something else, which is why neither is matched bare.
+    expect(deriveKeywords({ title: '55" flat screen 4K TV' })).not.toContain('shoes');
+    expect(deriveKeywords({ title: 'Table runner, linen' })).not.toContain('shoes');
+    expect(deriveKeywords({ title: 'Table runner, linen' })).toContain('rug');
+  });
+
+  it('keeps a wardrobe out of the dress rack', () => {
+    // "robe" is French for dress and sits inside "wardrobe".
+    expect(deriveKeywords({ title: 'ODEON Wardrobe with sliding doors' })).not.toContain('dress');
+    expect(deriveKeywords({ title: 'ODEON Wardrobe with sliding doors' })).toContain('storage');
+  });
+
   it('says nothing about a product it has no vocabulary for', () => {
     // Silence is correct here. A wrong keyword is worse than none: it puts a
     // product in front of someone who searched for something else.
