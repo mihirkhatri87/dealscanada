@@ -61,7 +61,11 @@ fly apps create dealscanada
 fly volumes create dealscanada_data --region yyz --size 1 --app dealscanada
 
 # 3. Secrets. CRON_SECRET is required or the scrape endpoint refuses everyone.
-fly secrets set CRON_SECRET="$([guid]::NewGuid().ToString('N'))" --app dealscanada
+#    Generate it into a variable first: GitHub Actions needs the SAME value, and
+#    Fly will not show it to you again.
+$cron = [guid]::NewGuid().ToString('N')
+$cron    # copy this — it goes into GitHub as a secret too
+fly secrets set CRON_SECRET="$cron" --app dealscanada
 # Optional, and only if you want the shopping assistant:
 # fly secrets set ANTHROPIC_API_KEY="sk-ant-..." --app dealscanada
 # Optional, once an affiliate application is approved:
