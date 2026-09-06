@@ -455,6 +455,19 @@ const RAW_CATALOGUE = [
     note: 'same session gate as shopperplus, Vue-rendered grid, and robots.txt also disallows /search and ?page=; served by the CJ affiliate feed instead',
   },
   {
+    id: 'aosom',
+    name: 'Aosom Canada',
+    domain: 'aosom.ca',
+    baseUrl: 'https://www.aosom.ca',
+    // Not part of the Shopper Plus group despite selling into the same
+    // furniture-and-housewares aisle — Aosom is its own operator, so no family.
+    engine: 'jsonld',
+    status: 'blocked',
+    enabled: false,
+    vertical: 'home',
+    note: 'Akamai answers 403 for every path from a Canadian residential IP, robots.txt included; with no readable robots.txt there is no permission to crawl',
+  },
+  {
     id: 'visions-electronics',
     name: 'Visions Electronics',
     domain: 'visions.ca',
