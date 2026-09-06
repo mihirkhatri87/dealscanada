@@ -346,15 +346,51 @@ interface MerchantResolverBundle {
 async function createMerchantResolver(repo: DealRepository): Promise<MerchantResolverBundle> {
   const known = new Map<string, { id: string; slug: string }>();
   const invented: MerchantInput[] = [];
+  // Identity is the domain, but `merchants.slug` is UNIQUE too, and a slug drops
+  // the TLD. Without tracking what is taken, a deal linking to thebay.ca mints a
+  // second merchant whose slug collides with the thebay.com seed, and the insert
+  // takes the entire run's writes down with it - every deal from every source.
+  const takenSlugs = new Set<string>();
 
   for (const merchant of await repo.listMerchants()) {
     known.set(merchant.domain, { id: merchant.id, slug: merchant.slug });
+    takenSlugs.add(merchant.slug);
   }
   for (const seed of ALL_MERCHANT_SEEDS) {
     if (!known.has(seed.domain)) {
       known.set(seed.domain, { id: merchantIdForDomain(seed.domain), slug: seed.slug });
     }
+    takenSlugs.add(seed.slug);
   }
+
+  /**
+   * A slug no other merchant holds.
+   *
+   * Existing slugs are never renamed - they are in URLs - so the new arrival is
+   * the one that yields. The TLD is tried first because it is the actual
+   * difference between the two domains and reads like a real name
+   * (`thebay-ca`); a counter is the fallback for anything stranger.
+   */
+  const claimSlug = (domain: string): string => {
+    const base = slugForDomain(domain);
+    if (!takenSlugs.has(base)) {
+      takenSlugs.add(base);
+      return base;
+    }
+
+    const tld = domain.split('.').pop()?.replace(/[^a-z0-9]/g, '') ?? '';
+    const withTld = `${base}-${tld}`;
+    if (tld !== '' && !takenSlugs.has(withTld)) {
+      takenSlugs.add(withTld);
+      return withTld;
+    }
+
+    let suffix = 2;
+    while (takenSlugs.has(`${base}-${suffix}`)) suffix += 1;
+    const numbered = `${base}-${suffix}`;
+    takenSlugs.add(numbered);
+    return numbered;
+  };
 
   return {
     resolve: (domain, name) => {
@@ -367,7 +403,7 @@ async function createMerchantResolver(repo: DealRepository): Promise<MerchantRes
       // Unseen domain: mint a merchant so a new retailer never silently loses
       // its deals. It is queued for insertion, not just cached - the deal rows
       // reference it by foreign key.
-      const created = { id: merchantIdForDomain(key), slug: slugForDomain(key) };
+      const created = { id: merchantIdForDomain(key), slug: claimSlug(key) };
       known.set(key, created);
       invented.push({
         id: created.id,
