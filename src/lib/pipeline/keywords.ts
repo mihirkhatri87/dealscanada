@@ -134,9 +134,141 @@ export const KEYWORD_RULES: KeywordRule[] = [
   {
     term: 'shoes',
     patterns: [
-      /\b(?:shoes?|sneakers?|runners?|trainers?|loafers?|sandals?|flats?|heels?)\b/i,
+      // Not bare "runner" (a rug is one too, and "table runner" is not
+      // footwear) and not bare "flat" (which is usually "flat screen").
+      /\b(?:shoes?|sneakers?|trainers?|loafers?|sandals?|heels?|moccasins?)\b/i,
+      /\b(?:ballet flats?|running shoes?)\b/i,
       /\b(?:chaussures?|espadrilles?)\b/i,
     ],
+  },
+
+  // Accessories and jewellery. These earn their place more than most: a listing
+  // called "Hoops with Sardine and Freshwater Pearls" never says "earrings",
+  // and "Raffia Tote" never says "bag".
+  {
+    term: 'earrings',
+    patterns: [/\b(?:earrings?|hoops?|studs?|boucles d'oreilles)\b/i],
+  },
+  {
+    term: 'necklace',
+    patterns: [/\b(?:necklaces?|pendants?|chokers?|collier)\b/i],
+  },
+  {
+    term: 'jewellery',
+    patterns: [
+      /\b(?:jewell?ery|bijoux)\b/i,
+      /\b(?:earrings?|hoops?|necklaces?|pendants?|bracelets?|bangles?|brooch(?:es)?|anklets?)\b/i,
+      // "Ring" on its own is inside "earring", "spring" and "string"; the
+      // boundary handles those, but it is still worth pinning to jewellery
+      // words rather than accepting any ring at all.
+      /\b(?:signet|stacking|cocktail|engagement|eternity) ring\b/i,
+    ],
+  },
+  {
+    term: 'bag',
+    patterns: [
+      /\b(?:bags?|handbags?|purses?|totes?|clutch(?:es)?|satchels?|crossbody|cross-body)\b/i,
+      /\b(?:backpacks?|knapsacks?|duffels?|duffles?|sacs?)\b/i,
+    ],
+  },
+  {
+    term: 'wallet',
+    patterns: [/\b(?:wallets?|cardholders?|card holders?|portefeuilles?)\b/i],
+  },
+  {
+    term: 'watch',
+    patterns: [/\b(?:watch(?:es)?|smartwatch(?:es)?|montres?)\b/i],
+  },
+
+  // Clothing. The shopper's noun is usually in the title already, so these
+  // matter most where the retailer uses a trade word - "romper", "bodysuit".
+  {
+    term: 'dress',
+    patterns: [/\b(?:dress(?:es)?|gowns?|sundress(?:es)?|robes?)\b/i],
+  },
+  {
+    term: 'shirt',
+    patterns: [
+      /\b(?:shirts?|blouses?|tees?|t-shirts?|polos?|tunics?|camisoles?|tank tops?)\b/i,
+      /\b(?:bodysuits?|chemisiers?)\b/i,
+    ],
+  },
+  {
+    term: 'sweater',
+    patterns: [
+      /\b(?:sweaters?|cardigans?|pullovers?|jumpers?|hoodies?|sweatshirts?|crewnecks?)\b/i,
+      /\b(?:chandails?|tricots?)\b/i,
+    ],
+  },
+  {
+    term: 'pants',
+    patterns: [
+      /\b(?:pants?|trousers?|chinos?|leggings?|joggers?|sweatpants?|pantalons?)\b/i,
+      /\b(?:jeans|denim)\b/i,
+    ],
+  },
+  {
+    term: 'skirt',
+    patterns: [/\b(?:skirts?|jupes?)\b/i],
+  },
+
+  // Baby and toys.
+  {
+    term: 'toy',
+    patterns: [
+      /\b(?:toys?|plush(?:ies)?|stuffed animals?|figurines?|action figures?|dolls?)\b/i,
+      /\b(?:puzzles?|board games?|play ?sets?|building blocks?|jouets?)\b/i,
+    ],
+  },
+  {
+    term: 'stroller',
+    patterns: [/\b(?:strollers?|pushchairs?|prams?|travel systems?|poussettes?)\b/i],
+  },
+  {
+    term: 'car seat',
+    patterns: [/\b(?:car ?seats?|booster seats?|infant seats?)\b/i],
+  },
+  {
+    term: 'diapers',
+    patterns: [/\b(?:diapers?|nappies|couches jetables)\b/i],
+  },
+
+  // Kitchen and appliances.
+  {
+    term: 'cookware',
+    patterns: [
+      /\b(?:cookware|skillets?|saucepans?|frying pans?|dutch ovens?|stockpots?|casseroles?)\b/i,
+      /\b(?:bakeware|roasting pans?|sheet pans?)\b/i,
+    ],
+  },
+  {
+    term: 'vacuum',
+    patterns: [/\b(?:vacuums?|vacuum cleaners?|aspirateurs?)\b/i],
+  },
+  {
+    term: 'kettle',
+    patterns: [/\b(?:kettles?|bouilloires?)\b/i],
+  },
+  {
+    term: 'towel',
+    patterns: [/\b(?:towels?|bath sheets?|serviettes?|washcloths?)\b/i],
+  },
+
+  // Electronics beyond the three already covered.
+  {
+    term: 'phone',
+    patterns: [
+      /\b(?:smartphones?|cell ?phones?|iphones?|t[ée]l[ée]phones?)\b/i,
+      /\b(?:galaxy s\d+|pixel \d+)\b/i,
+    ],
+  },
+  {
+    term: 'tablet',
+    patterns: [/\b(?:tablets?|ipads?|tablettes?)\b/i],
+  },
+  {
+    term: 'monitor',
+    patterns: [/\b(?:monitors?|[ée]crans?)\b/i],
   },
 ];
 
