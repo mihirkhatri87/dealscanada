@@ -98,13 +98,16 @@ const RAW_CATALOGUE = [
     name: 'Pro Hockey Life',
     domain: 'prohockeylife.com',
     baseUrl: 'https://www.prohockeylife.com',
-    engine: 'hybris',
-    status: 'unverified',
+    // Canadian Tire owns the banner, but the storefront is Shopify rather than
+    // the group's Hybris platform — /en/sale.html 404s and /collections.json
+    // answers. Family is kept so /brands still groups it correctly.
+    //
+    // No salePaths for the same reason as Indigo: the markdown collections are
+    // named for the year (`2025-stick-markdowns`) and will be renamed.
+    engine: 'shopify',
+    status: 'verified',
     family: 'canadian-tire',
     vertical: 'sports',
-    salePaths: ['SALE'],
-    jsonLdListingPaths: ['/en/sale.html'],
-    productLinkSelector: '.product-card a',
   },
   {
     id: 'partsource',
@@ -267,12 +270,14 @@ const RAW_CATALOGUE = [
     name: 'Giant Tiger',
     domain: 'gianttiger.com',
     baseUrl: 'https://www.gianttiger.com',
-    engine: 'jsonld',
-    status: 'unverified',
+    // Shopify, not a JSON-LD crawl: /collections.json answers, so the platform
+    // hands over compare_at_price instead of us scraping a strikethrough.
+    engine: 'shopify',
+    status: 'verified',
     enabled: true,
     vertical: 'general',
-    salePaths: ['/collections/sale'],
-    productLinkSelector: 'a.product-item__link',
+    // `sale` is empty and `clearance` holds no markdowns; this is where they are.
+    salePaths: ['flyers-and-deals'],
     maxProductPages: 30,
   },
   {
@@ -411,10 +416,22 @@ const RAW_CATALOGUE = [
     name: 'Roots',
     domain: 'roots.com',
     baseUrl: 'https://www.roots.com',
-    engine: 'shopify',
-    status: 'unverified',
-    enabled: true,
+    // Not Shopify: /collections.json 404s and the storefront is SFRA, serving
+    // Sites-RootsCA-Site. The engine and cgid below are correct — the grid
+    // returns 48 parseable markdowns — but they are recorded, not used.
+    //
+    // roots.com/robots.txt has a single `user-agent: *` group carrying
+    // `Disallow: */Search`, and this engine's only entry point is
+    // Search-UpdateGrid. There is no compliant route to this retailer's grid,
+    // so it stays off rather than becoming the one source that ignores robots.
+    engine: 'sfcc',
+    sfccSiteId: 'RootsCA',
+    sfccLocale: 'en_CA',
+    salePaths: ['Sale'],
+    status: 'blocked',
+    enabled: false,
     vertical: 'apparel',
+    note: 'robots.txt disallows */Search, which is the SFCC grid endpoint',
   },
   {
     id: 'aritzia',
@@ -496,7 +513,18 @@ const RAW_CATALOGUE = [
     domain: 'frankandoak.com',
     baseUrl: 'https://www.frankandoak.com',
     engine: 'shopify',
-    status: 'unverified',
+    // The store has no generic `sale` collection; every markdown lives under a
+    // department-scoped handle, which is why the default list found nothing.
+    salePaths: [
+      'sale-mens',
+      'sale-mens-jackets',
+      'sale-mens-pants',
+      'sale-mens-shirts',
+      'sale-mens-sweatshirts',
+      'sale-mens-polos',
+    ],
+    departmentHint: 'men',
+    status: 'verified',
     enabled: true,
     vertical: 'apparel',
   },
@@ -614,7 +642,10 @@ const RAW_CATALOGUE = [
     domain: 'suzyshier.com',
     baseUrl: 'https://www.suzyshier.com',
     engine: 'shopify',
-    status: 'unverified',
+    // `clearance` and `flash-sale` exist but are empty; these three carry the
+    // actual markdowns.
+    salePaths: ['promo', 'clothing-sale', 'extra-30-off-fall-markdowns'],
+    status: 'verified',
     enabled: true,
     vertical: 'apparel',
   },
@@ -770,13 +801,14 @@ const RAW_CATALOGUE = [
     name: 'Indigo',
     domain: 'indigo.ca',
     baseUrl: 'https://www.indigo.ca',
-    engine: 'jsonld',
-    status: 'unverified',
+    // Shopify. Deliberately no salePaths: Indigo files markdowns under three
+    // dozen campaign handles (`our-big-sale-vinyl-records`) that are renamed
+    // every season, so pinning any of them buys a source with an expiry date.
+    // The engine reads /collections.json and takes only genuine markdowns.
+    engine: 'shopify',
+    status: 'verified',
     enabled: true,
     vertical: 'books',
-    salePaths: ['/en-ca/deals/'],
-    productLinkSelector: 'a.product-list__product-link',
-    maxProductPages: 30,
   },
   {
     id: 'home-depot',
