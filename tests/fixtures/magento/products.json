@@ -1,0 +1,128 @@
+{
+  "data": {
+    "products": {
+      "items": [
+        {
+          "name": "Nomi Baby Set",
+          "sku": "63520",
+          "url_key": "nomi-baby-set",
+          "url_suffix": "",
+          "small_image": {
+            "url": "https://www.westcoastkids.ca/media/catalog/product/s/t/stokke-nomi-baby-set-black.jpg?optimize=high&fit=bounds&height=&width="
+          },
+          "price_range": {
+            "minimum_price": {
+              "regular_price": {
+                "value": 119.99,
+                "currency": "CAD"
+              },
+              "final_price": {
+                "value": 74.99
+              }
+            }
+          }
+        },
+        {
+          "name": "HEKA M Diaper Pail",
+          "sku": "MG-500",
+          "url_key": "heka-m-diaper-pail",
+          "url_suffix": "",
+          "small_image": {
+            "url": "https://www.westcoastkids.ca/media/catalog/product/h/e/heka-1.jpg?optimize=high&fit=bounds&height=&width="
+          },
+          "price_range": {
+            "minimum_price": {
+              "regular_price": {
+                "value": 109.95,
+                "currency": "CAD"
+              },
+              "final_price": {
+                "value": 79.99
+              }
+            }
+          }
+        },
+        {
+          "name": "Tiny Rabbit Richie Plush",
+          "sku": "HH-13/7",
+          "url_key": "tiny-rabbit-ritchie-plush",
+          "url_suffix": "",
+          "small_image": {
+            "url": "https://www.westcoastkids.ca/media/catalog/product/h/a/happy_horse_-_tiny_rabbit_ritchie_plush_-_ivory_2.jpg?optimize=high&fit=bounds&height=&width="
+          },
+          "price_range": {
+            "minimum_price": {
+              "regular_price": {
+                "value": 19.95,
+                "currency": "CAD"
+              },
+              "final_price": {
+                "value": 13.99
+              }
+            }
+          }
+        },
+        {
+          "name": "Keyhole Sunglasses (Limited Edition) - Fucia Haze",
+          "sku": "LTD-O-KEY02",
+          "url_key": "keyhole-sunglasses-limited-edition-fucia-haze",
+          "url_suffix": "",
+          "small_image": {
+            "url": "https://www.westcoastkids.ca/media/catalog/product/b/a/babiators-keyhole-sunglasses-fuchsia-haze.jpg?optimize=high&fit=bounds&height=&width="
+          },
+          "price_range": {
+            "minimum_price": {
+              "regular_price": {
+                "value": 42.99,
+                "currency": "CAD"
+              },
+              "final_price": {
+                "value": 29.99
+              }
+            }
+          }
+        },
+        {
+          "name": "Baby Basics Playsuit",
+          "sku": "22FMB/YMB",
+          "url_key": "baby-basics-coverall",
+          "url_suffix": "",
+          "small_image": {
+            "url": "https://www.westcoastkids.ca/media/catalog/product/m/i/milesthelabel-baby-basics-coverall-light-heather-grey.jpg?optimize=high&fit=bounds&height=&width="
+          },
+          "price_range": {
+            "minimum_price": {
+              "regular_price": {
+                "value": 33.99,
+                "currency": "CAD"
+              },
+              "final_price": {
+                "value": 23.99
+              }
+            }
+          }
+        },
+        {
+          "name": "Bestie Sling",
+          "sku": "BP44",
+          "url_key": "bestie-sling",
+          "url_suffix": "",
+          "small_image": {
+            "url": "https://www.westcoastkids.ca/media/catalog/product/s/l/sling-1.jpg?optimize=high&fit=bounds&height=&width="
+          },
+          "price_range": {
+            "minimum_price": {
+              "regular_price": {
+                "value": 26.99,
+                "currency": "CAD"
+              },
+              "final_price": {
+                "value": 18.99
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

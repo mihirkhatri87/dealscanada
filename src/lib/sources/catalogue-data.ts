@@ -811,16 +811,14 @@ const RAW_CATALOGUE = [
     name: 'West Coast Kids',
     domain: 'westcoastkids.ca',
     baseUrl: 'https://www.westcoastkids.ca',
-    // Magento, not Shopify. No Magento engine exists yet, but the sale listing
-    // is server-rendered and the product pages carry JSON-LD, so the universal
-    // engine reaches it today.
-    engine: 'jsonld',
+    // Magento. Now on the platform engine rather than the JSON-LD crawler: its
+    // GraphQL states regular and final price separately, so before/after is the
+    // merchant's own record, and one API call replaces thirty page fetches.
+    engine: 'magento',
     status: 'verified',
     enabled: true,
     vertical: 'baby',
-    salePaths: ['/sale'],
-    productLinkSelector: 'a.product-item-link',
-    maxProductPages: 30,
+    salePaths: ['sale'],
   },
   {
     id: 'scholars-choice',
