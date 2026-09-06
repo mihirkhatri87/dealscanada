@@ -285,8 +285,39 @@ export interface KeywordInput {
  * Returns them sorted so the stored string is stable: an unchanged product must
  * not look changed to the upsert just because a rule was reordered.
  */
+/**
+ * Longest description still treated as a statement of what the product is.
+ *
+ * A retailer's description is one of two things. Structube writes "rectangular
+ * coffee table" — a definition, and the only place that product's type appears
+ * at all. Everyone else writes marketing prose: "pairs perfectly with a sweater
+ * and ankle boots". Reading the second kind gave "Straight-Leg Jeans" the
+ * keywords dress, pants and sweater, and put jeans in front of anyone searching
+ * for a sweater.
+ *
+ * Length separates them cleanly in the live data. Structube's descriptions run
+ * 9 to 45 characters; every prose-writing source in the catalogue has a median
+ * between 135 and 218. Anything past this cutoff is styling advice, and styling
+ * advice is about other products by definition.
+ */
+const DEFINITIONAL_DESCRIPTION_LIMIT = 80;
+
 export function deriveKeywords(input: KeywordInput): string[] {
-  const haystack = [input.title, input.description ?? '', input.sourceHint ?? ''].join(' ');
+  // The first sentence, not the whole description. A description that opens by
+  // saying what the thing is and then advises what to wear it with is the
+  // common shape — "Our best-selling straight-leg jeans in a mid-rise fit.
+  // Pairs perfectly with an oversized sweater and ankle boots." — so the useful
+  // half is reachable without reading the half that is about other products.
+  const description = (input.description ?? '').trim();
+  const firstSentence = description.split(/(?<=[.!?])\s+/)[0] ?? description;
+  const definitional =
+    firstSentence.length > 0 && firstSentence.length <= DEFINITIONAL_DESCRIPTION_LIMIT
+      ? firstSentence
+      : '';
+
+  // The title and the retailer's own category are always statements about what
+  // the thing is. A long description is prose about how to wear it.
+  const haystack = [input.title, definitional, input.sourceHint ?? ''].join(' ');
   const found = new Set<string>();
 
   for (const rule of KEYWORD_RULES) {
