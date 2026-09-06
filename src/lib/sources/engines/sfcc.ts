@@ -43,7 +43,24 @@ const LIST_PRICE_SELECTORS = [
 ];
 
 const TILE_SELECTORS = ['.product-tile', '.product[data-pid]', '.grid-tile', '.product-grid-tile'];
-const NAME_SELECTORS = ['.pdp-link a', '.link', '.product-name a', '.name-link', '.tile-body a'];
+const NAME_SELECTORS = [
+  '.pdp-link a',
+  '.link',
+  '.product-name a',
+  '.name-link',
+  '.product-name-link',
+  '.tile-body a',
+];
+
+/**
+ * Anchors that sit inside a tile but do not name the product.
+ *
+ * A colour swatch links to the same page carrying the text "<product>: BLACK",
+ * and a quick-view trigger carries "Quick View". Both would be taken as the
+ * title by "first anchor with text", which is why the fallback skips them
+ * rather than trusting document order.
+ */
+const NON_NAME_ANCHORS = 'quickview|swatch|wishlist|compare|quick-view|colou?r';
 
 export function parseSfccGrid(html: string, options: SfccParseOptions): RawDeal[] {
   const $ = cheerio.load(html);
@@ -64,10 +81,7 @@ export function parseSfccGrid(html: string, options: SfccParseOptions): RawDeal[
       tile.closest('[data-pid]').attr('data-pid') ??
       null;
 
-    const link = firstMatch(tile, NAME_SELECTORS);
-    const href = link?.attr('href') ?? null;
-    const title = cleanText(link?.text() ?? tile.find('.product-name').first().text());
-
+    const { title, href } = identify($, tile);
     if (!title || !href) return;
 
     const url = absolute(href, base);
@@ -137,6 +151,49 @@ function priceFrom(tile: Tile, selectors: string[]): number | null {
     if (Number.isFinite(parsed) && parsed > 0) return parsed;
   }
   return null;
+}
+
+/**
+ * The product's name and page URL from one tile.
+ *
+ * SFRA's default tile puts both on a `.pdp-link a`, but storefronts rename that
+ * class freely — Roots ships `.product-name-link`, and a tile whose only styled
+ * anchor wraps the image carries no text at all. Requiring a known class means a
+ * renamed one drops the whole retailer to zero deals, which is the failure this
+ * engine keeps hitting in the wild.
+ *
+ * So the known classes are tried first, and anything they miss falls back to the
+ * tile's own structure: an anchor that actually reads like a name, then the
+ * image's alt text, which SFCC populates with the product name. The href is
+ * taken from any anchor, since every anchor in a tile points at the same PDP.
+ */
+function identify(
+  $: ReturnType<typeof cheerio.load>,
+  tile: Tile,
+): { title: string; href: string | null } {
+  const named = firstMatch(tile, NAME_SELECTORS);
+  const namedTitle = cleanText(named?.text());
+  const namedHref = named?.attr('href') ?? null;
+  if (namedTitle && namedHref) return { title: namedTitle, href: namedHref };
+
+  const anchors = tile
+    .find('a[href]')
+    .toArray()
+    .map((element) => $(element));
+  const href = namedHref ?? anchors.find((node) => node.attr('href'))?.attr('href') ?? null;
+
+  if (namedTitle) return { title: namedTitle, href };
+
+  for (const node of anchors) {
+    if (new RegExp(NON_NAME_ANCHORS, 'i').test(node.attr('class') ?? '')) continue;
+    const text = cleanText(node.text());
+    if (text) return { title: text, href: node.attr('href') ?? href };
+  }
+
+  const fromName = cleanText(tile.find('.product-name').first().text());
+  if (fromName) return { title: fromName, href };
+
+  return { title: cleanText(tile.find('img[alt]').first().attr('alt')), href };
 }
 
 function firstMatch(tile: Tile, selectors: string[]): Tile | null {
