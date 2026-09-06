@@ -5,6 +5,7 @@ import type { RawDeal } from '../sources/types';
 import { computeDiscount, parsePriceToCents } from '../util/money';
 import { canonicalizeUrl, extractAsin, extractDomain } from '../util/url';
 import { classifyCategory, classifyDepartment, extractBrand } from './classify';
+import { deriveKeywords, serializeKeywords } from './keywords';
 import { resolveProductIdentity } from './product-key';
 import { extractCouponFrom } from './coupon';
 import { computeHeat } from './score';
@@ -124,6 +125,12 @@ export function normalizeDeal(raw: RawDeal, context: NormalizeContext): Normaliz
     sourceHint: raw.categoryHint ?? null,
   });
 
+  // Plain shopper words for a product the retailer names in trade terms, so a
+  // search for "table" reaches a listing called "MARCO Console".
+  const keywords = serializeKeywords(
+    deriveKeywords({ title, description, sourceHint: raw.categoryHint ?? null }),
+  );
+
   const department: Department = classifyDepartment({
     title,
     description,
@@ -180,6 +187,7 @@ export function normalizeDeal(raw: RawDeal, context: NormalizeContext): Normaliz
       category,
       department,
       brand,
+      keywords,
       sizesAvailable: raw.sizesAvailable?.length ? raw.sizesAvailable : null,
       productKey: identity.key,
       productKeyStrength: identity.strength,

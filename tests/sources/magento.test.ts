@@ -214,3 +214,56 @@ describe('createMagentoAdapter', () => {
     });
   });
 });
+
+describe('saying what the product actually is', () => {
+  // Structube titles its products "LUCAS" and "MADERA". The name says nothing
+  // about the thing, so a shopper searching for a table found none of them --
+  // and no synonym list can help, because there is no word to map. The
+  // short_description says "rectangular coffee table" and the engine simply was
+  // not asking for it.
+  const payload = {
+    data: {
+      products: {
+        items: [
+          {
+            name: 'LUCAS',
+            sku: 'LUC-1',
+            url_key: 'lucas',
+            url_suffix: '',
+            short_description: { html: '<p>rectangular coffee&nbsp;table</p>' },
+            categories: [
+              { name: 'Sale' },
+              { name: 'Living room' },
+              { name: 'Coffee Tables' },
+              { name: 'Living room' },
+            ],
+            price_range: {
+              minimum_price: {
+                regular_price: { value: 399 },
+                final_price: { value: 249 },
+              },
+            },
+          },
+        ],
+      },
+    },
+  };
+
+  const [deal] = parseMagentoProducts(payload, {
+    baseUrl: 'https://www.structube.com',
+    merchantDomain: 'structube.com',
+  });
+
+  it('takes the description from short_description, without its markup', () => {
+    expect(deal?.description).toBe('rectangular coffee table');
+  });
+
+  it("uses the retailer's own category path as the category hint", () => {
+    expect(deal?.categoryHint).toBe('Sale Living room Coffee Tables');
+  });
+
+  it('does not repeat a category the ancestry lists twice', () => {
+    // Magento returns every tree a product sits in, and they overlap.
+    expect(deal?.categoryHint?.match(/Living room/g)).toHaveLength(1);
+  });
+});

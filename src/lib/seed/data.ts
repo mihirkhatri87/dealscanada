@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { DealInput, StoreInput } from '../db/repository';
 import type { Category, Department } from '../db/types';
 import { classifyCategory, classifyDepartment } from '../pipeline/classify';
+import { deriveKeywords, serializeKeywords } from '../pipeline/keywords';
 import { computeDiscount } from '../util/money';
 import { computeHeat } from '../pipeline/score';
 import { resolveProductIdentity } from '../pipeline/product-key';
@@ -924,6 +925,9 @@ export function buildSeedDeals(
 
     const category = spec.category ?? classifyCategory({ title: spec.title });
     const department = spec.department ?? classifyDepartment({ title: spec.title, category });
+    // Sample data must be searchable the way real data is, or the offline site
+    // silently behaves differently from the live one.
+    const keywords = serializeKeywords(deriveKeywords({ title: spec.title }));
 
     const identity = resolveProductIdentity({
       title: spec.title,
@@ -952,6 +956,7 @@ export function buildSeedDeals(
       category,
       department,
       brand: spec.brand ?? null,
+      keywords,
       sizesAvailable: spec.sizes ?? null,
       productKey: identity.key,
       productKeyStrength: identity.strength,

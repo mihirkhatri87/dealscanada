@@ -2,7 +2,7 @@ import postgres from 'postgres';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { splitStatements, translateSchema } from './dialect';
+import { splitStatements, translateSchema, ADDITIVE_COLUMNS } from './dialect';
 import { boundingBox, buildDealQuery } from './query-builder';
 import { haversineKm } from '../util/geo';
 import { mapDealWithRelations, summarizeUsage, toDealParams } from './sqlite';
@@ -63,6 +63,19 @@ export class PostgresDealRepository implements DealRepository {
     const statements = splitStatements(translateSchema(raw, 'postgres'));
     await this.sql.begin(async (tx) => {
       for (const statement of statements) await tx.unsafe(statement);
+
+      // schema.sql is all CREATE ... IF NOT EXISTS, so a table that already
+      // exists never sees a column added to it later. See ADDITIVE_COLUMNS.
+      for (const [table, columns] of Object.entries(ADDITIVE_COLUMNS)) {
+        for (const [column, type] of Object.entries(columns)) {
+          await tx.unsafe(
+            `ALTER TABLE ${table} ADD COLUMN IF NOT EXISTS ${column} ${translateSchema(
+              type,
+              'postgres',
+            )}`,
+          );
+        }
+      }
     });
   }
 
@@ -201,6 +214,7 @@ export class PostgresDealRepository implements DealRepository {
               title = ${p.title}, description = ${p.description}, image_url = ${p.imageUrl},
               merchant_id = ${p.merchantId}, store_id = ${p.storeId},
               category = ${p.category}, department = ${p.department}, brand = ${p.brand},
+              keywords = ${p.keywords ?? null},
               sizes_available = ${p.sizesAvailable}, price_now = ${p.priceNow},
               price_was = ${p.priceWas}, currency = ${p.currency},
               discount_pct = ${p.discountPct}, discount_abs = ${p.discountAbs},
@@ -221,6 +235,7 @@ export class PostgresDealRepository implements DealRepository {
           await tx`
             INSERT INTO deals (id, source, source_id, slug, url, canonical_url, title,
               description, image_url, merchant_id, store_id, category, department, brand,
+              keywords,
               sizes_available, price_now, price_was, currency, discount_pct, discount_abs,
               coupon_code, coupon_note, shipping_note, in_stock, stock_note, posted_at,
               expires_at, first_seen_at, last_seen_at, votes, heat, status, locale,
@@ -228,6 +243,7 @@ export class PostgresDealRepository implements DealRepository {
             VALUES (${p.id}, ${p.source}, ${p.sourceId}, ${p.slug}, ${p.url},
               ${p.canonicalUrl}, ${p.title}, ${p.description}, ${p.imageUrl},
               ${p.merchantId}, ${p.storeId}, ${p.category}, ${p.department}, ${p.brand},
+              ${p.keywords ?? null},
               ${p.sizesAvailable}, ${p.priceNow}, ${p.priceWas}, ${p.currency},
               ${p.discountPct}, ${p.discountAbs}, ${p.couponCode}, ${p.couponNote},
               ${p.shippingNote}, ${p.inStock}, ${p.stockNote}, ${p.postedAt},

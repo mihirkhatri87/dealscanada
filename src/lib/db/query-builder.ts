@@ -102,12 +102,30 @@ export function buildDealQuery(query: DealQuery, dialect: Dialect): BuiltQuery {
   if (query.search?.trim()) {
     // Accent- and case-insensitive partial matching across the fields a shopper
     // would actually type into a search box.
-    const needle = `%${normalizeSearchTerm(query.search)}%`;
+    const term = normalizeSearchTerm(query.search);
+
+    /**
+     * Matches the term at the START of a word, not anywhere inside one.
+     *
+     * A bare '%table%' matches "comfortable", "sustainable", "adjustable" and
+     * "breathable" — words that appear in the description of most garments ever
+     * written. Searching "table" returned tank tops and beanies, and any real
+     * table was buried under them.
+     *
+     * Padding the column with a leading space lets one LIKE cover both "the
+     * word starts the text" and "the word follows a space", so "tables" and
+     * "tablecloth" still match while "comfortable" no longer does.
+     */
+    const wordStart = (column: string): string =>
+      `(' ' || LOWER(COALESCE(${column}, ''))) LIKE ${ph(`% ${term}%`)}`;
+
     clauses.push(
-      `(LOWER(d.title) LIKE ${ph(needle)} OR LOWER(COALESCE(d.description, '')) LIKE ${ph(
-        needle,
-      )} OR LOWER(COALESCE(m.name, '')) LIKE ${ph(needle)} OR LOWER(COALESCE(d.brand, '')) LIKE ${ph(
-        needle,
+      `(${wordStart('d.title')} OR ${wordStart('d.description')} OR ${wordStart(
+        'm.name',
+      )} OR ${wordStart('d.brand')} OR LOWER(COALESCE(d.keywords, '')) LIKE ${ph(
+        // Keywords are stored already padded, and are whole words by
+        // construction, so this is an exact word match rather than a prefix.
+        `% ${term} %`,
       )})`,
     );
   }
