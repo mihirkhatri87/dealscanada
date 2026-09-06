@@ -44,9 +44,11 @@ export function parseWordPressPosts(payload: unknown, options: WordPressParseOpt
     if (seen.has(key)) continue;
 
     const excerpt = rendered(post['excerpt']);
-    const body = `${title} ${excerpt ?? ''} ${rendered(post['content']) ?? ''}`;
 
-    const prices = extractPrices(body);
+    // Title and excerpt only. The body is where a roundup lists thirty other
+    // products, and a price taken from there would caption this card with a
+    // number describing something its headline does not name.
+    const prices = extractPrices(`${title} ${excerpt ?? ''}`);
     if (prices === null) continue;
 
     seen.add(key);
@@ -80,26 +82,89 @@ export function parseWordPressPosts(payload: unknown, options: WordPressParseOpt
   return deals;
 }
 
+/** Marks the neighbouring higher number as the pre-sale price. */
+const WAS_MARKER =
+  /\b(?:reg|reg\.|regular|regularly|was|orig|orig\.|originally|retail|list|compare|compared at|value|instead of|down from)\b/i;
+/** Marks the neighbouring lower number as what a shopper pays today. */
+const NOW_MARKER = /\b(?:now|sale|only|just|deal|for)\b|→|->|»/i;
+
+/** How much text may sit between two numbers before they stop being a pair. */
+const PAIR_GAP_LIMIT = 40;
+
+function toAmount(raw: string): number | null {
+  const cleaned = raw.trim();
+  // "19,99" is a decimal comma; "1,299.99" is a thousands comma.
+  const normalized =
+    /,\d{2}$/.test(cleaned) && !/\.\d{2}$/.test(cleaned)
+      ? cleaned.replace(/\./g, '').replace(',', '.')
+      : cleaned.replace(/,/g, '');
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 /**
- * Finds a before/after pair in post text.
+ * Finds a before/after pair the post actually states as a pair.
  *
- * Returns null unless two distinct prices are present. One price is a mention,
- * not a deal, and inventing the other would be exactly the fabrication the whole
- * pipeline is built to avoid.
+ * The previous version took the smallest and largest dollar amounts anywhere in
+ * the post. On a single-product post that happens to be right, and on a roundup
+ * it is a fabrication: "Costco Sale Items for September 4-6" lists dozens of
+ * unrelated products, and pairing the cheapest with the most expensive produced
+ * cards like "Best Buy Canada: Labour Day Sale — $70.00, was $400.00". An 82%
+ * saving on something nobody can buy, with a headline for a product name. That
+ * is the inflated anchor this project exists to call out, published by us.
+ *
+ * Two numbers are a before/after only if the post writes them as one: adjacent,
+ * close together, with the language of a markdown between them - "$19.99 (reg.
+ * $39.99)", "was $39.99, now $19.99". Prices from separate sentences are
+ * separate products.
+ *
+ * Scanned over the title and excerpt alone, never the body, because the card is
+ * captioned with the title. A price lifted from paragraph nine of a roundup
+ * describes something the headline does not name, and the two together read as
+ * a claim about a product that was never on offer at that price.
  */
 export function extractPrices(text: string): { now: number; was: number } | null {
-  const numbers: number[] = [];
+  const found: Array<{ value: number; start: number; end: number }> = [];
 
-  for (const match of text.matchAll(/\$\s?(\d{1,5}(?:[.,]\d{2})?)/g)) {
-    const parsed = Number((match[1] ?? '').replace(',', '.'));
-    if (Number.isFinite(parsed) && parsed > 0) numbers.push(parsed);
+  for (const match of text.matchAll(/\$\s?(\d{1,3}(?:,\d{3})*(?:[.,]\d{2})?|\d{1,5}(?:[.,]\d{2})?)/g)) {
+    const value = toAmount(match[1] ?? '');
+    if (value === null || match.index === undefined) continue;
+    found.push({ value, start: match.index, end: match.index + match[0].length });
   }
 
-  if (numbers.length < 2) return null;
+  if (found.length < 2) return null;
 
-  const now = Math.min(...numbers);
-  const was = Math.max(...numbers);
-  return was > now ? { now, was } : null;
+  for (let index = 0; index < found.length - 1; index += 1) {
+    const left = found[index]!;
+    const right = found[index + 1]!;
+
+    const gap = text.slice(left.end, right.start);
+    if (gap.length > PAIR_GAP_LIMIT) continue;
+    // A digit between them means a third amount we failed to parse; the two are
+    // then not actually adjacent.
+    if (/\d/.test(gap)) continue;
+
+    // "$19.99 (reg. $39.99)"
+    if (WAS_MARKER.test(gap) && right.value > left.value) {
+      return { now: left.value, was: right.value };
+    }
+
+    // "was $39.99, now $19.99" - the marker for the higher number sits before it.
+    if (NOW_MARKER.test(gap) && left.value > right.value) {
+      const lead = text.slice(Math.max(0, left.start - 24), left.start);
+      if (WAS_MARKER.test(lead)) return { now: right.value, was: left.value };
+    }
+  }
+
+  return null;
+}
+
+function codePoint(code: number): string {
+  // An out-of-range entity is malformed markup, not a character. Dropping it to
+  // a space keeps the title readable rather than throwing on the whole post.
+  if (!Number.isFinite(code) || code <= 0 || code > 0x10ffff) return ' ';
+  return String.fromCodePoint(code);
 }
 
 function rendered(value: unknown): string | null {
@@ -109,11 +174,18 @@ function rendered(value: unknown): string | null {
 
   const stripped = text
     .replace(/<[^>]*>/g, ' ')
-    .replace(/&#8217;|&#039;|&#39;/g, "'")
-    .replace(/&#8211;|&#8212;/g, '-')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
+    // Numeric entities generally, rather than the handful that had been listed:
+    // WordPress emits &#038; for an ampersand, which was reaching deal titles
+    // verbatim as "Costco Flyer &#038; Costco Sale Items".
+    .replace(/&#(\d+);/g, (_, code: string) => codePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) => codePoint(parseInt(code, 16)))
     .replace(/&nbsp;/g, ' ')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    // Last, so a decoded "&amp;amp;" does not become a stray entity.
+    .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ')
     .trim();
 

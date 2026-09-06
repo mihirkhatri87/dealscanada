@@ -139,6 +139,91 @@ describe('price extraction', () => {
   it('refuses a pair that is not a discount', () => {
     expect(extractPrices('$10.00 and $10.00')).toBeNull();
   });
+
+  it('takes a pair the text writes as a pair', () => {
+    expect(extractPrices('Instant Pot Duo $79.99 (reg. $129.99)')).toEqual({
+      now: 79.99,
+      was: 129.99,
+    });
+    expect(extractPrices('Sale $24.99, regularly $49.99')).toEqual({ now: 24.99, was: 49.99 });
+    expect(extractPrices('Bath towels $1,299.99 was $1,899.99')).toEqual({
+      now: 1299.99,
+      was: 1899.99,
+    });
+  });
+
+  it('refuses unrelated prices from a roundup', () => {
+    // This is the bug that reached production. A roundup lists many products,
+    // and taking the smallest and largest amounts anywhere in it invented an
+    // 82% saving on a headline nobody can buy:
+    //   "Best Buy Canada: Labour Day Sale + Top Deals - $70.00, was $400.00"
+    expect(
+      extractPrices('Laptops from $400. Headphones $70. Tablets $250. Monitors $180.'),
+    ).toBeNull();
+
+    // Two prices, adjacent, but the text says nothing about one replacing the
+    // other. Separate sentences are separate products.
+    expect(extractPrices('The bacon is $12.99. The cheese is $16.99.')).toBeNull();
+  });
+
+  it('does not pair prices separated by a paragraph of text', () => {
+    const far = `Sale $19.99 ${'and plenty of other things worth reading about '.repeat(2)} $99.99`;
+    expect(extractPrices(far)).toBeNull();
+  });
+});
+
+describe('what a post is allowed to claim', () => {
+  const editorial = {
+    merchantDomain: 'smartcanucks.ca',
+    merchantName: 'Smart Canucks',
+  };
+
+  function post(overrides: Record<string, unknown>) {
+    return [
+      {
+        id: 501,
+        link: 'https://smartcanucks.ca/a-post/',
+        title: { rendered: 'A Post' },
+        excerpt: { rendered: '' },
+        content: { rendered: '' },
+        ...overrides,
+      },
+    ];
+  }
+
+  it('ignores prices that appear only in the body', () => {
+    // The card is captioned with the title, so a price from paragraph nine
+    // describes something the headline does not name.
+    const deals = parseWordPressPosts(
+      post({
+        title: { rendered: 'Best Buy Canada: Labour Day Sale + Top Deals' },
+        content: { rendered: '<p>Air fryer $70 (reg $400) and much more in store.</p>' },
+      }),
+      editorial,
+    );
+
+    expect(deals).toEqual([]);
+  });
+
+  it('keeps a post whose own headline states the offer', () => {
+    const deals = parseWordPressPosts(
+      post({ title: { rendered: 'Sobeys: Coca-Cola 12-pack $3.99 (reg. $6.99)' } }),
+      editorial,
+    );
+
+    expect(deals).toHaveLength(1);
+    expect(deals[0]?.price).toBe(3.99);
+    expect(deals[0]?.priceWas).toBe(6.99);
+  });
+
+  it('decodes numeric HTML entities in a title', () => {
+    const deals = parseWordPressPosts(
+      post({ title: { rendered: 'Costco Flyer &#038; Sale Items $2.00 (reg $4.00)' } }),
+      editorial,
+    );
+
+    expect(deals[0]?.title).toBe('Costco Flyer & Sale Items $2.00 (reg $4.00)');
+  });
 });
 
 describe('images', () => {
