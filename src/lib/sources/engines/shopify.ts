@@ -197,6 +197,37 @@ function extractSizes(
   return [...sizes];
 }
 
+const collectionsSchema = z
+  .object({ collections: z.array(z.object({ handle: z.string().nullish() }).passthrough()) })
+  .passthrough();
+
+/** Handles that read like a markdown section rather than a department. */
+const SALE_HANDLE = /sale|clearance|outlet|markdown|final-?sale|last-chance|promo|deals?\b/i;
+
+/**
+ * Sale collections a store actually has, from its own `/collections.json`.
+ *
+ * The fixed list in `SALE_COLLECTIONS` covers stores that name things plainly,
+ * but plenty do not: Indigo files markdowns under three dozen seasonal handles
+ * like `our-big-sale-vinyl-records`, and pinning this month's name in the
+ * catalogue buys a source that works until the promotion ends. Reading the
+ * store's own index costs one request and survives the rename.
+ *
+ * Shorter handles sort first because generic sections (`sale`, `clearance`)
+ * outlast campaign ones (`sale-fall-most-anticipated-books`), and the budget
+ * here is small enough that ordering decides what gets fetched at all.
+ */
+export function saleCollectionHandles(payload: unknown, limit = 8): string[] {
+  const parsed = collectionsSchema.safeParse(payload);
+  if (!parsed.success) return [];
+
+  return parsed.data.collections
+    .map((collection) => collection.handle)
+    .filter((handle): handle is string => typeof handle === 'string' && SALE_HANDLE.test(handle))
+    .sort((a, b) => a.length - b.length || a.localeCompare(b))
+    .slice(0, limit);
+}
+
 /** Builds an adapter for one Shopify retailer from its catalogue entry. */
 export function createShopifyAdapter(config: RetailerConfig): SourceAdapter {
   return {
@@ -218,9 +249,14 @@ export function createShopifyAdapter(config: RetailerConfig): SourceAdapter {
       const tried: string[] = [];
       let lastError: string | undefined;
 
-      for (const collection of collections) {
-        if (collected.length >= limit) break;
-
+      /**
+       * `pinned` is the difference between a collection someone chose and one a
+       * regex matched. A pinned handle is a decision that everything filed under
+       * it is a deal, so an item with no `compare_at_price` still counts. A
+       * discovered handle is a guess — `sale-klutz` is a brand section at list
+       * price — so there, only an actual markdown qualifies.
+       */
+      const harvest = async (collection: string, pinned: boolean): Promise<void> => {
         const url = `${base}/collections/${collection}/products.json?limit=250`;
         tried.push(collection);
 
@@ -230,7 +266,7 @@ export function createShopifyAdapter(config: RetailerConfig): SourceAdapter {
             baseUrl: base,
             merchantDomain: config.domain,
             merchantName: config.name,
-            fromSaleCollection: true,
+            fromSaleCollection: pinned,
             departmentHint: config.departmentHint ?? undefined,
           });
 
@@ -241,19 +277,50 @@ export function createShopifyAdapter(config: RetailerConfig): SourceAdapter {
           // a total failure across all of them is worth reporting.
           lastError = error instanceof Error ? error.message : String(error);
         }
+      };
+
+      for (const collection of collections) {
+        if (collected.length >= limit) break;
+        await harvest(collection, true);
+      }
+
+      // Nothing under the names we guessed does not mean nothing on sale. Ask
+      // the store which collections it has before giving up on it.
+      let discovered: string[] = [];
+      if (collected.length === 0) {
+        try {
+          const index = await context.http.fetchJson<unknown>(
+            `${base}/collections.json?limit=250`,
+            { skipRobots: true },
+          );
+          discovered = saleCollectionHandles(index.data).filter(
+            (handle) => !tried.includes(handle),
+          );
+        } catch (error) {
+          lastError = error instanceof Error ? error.message : String(error);
+        }
+
+        for (const collection of discovered) {
+          if (collected.length >= limit) break;
+          await harvest(collection, false);
+        }
       }
 
       if (collected.length === 0) {
+        const attempted = tried.join(', ');
         return {
           deals: [],
           path: 'products.json',
           reason: lastError
-            ? `no sale collections found (tried ${tried.join(', ')}); last error: ${lastError}`
-            : `no discounted products in ${tried.join(', ')}`,
+            ? `no sale collections found (tried ${attempted}); last error: ${lastError}`
+            : `no discounted products in ${attempted}`,
         };
       }
 
-      return { deals: collected.slice(0, limit), path: 'products.json' };
+      return {
+        deals: collected.slice(0, limit),
+        path: discovered.length > 0 ? 'products.json (discovered)' : 'products.json',
+      };
     },
   };
 }
