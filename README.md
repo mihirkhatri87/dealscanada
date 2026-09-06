@@ -160,7 +160,8 @@ suite against both, so that claim is tested rather than asserted.
 
 | Command | What it does |
 |---|---|
-| `npm run dev` / `build` / `start` | The site |
+| `npm run dev` / `build` | The site. Use `dev` locally |
+| `node .next/standalone/server.js` | Production run after `build`. `npm start` warns here and is not the path Docker uses — the build emits a standalone server so the container carries no `node_modules` |
 | `npm run db:migrate` / `db:reset` | Schema, idempotent |
 | `npm run seed` | Offline sample dataset |
 | `npm run scrape` | Ingest; `--dry-run`, `--source=`, `--family=`, `--limit=`, `--verbose` |
