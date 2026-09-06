@@ -380,13 +380,15 @@ const RAW_CATALOGUE = [
     name: 'Visions Electronics',
     domain: 'visions.ca',
     baseUrl: 'https://www.visions.ca',
-    engine: 'jsonld',
-    status: 'unverified',
+    // The /collections/ path was a Shopify shape this store never had, hence
+    // the 404. It is Magento, and its clearance category holds ~1,800 items
+    // whose grid is client-rendered — invisible to a crawler, plain over the
+    // platform API.
+    engine: 'magento',
+    status: 'verified',
     enabled: true,
     vertical: 'electronics',
-    salePaths: ['/collections/sale'],
-    productLinkSelector: 'a.product-item__link',
-    maxProductPages: 30,
+    salePaths: ['clearance'],
   },
   {
     id: 'the-source',
@@ -910,11 +912,13 @@ const RAW_CATALOGUE = [
     name: 'Structube',
     domain: 'structube.com',
     baseUrl: 'https://www.structube.com',
-    engine: 'jsonld',
-    status: 'unverified',
-    enabled: false,
+    // Was disabled for want of a listing path. It is Magento, so there is no
+    // path to find: the store names its own sale category.
+    engine: 'magento',
+    status: 'verified',
+    enabled: true,
     vertical: 'home',
-    note: 'no sale listing path discovered yet - run retailer:probe',
+    salePaths: ['sale'],
   },
   {
     id: 'leons',
