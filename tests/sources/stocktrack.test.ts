@@ -58,11 +58,32 @@ describe('parseClearancePage', () => {
 });
 
 describe('stocktrack adapter', () => {
-  it('is skipped, not failed, when no stores are selected', () => {
-    expect(buildStocktrackAdapter([]).enabled()).toMatchObject({
+  it('is off by default, and says so rather than failing', () => {
+    // The default is off because the adapter's paths 404 against the live site.
+    // Leaving it on pointed failing requests at a small independent site every
+    // time someone synced stores.
+    expect(buildStocktrackAdapter(stores).enabled()).toMatchObject({
+      enabled: false,
+      reason: expect.stringContaining('STOCKTRACK_ENABLED'),
+    });
+  });
+
+  it('is skipped, not failed, when it is on but no stores are selected', async () => {
+    vi.resetModules();
+    vi.doMock('@/lib/config', async () => {
+      const actual = await vi.importActual<typeof import('@/lib/config')>('@/lib/config');
+      return { ...actual, flags: { ...actual.flags, stocktrackEnabled: true } };
+    });
+
+    const { buildStocktrackAdapter: build } = await import('@/lib/sources/stocktrack');
+
+    expect(build([]).enabled()).toMatchObject({
       enabled: false,
       reason: expect.stringContaining('no stores selected'),
     });
+
+    vi.doUnmock('@/lib/config');
+    vi.resetModules();
   });
 
   it('scrapes only the stores the user selected', async () => {

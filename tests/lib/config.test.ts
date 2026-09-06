@@ -7,7 +7,10 @@ describe('config', () => {
     expect(env.SQLITE_PATH).toBe('data/deals.db');
     expect(env.RATE_LIMIT_RPS).toBe(1);
     expect(env.ASSISTANT_MODEL).toBe('claude-sonnet-5');
-    expect(env.STOCKTRACK_ENABLED).toBe(true);
+    // Off unless someone asks for it: the adapter's endpoints 404 against the
+    // live site, so the default must not point failing requests at a small
+    // independent one.
+    expect(env.STOCKTRACK_ENABLED).toBe(false);
   });
 
   it('treats blank values as absent rather than invalid', () => {

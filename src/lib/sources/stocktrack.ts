@@ -23,6 +23,21 @@ import { addInStoreDeals } from './in-store-pool';
  * every retailer host. The selectors are therefore configuration rather than
  * literals, so correcting them after a real `npm run health` run is a config
  * edit and not a rewrite.
+ *
+ * Checked against the live site on 2026-09-06, and the paths below are wrong.
+ * `/clearance/{storeId}`, `/stores/{chain}`, `/clearance` and `/stores` all
+ * return 404. stocktrack.ca serves a JavaScript app that loads its data from
+ * endpoints published nowhere; there is no API, no terms page and no about
+ * page. Its robots.txt is 24 lines of content-signal boilerplate carrying no
+ * directive at all, which by its own wording neither grants nor restricts.
+ *
+ * That makes this adapter aspirational rather than broken-and-fixable, and
+ * STOCKTRACK_ENABLED now defaults to false because of it. Reverse-engineering
+ * a donation-funded hobby site's private endpoints — past the browser
+ * fingerprinting it runs via /fp.php — to take the data that is its entire
+ * reason to exist is not a selector fix. The route to this data is asking the
+ * operator, which for a site this size is a plausible conversation rather than
+ * a formality.
  */
 
 export interface StocktrackConfig {
@@ -43,7 +58,9 @@ export interface StocktrackConfig {
 }
 
 export const DEFAULT_STOCKTRACK_CONFIG: StocktrackConfig = {
-  baseUrl: 'https://www.stocktrack.ca',
+  // The apex, not www: www.stocktrack.ca 301s here, and paying a redirect on
+  // every request is not what a slow rate limit is for.
+  baseUrl: 'https://stocktrack.ca',
   clearancePath: '/clearance/{storeId}',
   storeListPath: '/stores/{chain}',
   selectors: {
