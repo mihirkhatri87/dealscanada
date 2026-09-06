@@ -78,6 +78,8 @@ export interface Deal {
   category: Category;
   department: Department;
   brand: string | null;
+  /** Plain shopper words for what this is; see pipeline/keywords.ts. */
+  keywords: string | null;
   sizesAvailable: string[] | null;
   /** Cross-merchant product identity; null when nothing reliable was available. */
   productKey: string | null;

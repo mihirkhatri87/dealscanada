@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { splitStatements } from './dialect';
+import { splitStatements, ADDITIVE_COLUMNS } from './dialect';
 import { boundingBox, buildDealQuery } from './query-builder';
 import { haversineKm } from '../util/geo';
 import type {
@@ -59,8 +59,42 @@ export class SqliteDealRepository implements DealRepository {
     const statements = splitStatements(sql);
     const run = this.db.transaction(() => {
       for (const statement of statements) this.db.exec(statement);
+      this.addMissingColumns();
     });
     run();
+  }
+
+  /**
+   * Adds columns that schema.sql declares but an existing database lacks.
+   *
+   * Every statement in schema.sql is CREATE ... IF NOT EXISTS, which means a
+   * table that already exists is left exactly as it was. Adding a column to the
+   * schema therefore applied to new databases only, and silently did nothing to
+   * every database that already had rows in it — including any deployment with
+   * a volume. The next insert naming that column would fail, on the one
+   * installation whose data you cared about.
+   *
+   * This is deliberately additive and nothing more. Adding a nullable column is
+   * the one schema change that is safe to apply automatically: it cannot lose
+   * data and it cannot fail against rows that already exist. Anything else -
+   * dropping, renaming, retyping, backfilling - needs a considered migration
+   * with a human deciding what happens to the existing rows, and must not be
+   * smuggled in behind a boot-time call.
+   */
+  private addMissingColumns(): void {
+    for (const [table, columns] of Object.entries(ADDITIVE_COLUMNS)) {
+      const existing = new Set(
+        this.db
+          .prepare(`PRAGMA table_info(${table})`)
+          .all()
+          .map((row) => (row as { name: string }).name),
+      );
+
+      for (const [column, type] of Object.entries(columns)) {
+        if (existing.has(column)) continue;
+        this.db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+      }
+    }
   }
 
   async close(): Promise<void> {
@@ -202,7 +236,7 @@ export class SqliteDealRepository implements DealRepository {
     const insert = this.db.prepare(`
       INSERT INTO deals (id, source, source_id, slug, url, canonical_url, title,
         description, image_url, merchant_id, store_id, product_key, product_key_strength,
-        gtin, mpn, asin, category, department, brand,
+        gtin, mpn, asin, category, department, brand, keywords,
         sizes_available, price_now, price_was, currency, discount_pct, discount_abs,
         market_price, market_discount_pct, observed_low, price_rank_pct, verdict,
         evidence, claim_suspect, quality_note,
@@ -211,7 +245,7 @@ export class SqliteDealRepository implements DealRepository {
         also_seen_on, source_path)
       VALUES (@id, @source, @sourceId, @slug, @url, @canonicalUrl, @title,
         @description, @imageUrl, @merchantId, @storeId, @productKey, @productKeyStrength,
-        @gtin, @mpn, @asin, @category, @department, @brand,
+        @gtin, @mpn, @asin, @category, @department, @brand, @keywords,
         @sizesAvailable, @priceNow, @priceWas, @currency, @discountPct, @discountAbs,
         @marketPrice, @marketDiscountPct, @observedLow, @priceRankPct, @verdict,
         @evidence, @claimSuspect, @qualityNote,
@@ -224,7 +258,7 @@ export class SqliteDealRepository implements DealRepository {
         slug = @slug, url = @url, canonical_url = @canonicalUrl, title = @title,
         description = @description, image_url = @imageUrl, merchant_id = @merchantId,
         store_id = @storeId, category = @category, department = @department,
-        brand = @brand, sizes_available = @sizesAvailable, price_now = @priceNow,
+        brand = @brand, keywords = @keywords, sizes_available = @sizesAvailable, price_now = @priceNow,
         product_key = @productKey, product_key_strength = @productKeyStrength,
         gtin = @gtin, mpn = @mpn, asin = @asin,
         market_price = @marketPrice, market_discount_pct = @marketDiscountPct,
@@ -649,6 +683,7 @@ export function mapDealWithRelations(row: Row): DealWithRelations {
     category: row['category'] as Deal['category'],
     department: row['department'] as Deal['department'],
     brand: (row['brand'] as string | null) ?? null,
+    keywords: (row['keywords'] as string | null) ?? null,
     sizesAvailable: parseJsonArray(row['sizes_available']),
     productKey: (row['product_key'] as string | null) ?? null,
     productKeyStrength: (row['product_key_strength'] as Deal['productKeyStrength']) ?? null,
@@ -738,6 +773,7 @@ export function toDealParams(deal: DealInput, now: string, prior?: Row) {
     category: deal.category,
     department: deal.department,
     brand: deal.brand,
+    keywords: deal.keywords ?? null,
     sizesAvailable: deal.sizesAvailable ? JSON.stringify(deal.sizesAvailable) : null,
     productKey: deal.productKey,
     productKeyStrength: deal.productKeyStrength,

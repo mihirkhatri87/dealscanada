@@ -73,6 +73,7 @@ export function makeDeal(overrides: Partial<DealInput> = {}): DealInput {
     category: 'electronics',
     department: 'na',
     brand: null,
+    keywords: null,
     sizesAvailable: null,
     productKey: null,
     productKeyStrength: null,

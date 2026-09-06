@@ -84,6 +84,10 @@ CREATE TABLE IF NOT EXISTS deals (
   -- women | men | girls | boys | baby | unisex | na
   department     TEXT NOT NULL DEFAULT 'na',
   brand          TEXT,
+  -- Plain shopper words for what this is, when the retailer calls it something
+  -- else: a Structube "MARCO Console" is a table, and nobody searches for a
+  -- console. Space-padded (" table storage ") so a LIKE cannot match mid-word.
+  keywords       TEXT,
   sizes_available TEXT,
 
   -- Money in integer cents. price_was is NULL when no source provided one.

@@ -32,6 +32,10 @@ const itemSchema = z
     /** Configurable per store, and routinely empty. See the URL note below. */
     url_suffix: z.string().nullish(),
     small_image: z.object({ url: z.string().nullish() }).passthrough().nullish(),
+    short_description: z.object({ html: z.string().nullish() }).passthrough().nullish(),
+    categories: z
+      .array(z.object({ name: z.string().nullish() }).passthrough())
+      .nullish(),
     price_range: z
       .object({
         minimum_price: z
@@ -100,7 +104,15 @@ export function buildCategoryQuery(urlKeys: string[]): string {
 export function buildProductsQuery(categoryUid: string, pageSize: number): string {
   return (
     `{products(filter:{category_uid:{eq:${JSON.stringify(categoryUid)}}},pageSize:${pageSize})` +
+    // short_description and categories are what make these products findable.
+    // Structube titles its products "LUCAS" and "MADERA" — the name says
+    // nothing about what the thing is, and its short_description says
+    // "rectangular coffee table". Without them a shopper searching for a table
+    // gets nothing, and no synonym list can help because there is no word to
+    // map. The retailer's own category path is the second-best answer when a
+    // description is missing.
     `{items{name sku url_key url_suffix small_image{url}` +
+    `short_description{html} categories{name}` +
     `price_range{minimum_price{regular_price{value currency}final_price{value}}}}}}`
   );
 }
@@ -113,6 +125,40 @@ export function parseCategories(payload: unknown): Array<{ uid: string; urlKey: 
     // An empty category is a request that will come back with nothing.
     .filter((category) => (category.product_count ?? 1) > 0)
     .map((category) => ({ uid: category.uid, urlKey: category.url_key ?? category.uid }));
+}
+
+function stripHtml(html: string | null | undefined): string | null {
+  if (!html) return null;
+  const text = html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text === '' ? null : text;
+}
+
+/**
+ * The category names a product is filed under, as one hint string.
+ *
+ * Deduplicated because Magento returns the whole ancestry and a product sits in
+ * several overlapping trees at once - "Sale / Furniture / Living room" and
+ * "Furniture / Living Room" both come back for the same item.
+ */
+function categoryNames(
+  categories: Array<{ name?: string | null }> | null | undefined,
+): string | null {
+  if (!categories?.length) return null;
+
+  const names = [
+    ...new Set(
+      categories
+        .map((category) => category.name?.trim())
+        .filter((name): name is string => Boolean(name)),
+    ),
+  ];
+
+  return names.length > 0 ? names.join(' ') : null;
 }
 
 export interface MagentoParseOptions {
@@ -159,7 +205,7 @@ export function parseMagentoProducts(payload: unknown, options: MagentoParseOpti
       // suffix would publish a catalogue of dead links, so the store's own
       // `url_suffix` decides and an absent one means none.
       url: item.url_key ? `${base}/${item.url_key}${item.url_suffix ?? ''}` : base,
-      description: null,
+      description: stripHtml(item.short_description?.html),
       imageUrl: item.small_image?.url ?? null,
       price,
       priceWas,
@@ -172,7 +218,9 @@ export function parseMagentoProducts(payload: unknown, options: MagentoParseOpti
       // would let two retailers' internal codes collide into a confident, wrong
       // cross-merchant comparison.
       mpn: item.sku ?? null,
-      categoryHint: options.categoryHint ?? null,
+      // The retailer's own taxonomy, which names the product type even when the
+      // title and description do not: "Coffee Tables", "Sofas & Loveseats".
+      categoryHint: categoryNames(item.categories) ?? options.categoryHint ?? null,
       departmentHint: options.departmentHint ?? null,
       inStock: true,
       postedAt: null,

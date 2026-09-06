@@ -8,6 +8,31 @@
 
 export type Dialect = 'sqlite' | 'postgres';
 
+/**
+ * Columns added to tables that already exist in the wild.
+ *
+ * schema.sql is entirely CREATE ... IF NOT EXISTS, so it describes a *new*
+ * database perfectly and an *existing* one not at all: a table that is already
+ * there is left untouched, and a column added to the schema never reaches it.
+ * Both drivers consult this list after running the schema and add whatever is
+ * missing, which is what lets the schema evolve against a database that already
+ * holds rows.
+ *
+ * Nullable additions only. That is the one change safe to apply automatically -
+ * it cannot lose data and cannot fail against existing rows. Drops, renames,
+ * retypes and backfills all need a human deciding what happens to what is
+ * already stored, and do not belong in a boot-time call.
+ *
+ * Types are written in the SQLite dialect and translated for Postgres.
+ */
+export const ADDITIVE_COLUMNS: Record<string, Record<string, string>> = {
+  deals: {
+    // Shopper vocabulary for a product the retailer names differently: a
+    // Structube "console" is a table, and nobody searches for "console".
+    keywords: 'TEXT',
+  },
+};
+
 /** Rewrites the SQLite-dialect schema for Postgres. Identity on SQLite. */
 export function translateSchema(sql: string, dialect: Dialect): string {
   if (dialect === 'sqlite') return sql;
