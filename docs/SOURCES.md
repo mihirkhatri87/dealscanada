@@ -352,7 +352,7 @@ account's actual sales, so a new account hits it constantly. That is not a bug.
 ## Not built yet
 
 These are designed and specified in the PRD but **not in the repository**. Listed
-here so `npm run health` showing 71 sources rather than 101 is not a mystery.
+here so `npm run health` showing 71 sources rather than 106 is not a mystery.
 
 | Planned | Story | Why it is not here yet |
 |---|---|---|
