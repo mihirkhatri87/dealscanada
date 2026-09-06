@@ -1,0 +1,10 @@
+# DealsCanada
+#
+# The JSON API is not content. Every deal it returns is already reachable as a
+# page, so crawling /api/ spends a crawler's budget and ours to index nothing.
+#
+# Everything else is open. A deal site that hides from search engines is a deal
+# site nobody finds.
+
+User-agent: *
+Disallow: /api/

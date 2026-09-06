@@ -71,8 +71,9 @@ fly secrets set CRON_SECRET="$cron" --app dealscanada
 # Optional, once an affiliate application is approved:
 # fly secrets set AFFILIATE_FEEDS='{"mec":"https://..."}' --app dealscanada
 
-# 4. First deploy from your machine
-fly deploy
+# 4. First deploy. --remote-only builds on Fly's builder, so Docker Desktop does
+#    not need to be installed or running locally. The deploy workflow uses it too.
+fly deploy --remote-only
 
 # 5. Populate it. The machine is in Canada, so this is the real catalogue.
 fly ssh console --app dealscanada -C "node -e \"fetch('http://127.0.0.1:3000/api/health').then(r=>r.text()).then(console.log)\""
