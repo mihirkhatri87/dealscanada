@@ -44,15 +44,25 @@ jobs:
         run: npm run build
 
       - name: No secrets in the client bundle
-        # The Anthropic key is server-only. If it ever reaches .next/static the
-        # assistant has leaked a paid credential to every visitor, so this is a
-        # build-breaking check rather than a review habit.
+        # The Anthropic key is server-only. If a key value ever reaches
+        # .next/static the assistant has leaked a paid credential to every
+        # visitor, so this breaks the build rather than being a review habit.
+        #
+        # It looks for a key VALUE, not the variable's name: the assistant's
+        # "not configured" panel legitimately renders the string
+        # ANTHROPIC_API_KEY as help text, and failing on that would block correct
+        # code while teaching everyone to ignore the check.
         run: |
-          if grep -rIl --exclude-dir=cache -E 'sk-ant-|ANTHROPIC_API_KEY' .next/static 2>/dev/null; then
-            echo "::error::A secret or its env var name reached the client bundle."
+          leaked=$(grep -rIoh --exclude-dir=cache -E \
+            "sk-ant-[A-Za-z0-9_-]{8,}|ANTHROPIC_API_KEY[\"']?\s*[:=]\s*[\"'][^\"']+[\"']" \
+            .next/static 2>/dev/null || true)
+          if [ -n "$leaked" ]; then
+            echo "::error::An API key value reached the client bundle."
+            # Print only the shape, never the value itself - CI logs are public.
+            echo "$leaked" | sed -E 's/(sk-ant-).*/\1<redacted>/; s/([:=]).*/\1<redacted>/' | sort -u
             exit 1
           fi
-          echo "Client bundle is clean."
+          echo "Client bundle carries no key values."
 
   postgres:
     name: Repository contract on Postgres
