@@ -83,15 +83,65 @@ function collect(value: unknown, into: unknown[]): void {
   into.push(value);
 }
 
+/**
+ * `ProductGroup` counts too.
+ *
+ * It is what schema.org tells a retailer to publish for a product sold in
+ * several sizes or colours, and it is increasingly what they do publish -
+ * Altitude Sports and The Last Hunt both ship it. Accepting only `Product`
+ * reads those pages as carrying no structured data at all, when in fact they
+ * carry more than most.
+ */
+const PRODUCT_TYPES = new Set(['product', 'productgroup']);
+
 function isProduct(node: unknown): node is JsonLdProduct {
   if (node === null || typeof node !== 'object') return false;
   const type = (node as JsonLdProduct)['@type'];
 
-  if (typeof type === 'string') return type.toLowerCase() === 'product';
+  if (typeof type === 'string') return PRODUCT_TYPES.has(type.toLowerCase());
   if (Array.isArray(type)) {
-    return type.some((entry) => typeof entry === 'string' && entry.toLowerCase() === 'product');
+    return type.some(
+      (entry) => typeof entry === 'string' && PRODUCT_TYPES.has(entry.toLowerCase()),
+    );
   }
   return false;
+}
+
+/**
+ * The variant a shopper would actually get: in stock, cheapest.
+ *
+ * A ProductGroup holds no offers of its own — the prices sit on the `hasVariant`
+ * Products beneath it — so without this the group parses as priceless and the
+ * page is discarded. Mirrors the Shopify engine's choice of variant, for the
+ * same reason: the cheapest available one is the price on the shelf.
+ */
+function cheapestVariant(product: JsonLdProduct): JsonLdProduct | null {
+  const variants = (product as { hasVariant?: unknown }).hasVariant;
+  if (!Array.isArray(variants)) return null;
+
+  let best: JsonLdProduct | null = null;
+  let bestPrice = Number.POSITIVE_INFINITY;
+
+  for (const candidate of variants) {
+    if (candidate === null || typeof candidate !== 'object') continue;
+    const variant = candidate as JsonLdProduct;
+    const offer = firstOffer(variant.offers);
+    const price = Number(offer?.price ?? offer?.lowPrice);
+    if (!Number.isFinite(price)) continue;
+
+    const availability = firstString(offer?.availability)?.toLowerCase() ?? '';
+    const inStock = availability === '' || /instock|in stock|available/.test(availability);
+
+    // An out-of-stock variant is a last resort, never a reason to show a price
+    // nobody can pay.
+    if (best !== null && !inStock) continue;
+    if (price < bestPrice) {
+      best = variant;
+      bestPrice = price;
+    }
+  }
+
+  return best;
 }
 
 function firstString(value: unknown): string | null {
@@ -151,7 +201,12 @@ export function parseProductPage(html: string, options: JsonLdParseOptions): Raw
   const product = nodes.find(isProduct);
 
   if (product) {
-    const offer = firstOffer(product.offers);
+    // A ProductGroup keeps its name, image and brand at the top and its prices
+    // and identifiers on the chosen variant, so both are read.
+    const variant = firstOffer(product.offers) ? null : cheapestVariant(product);
+    const priced = variant ?? product;
+
+    const offer = firstOffer(priced.offers);
     const price = offer?.price ?? offer?.lowPrice ?? null;
     const title = firstString(product.name);
 
@@ -159,7 +214,7 @@ export function parseProductPage(html: string, options: JsonLdParseOptions): Raw
       const availability = firstString(offer?.availability)?.toLowerCase() ?? '';
 
       return {
-        sourceId: `${options.merchantDomain}:${firstString(product.sku) ?? options.url}`,
+        sourceId: `${options.merchantDomain}:${firstString(priced.sku) ?? options.url}`,
         title,
         url: options.url,
         description: firstString(product.description),
@@ -175,12 +230,12 @@ export function parseProductPage(html: string, options: JsonLdParseOptions): Raw
         merchantName: options.merchantName ?? null,
         brand: firstString(product.brand),
         gtin:
-          firstString(product.gtin13) ??
-          firstString(product.gtin12) ??
-          firstString(product.gtin14) ??
-          firstString(product.gtin8) ??
-          firstString(product.gtin),
-        mpn: firstString(product.mpn),
+          firstString(priced.gtin13) ??
+          firstString(priced.gtin12) ??
+          firstString(priced.gtin14) ??
+          firstString(priced.gtin8) ??
+          firstString(priced.gtin),
+        mpn: firstString(priced.mpn) ?? firstString(product.mpn),
         categoryHint: options.categoryHint ?? firstString(product.category),
         departmentHint: options.departmentHint ?? null,
         inStock:
@@ -286,23 +341,37 @@ export function createJsonLdAdapter(config: RetailerConfig): SourceAdapter {
       }
 
       const links = new Set<string>();
+      let listingError: string | undefined;
 
       for (const path of listingPaths(config)) {
         if (links.size >= limit) break;
 
         const listingUrl = `${base}${path.startsWith('/') ? '' : '/'}${path}`;
-        // This engine crawls, so robots.txt is honoured on every request - it is
-        // deliberately NOT skipped the way a documented API endpoint is.
-        const listing = await context.http.fetchText(listingUrl);
 
-        for (const link of extractProductLinks(
-          listing.data,
-          base,
-          config.productLinkSelector ?? 'a',
-        )) {
-          links.add(link);
-          if (links.size >= limit) break;
+        try {
+          // This engine crawls, so robots.txt is honoured on every request - it
+          // is deliberately NOT skipped the way a documented API endpoint is.
+          const listing = await context.http.fetchText(listingUrl);
+
+          for (const link of extractProductLinks(
+            listing.data,
+            base,
+            config.productLinkSelector ?? 'a',
+          )) {
+            links.add(link);
+            if (links.size >= limit) break;
+          }
+        } catch (error) {
+          // Retailers rename and retire sale sections constantly, and entries
+          // here list several. One stale path used to throw out of the loop and
+          // take the retailer with it, even when a later path still worked.
+          listingError = error instanceof Error ? error.message : String(error);
+          context.log(`listing ${path} unavailable: ${listingError}`);
         }
+      }
+
+      if (links.size === 0 && listingError) {
+        return { deals: [], path: 'jsonld', reason: `no listing reachable: ${listingError}` };
       }
 
       const deals: RawDeal[] = [];

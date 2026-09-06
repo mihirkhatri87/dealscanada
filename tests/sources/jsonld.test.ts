@@ -177,6 +177,78 @@ describe('parseProductPage', () => {
       parseProductPage(page(JSON.stringify({ '@type': 'Product', name: 'No price' })), options),
     ).toBeNull();
   });
+
+  // schema.org tells a retailer to publish ProductGroup for anything sold in
+  // several sizes or colours, and the offers then sit on the variants rather
+  // than the group. Altitude Sports and The Last Hunt both ship this shape.
+  const productGroup = {
+    '@type': 'ProductGroup',
+    name: 'Ultride Vest',
+    image: 'https://cdn.example/vest.jpg',
+    brand: { name: 'Café du Cycliste' },
+    hasVariant: [
+      {
+        '@type': 'Product',
+        name: 'Ultride Vest - L',
+        sku: 'VEST-L',
+        gtin13: '7630326407943',
+        offers: { '@type': 'Offer', price: 336.99, priceCurrency: 'CAD', availability: 'InStock' },
+      },
+      {
+        '@type': 'Product',
+        name: 'Ultride Vest - S',
+        sku: 'VEST-S',
+        gtin13: '7630326407950',
+        offers: { '@type': 'Offer', price: 299.99, priceCurrency: 'CAD', availability: 'InStock' },
+      },
+    ],
+  };
+
+  it('reads a ProductGroup, whose prices live on its variants', () => {
+    const deal = parseProductPage(page(JSON.stringify(productGroup)), options);
+
+    // The group's name and image, the chosen variant's price and identity.
+    expect(deal?.title).toBe('Ultride Vest');
+    expect(deal?.price).toBe(299.99);
+    expect(deal?.gtin).toBe('7630326407950');
+    expect(deal?.imageUrl).toBe('https://cdn.example/vest.jpg');
+  });
+
+  it('prefers an in-stock variant over a cheaper sold-out one', () => {
+    const soldOutIsCheaper = {
+      ...productGroup,
+      hasVariant: [
+        {
+          '@type': 'Product',
+          name: 'Vest - XL',
+          sku: 'VEST-XL',
+          offers: { price: 250, priceCurrency: 'CAD', availability: 'https://schema.org/InStock' },
+        },
+        {
+          '@type': 'Product',
+          name: 'Vest - XS',
+          sku: 'VEST-XS',
+          offers: {
+            price: 99,
+            priceCurrency: 'CAD',
+            availability: 'https://schema.org/OutOfStock',
+          },
+        },
+      ],
+    };
+
+    // $99 is not a price anybody can pay.
+    expect(parseProductPage(page(JSON.stringify(soldOutIsCheaper)), options)?.price).toBe(250);
+  });
+
+  it('still prefers a group offer when the group carries one itself', () => {
+    const withOwnOffer = {
+      ...productGroup,
+      offers: { '@type': 'Offer', price: 199, priceCurrency: 'CAD' },
+    };
+
+    expect(parseProductPage(page(JSON.stringify(withOwnOffer)), options)?.price).toBe(199);
+  });
 });
 
 describe('parseOpenGraph', () => {
@@ -226,6 +298,50 @@ describe('createJsonLdAdapter', () => {
     expect(createJsonLdAdapter({ ...config, salePaths: null }).enabled()).toMatchObject({
       enabled: false,
     });
+  });
+
+  it('keeps going when one listing path has been retired', async () => {
+    // Entries here list several sale sections and retailers retire them all the
+    // time. A stale path used to throw out of the loop and take the whole
+    // retailer with it, even though a later path still worked.
+    const fetchText = vi.fn(async (url: string) => {
+      if (url.includes('/en/gone')) throw new Error('HTTP 404');
+      if (url.includes('/en/live')) {
+        return { data: '<a class="product-link" href="/en/p/1">One</a>' };
+      }
+      return {
+        data: `<script type="application/ld+json">${JSON.stringify({
+          '@type': 'Product',
+          name: 'Graphics Card',
+          offers: { price: 499.99, priceCurrency: 'CAD' },
+        })}</script>`,
+      };
+    });
+
+    const result = await createJsonLdAdapter({
+      ...config,
+      salePaths: ['/en/gone', '/en/live'],
+    }).fetch({
+      http: {
+        fetchText,
+        setDomainRate: vi.fn(),
+      } as unknown as AdapterContext['http'],
+      log: () => {},
+    });
+
+    expect(result.deals.map((deal) => deal.title)).toEqual(['Graphics Card']);
+  });
+
+  it('says the listings were unreachable rather than blaming the markup', async () => {
+    const fetchText = vi.fn().mockRejectedValue(new Error('HTTP 404'));
+
+    const result = await createJsonLdAdapter(config).fetch({
+      http: { fetchText, setDomainRate: vi.fn() } as unknown as AdapterContext['http'],
+      log: () => {},
+    });
+
+    expect(result.deals).toEqual([]);
+    expect(result.reason).toContain('no listing reachable');
   });
 
   it('honours robots.txt on every request, unlike the API engines', async () => {
