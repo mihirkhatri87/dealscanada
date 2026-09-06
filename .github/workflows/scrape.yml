@@ -1,0 +1,87 @@
+name: Scrape
+
+# GitHub schedules it; the Fly machine in Toronto runs it.
+#
+# The split matters. GitHub-hosted runners are US-based, and every retailer in
+# the catalogue is Canadian: several geo-redirect a US caller to a .com
+# storefront, price in USD, or refuse outright. A scrape running on the runner
+# itself would collect a different, wrong catalogue and report it as a success.
+#
+# So this workflow is a scheduler and nothing else. It calls the app's own
+# authenticated endpoint, which does the work from a Canadian IP and writes to
+# the SQLite volume it already owns. That also sidesteps every hosted-cron
+# frequency cap, which is the other reason not to use the platform's scheduler.
+on:
+  schedule:
+    # Every six hours. Retailers change prices daily at most, and each run is
+    # polite to them - see the rate limiting in src/lib/util/rate-limit.ts.
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      budgetMs:
+        description: 'Wall-clock budget for the run, in ms (clamped to 285000)'
+        required: false
+        default: ''
+
+concurrency:
+  # Never let a delayed run overlap the next scheduled one: two concurrent
+  # scrapes would double every retailer's request rate, which is the one thing
+  # this project promises not to do.
+  group: scrape-production
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    name: Trigger the scheduled scrape
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask the app to scrape
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.APP_URL || 'https://dealscanada.fly.dev' }}
+          BUDGET: ${{ inputs.budgetMs }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::CRON_SECRET is not set, so the endpoint will refuse the call."
+            exit 1
+          fi
+
+          url="${APP_URL}/api/cron/scrape"
+          if [ -n "$BUDGET" ]; then
+            url="${url}?budgetMs=${BUDGET}"
+          fi
+
+          # --max-time comfortably exceeds the route's own 285s ceiling, so a
+          # slow run finishes rather than being cut off by the client.
+          # The machine may be suspended, so allow for a resume before failing.
+          status=$(curl -sS -o response.json -w '%{http_code}' \
+            --max-time 330 --retry 2 --retry-connrefused --retry-delay 10 \
+            -X POST "$url" \
+            -H "Authorization: Bearer ${CRON_SECRET}")
+
+          echo "HTTP $status"
+          # The body carries per-source outcomes and any sources it never
+          # reached, which is the part worth reading in the run log.
+          cat response.json
+          echo
+
+          if [ "$status" != "200" ]; then
+            echo "::error::The scrape endpoint returned HTTP $status."
+            exit 1
+          fi
+
+      - name: Summarise the run
+        if: always()
+        run: |
+          if [ ! -s response.json ]; then
+            echo 'No response body was captured.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          {
+            echo '### Scrape result'
+            echo
+            echo '```json'
+            head -c 4000 response.json
+            echo
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

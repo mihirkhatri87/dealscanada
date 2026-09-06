@@ -1,0 +1,68 @@
+# Fly.io — the whole stack, not just a database.
+#
+# Fly boots the image built from ./Dockerfile as a real VM, so this one file
+# hosts the Next.js server, the scrape worker and the SQLite database together.
+# There is no separate database service to provision, expire or pay for.
+#
+# Cost at this shape is roughly $2/month: a shared-cpu-1x/512MB machine that
+# suspends when idle, plus a 1GB volume at about $0.15.
+
+app = "dealscanada"
+
+# Toronto, and this is not a preference.
+#
+# Every retailer in the catalogue is Canadian. Several geo-redirect a US
+# visitor to a .com storefront, price in USD, or refuse outright — the whole
+# reason `npm run health` has to be run from a Canadian IP. A machine in a US
+# region would quietly collect the wrong catalogue and report it as success.
+primary_region = "yyz"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
+  # Lives on the mounted volume below, so it survives deploys and restarts.
+  SQLITE_PATH = "/app/data/deals.db"
+
+# SQLite is a file, and a file has exactly one writer. This volume is what makes
+# the data outlive a deploy — without it every release would ship an empty
+# database and the price history the verification pass depends on would reset,
+# which would silently turn every deal into "the lowest price we've recorded".
+[mounts]
+  source = "dealscanada_data"
+  destination = "/app/data"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  # Suspend when idle and wake on the next request. The scrape schedule wakes it
+  # every six hours anyway, and a suspended machine resumes in about a second.
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  # Zero, not one: a deal site with no visitors at 4am should not be billed as
+  # though it had them.
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "20s"
+    method = "GET"
+    path = "/api/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  # 512MB rather than 256: `next build` output is served fine by 256, but a
+  # scrape holds a batch of deals plus cheerio's DOM for the page being parsed.
+  memory = "512mb"
+  cpus = 1
+
+# One machine, deliberately. Two would both try to mount the same volume and
+# write the same SQLite file. Scaling this app means a bigger machine, or moving
+# to Postgres by setting DATABASE_URL — which the repository layer already
+# supports, and which a CI job already tests against.
+[deploy]
+  strategy = "immediate"

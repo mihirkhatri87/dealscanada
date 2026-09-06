@@ -53,6 +53,21 @@ describe('platform detection', () => {
     );
   });
 
+  it('does not read "image/" in an asset path as a Magento marker', () => {
+    // `mage/` without a word boundary matches inside "image/", which appears in
+    // the asset URLs of practically every storefront. Every unrecognised site
+    // came back Magento and never reached the JSON-LD fallback.
+    const result = detectPlatform({
+      html: '<img src="/static/image/logo.png"><script type="application/ld+json">{}</script>',
+    });
+
+    expect(result.engine).toBe('jsonld');
+  });
+
+  it('still recognises a real mage/ module path', () => {
+    expect(detectPlatform({ html: '<script src="/js/mage/apply/main.js">' }).engine).toBe('magento');
+  });
+
   it('offers JSON-LD as a fallback when it recognises nothing but sees structured data', () => {
     const result = detectPlatform({
       html: '<script type="application/ld+json">{"@type":"Product"}</script>',

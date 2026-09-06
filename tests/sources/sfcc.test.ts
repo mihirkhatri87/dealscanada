@@ -103,6 +103,49 @@ describe('parsing the search grid', () => {
     expect(parseSfccGrid('<div><p>Nothing here</p></div>', options)).toEqual([]);
     expect(parseSfccGrid('', options)).toEqual([]);
   });
+
+  // Roots renames SFRA's `.pdp-link` to `.product-name-link`, and its only
+  // styled anchor wraps the image and carries no text. Requiring a known class
+  // dropped the whole retailer to zero deals against a grid that parses fine.
+  it('reads a renamed name link rather than dropping the retailer', () => {
+    const html = `<div class="product" data-pid="123">
+      <a class="product-tile-image-link" href="/p/coat.html"><img alt="Wool Coat" src="/i.jpg"></a>
+      <a class="quickview" href="/p/coat.html">Quick View</a>
+      <div class="product-name-link"><a href="/p/coat.html">Wool Coat</a></div>
+      <span class="sales"><span class="value" content="49.99">$49.99</span></span>
+      <span class="strike-through"><span class="value" content="120.00">$120.00</span></span>
+    </div>`;
+
+    const [deal] = parseSfccGrid(html, options);
+    expect(deal?.title).toBe('Wool Coat');
+    expect(deal?.price).toBe(49.99);
+    expect(deal?.priceWas).toBe(120);
+  });
+
+  it('falls back to the image alt when no anchor carries the name', () => {
+    const html = `<div class="product" data-pid="456">
+      <a class="product-tile-image-link" href="/p/boot.html"><img alt="Chelsea Boot" src="/i.jpg"></a>
+      <span class="sales"><span class="value" content="80.00">$80.00</span></span>
+      <span class="strike-through"><span class="value" content="160.00">$160.00</span></span>
+    </div>`;
+
+    const [deal] = parseSfccGrid(html, options);
+    expect(deal?.title).toBe('Chelsea Boot');
+    expect(deal?.url).toContain('/p/boot.html');
+  });
+
+  it('does not take a colour swatch label as the product name', () => {
+    // Swatches link to the same page with text like "Wool Coat: BLACK", which
+    // document order would otherwise hand over as the title.
+    const html = `<div class="product" data-pid="789">
+      <a class="product-tile-image-link" href="/p/coat.html"><img alt="Wool Coat" src="/i.jpg"></a>
+      <a class="swatch-button-li" href="/p/coat.html">Wool Coat: BLACK Colour</a>
+      <span class="sales"><span class="value" content="49.99">$49.99</span></span>
+      <span class="strike-through"><span class="value" content="120.00">$120.00</span></span>
+    </div>`;
+
+    expect(parseSfccGrid(html, options)[0]?.title).toBe('Wool Coat');
+  });
 });
 
 describe('site id detection', () => {

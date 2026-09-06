@@ -21,12 +21,14 @@ const RAW_CATALOGUE = [
     domain: 'canadiantire.ca',
     baseUrl: 'https://www.canadiantire.ca',
     engine: 'hybris',
-    status: 'unverified',
+    status: 'blocked',
     family: 'canadian-tire',
     vertical: 'general',
     salePaths: ['CLEARANCE'],
     jsonLdListingPaths: ['/en/clearance.html'],
     productLinkSelector: '.product-tile a, a.nl-product-card__link',
+    enabled: false,
+    note: 'storefront returns HTTP 403 (bot protection); needs an ocp-apim-subscription-key for the Hybris API',
   },
   {
     id: 'sportchek',
@@ -34,12 +36,14 @@ const RAW_CATALOGUE = [
     domain: 'sportchek.ca',
     baseUrl: 'https://www.sportchek.ca',
     engine: 'hybris',
-    status: 'unverified',
+    status: 'blocked',
     family: 'canadian-tire',
     vertical: 'sports',
     salePaths: ['SALE'],
     jsonLdListingPaths: ['/en/sale.html'],
     productLinkSelector: '.product-card a, a.product-card__link',
+    enabled: false,
+    note: 'storefront returns HTTP 403 (bot protection); needs an ocp-apim-subscription-key for the Hybris API',
   },
   {
     id: 'marks',
@@ -47,12 +51,14 @@ const RAW_CATALOGUE = [
     domain: 'marks.com',
     baseUrl: 'https://www.marks.com',
     engine: 'hybris',
-    status: 'unverified',
+    status: 'blocked',
     family: 'canadian-tire',
     vertical: 'apparel',
     salePaths: ['SALE'],
     jsonLdListingPaths: ['/en/sale.html'],
     productLinkSelector: '.product-tile a',
+    enabled: false,
+    note: 'storefront returns HTTP 403 (bot protection); needs an ocp-apim-subscription-key for the Hybris API',
   },
   {
     id: 'atmosphere',
@@ -60,12 +66,14 @@ const RAW_CATALOGUE = [
     domain: 'atmosphere.ca',
     baseUrl: 'https://www.atmosphere.ca',
     engine: 'hybris',
-    status: 'unverified',
+    status: 'blocked',
     family: 'canadian-tire',
     vertical: 'sports',
     salePaths: ['SALE'],
     jsonLdListingPaths: ['/en/sale.html'],
     productLinkSelector: '.product-card a',
+    enabled: false,
+    note: 'storefront answers 200 but serves one SPA shell for every route, so there are no product links to crawl; needs the Hybris API key',
   },
   {
     id: 'sports-experts',
@@ -73,12 +81,14 @@ const RAW_CATALOGUE = [
     domain: 'sportsexperts.ca',
     baseUrl: 'https://www.sportsexperts.ca',
     engine: 'hybris',
-    status: 'unverified',
+    status: 'blocked',
     family: 'canadian-tire',
     vertical: 'sports',
     salePaths: ['SALE'],
     jsonLdListingPaths: ['/fr/solde.html'],
     productLinkSelector: '.product-card a',
+    enabled: false,
+    note: 'storefront redirects to itself (302 loop) for every request; needs the Hybris API key',
   },
   {
     id: 'lequipeur',
@@ -86,25 +96,30 @@ const RAW_CATALOGUE = [
     domain: 'lequipeur.com',
     baseUrl: 'https://www.lequipeur.com',
     engine: 'hybris',
-    status: 'unverified',
+    status: 'blocked',
     family: 'canadian-tire',
     vertical: 'apparel',
     salePaths: ['SALE'],
     jsonLdListingPaths: ['/fr/solde.html'],
     productLinkSelector: '.product-tile a',
+    enabled: false,
+    note: 'storefront returns HTTP 403 (bot protection); needs an ocp-apim-subscription-key for the Hybris API',
   },
   {
     id: 'pro-hockey-life',
     name: 'Pro Hockey Life',
     domain: 'prohockeylife.com',
     baseUrl: 'https://www.prohockeylife.com',
-    engine: 'hybris',
-    status: 'unverified',
+    // Canadian Tire owns the banner, but the storefront is Shopify rather than
+    // the group's Hybris platform — /en/sale.html 404s and /collections.json
+    // answers. Family is kept so /brands still groups it correctly.
+    //
+    // No salePaths for the same reason as Indigo: the markdown collections are
+    // named for the year (`2025-stick-markdowns`) and will be renamed.
+    engine: 'shopify',
+    status: 'verified',
     family: 'canadian-tire',
     vertical: 'sports',
-    salePaths: ['SALE'],
-    jsonLdListingPaths: ['/en/sale.html'],
-    productLinkSelector: '.product-card a',
   },
   {
     id: 'partsource',
@@ -267,12 +282,14 @@ const RAW_CATALOGUE = [
     name: 'Giant Tiger',
     domain: 'gianttiger.com',
     baseUrl: 'https://www.gianttiger.com',
-    engine: 'jsonld',
-    status: 'unverified',
+    // Shopify, not a JSON-LD crawl: /collections.json answers, so the platform
+    // hands over compare_at_price instead of us scraping a strikethrough.
+    engine: 'shopify',
+    status: 'verified',
     enabled: true,
     vertical: 'general',
-    salePaths: ['/collections/sale'],
-    productLinkSelector: 'a.product-item__link',
+    // `sale` is empty and `clearance` holds no markdowns; this is where they are.
+    salePaths: ['flyers-and-deals'],
     maxProductPages: 30,
   },
   {
@@ -280,9 +297,17 @@ const RAW_CATALOGUE = [
     name: "Hudson's Bay",
     domain: 'thebay.com',
     baseUrl: 'https://www.thebay.com',
+    // The retailer is gone, not unreachable. HBC entered CCAA protection in
+    // March 2025, closed every store by 1 June 2025, and Canadian Tire bought
+    // the trademarks and domains. thebay.com now redirects into canadiantire.ca.
+    //
+    // Health was reporting this as "probe timed out", which reads like a
+    // transient fault and invites retrying it forever.
     engine: 'sfcc',
-    status: 'unverified',
+    status: 'blocked',
+    enabled: false,
     vertical: 'general',
+    note: 'ceased trading June 2025; thebay.com redirects to Canadian Tire, which bought the brand',
   },
   {
     id: 'simons',
@@ -363,13 +388,15 @@ const RAW_CATALOGUE = [
     name: 'Visions Electronics',
     domain: 'visions.ca',
     baseUrl: 'https://www.visions.ca',
-    engine: 'jsonld',
-    status: 'unverified',
+    // The /collections/ path was a Shopify shape this store never had, hence
+    // the 404. It is Magento, and its clearance category holds ~1,800 items
+    // whose grid is client-rendered — invisible to a crawler, plain over the
+    // platform API.
+    engine: 'magento',
+    status: 'verified',
     enabled: true,
     vertical: 'electronics',
-    salePaths: ['/collections/sale'],
-    productLinkSelector: 'a.product-item__link',
-    maxProductPages: 30,
+    salePaths: ['clearance'],
   },
   {
     id: 'the-source',
@@ -411,10 +438,22 @@ const RAW_CATALOGUE = [
     name: 'Roots',
     domain: 'roots.com',
     baseUrl: 'https://www.roots.com',
-    engine: 'shopify',
-    status: 'unverified',
-    enabled: true,
+    // Not Shopify: /collections.json 404s and the storefront is SFRA, serving
+    // Sites-RootsCA-Site. The engine and cgid below are correct — the grid
+    // returns 48 parseable markdowns — but they are recorded, not used.
+    //
+    // roots.com/robots.txt has a single `user-agent: *` group carrying
+    // `Disallow: */Search`, and this engine's only entry point is
+    // Search-UpdateGrid. There is no compliant route to this retailer's grid,
+    // so it stays off rather than becoming the one source that ignores robots.
+    engine: 'sfcc',
+    sfccSiteId: 'RootsCA',
+    sfccLocale: 'en_CA',
+    salePaths: ['Sale'],
+    status: 'blocked',
+    enabled: false,
     vertical: 'apparel',
+    note: 'robots.txt disallows */Search, which is the SFCC grid endpoint',
   },
   {
     id: 'aritzia',
@@ -465,20 +504,32 @@ const RAW_CATALOGUE = [
     name: 'Altitude Sports',
     domain: 'altitude-sports.com',
     baseUrl: 'https://www.altitude-sports.com',
-    engine: 'shopify',
-    status: 'unverified',
+    // Never Shopify — /collections.json 404s. Product pages publish a
+    // schema.org ProductGroup carrying GTINs, which is better identity than
+    // most of the catalogue has.
+    engine: 'jsonld',
+    status: 'verified',
     enabled: true,
     vertical: 'apparel',
+    salePaths: ['/c/sale'],
+    productLinkSelector: 'a[href*="/p/"]',
+    maxProductPages: 30,
   },
   {
     id: 'the-last-hunt',
     name: 'The Last Hunt',
     domain: 'thelasthunt.com',
     baseUrl: 'https://www.thelasthunt.com',
-    engine: 'shopify',
-    status: 'unverified',
+    // Same platform as its sibling Altitude Sports, and the same ProductGroup
+    // markup. The seasonal path is listed first and the evergreen one second,
+    // so the entry keeps working when the season ends.
+    engine: 'jsonld',
+    status: 'verified',
     enabled: true,
     vertical: 'apparel',
+    salePaths: ['/c/end-of-season-sale', '/discovery-deals'],
+    productLinkSelector: 'a[href*="/p/"]',
+    maxProductPages: 30,
   },
   {
     id: 'sporting-life',
@@ -496,7 +547,18 @@ const RAW_CATALOGUE = [
     domain: 'frankandoak.com',
     baseUrl: 'https://www.frankandoak.com',
     engine: 'shopify',
-    status: 'unverified',
+    // The store has no generic `sale` collection; every markdown lives under a
+    // department-scoped handle, which is why the default list found nothing.
+    salePaths: [
+      'sale-mens',
+      'sale-mens-jackets',
+      'sale-mens-pants',
+      'sale-mens-shirts',
+      'sale-mens-sweatshirts',
+      'sale-mens-polos',
+    ],
+    departmentHint: 'men',
+    status: 'verified',
     enabled: true,
     vertical: 'apparel',
   },
@@ -563,10 +625,16 @@ const RAW_CATALOGUE = [
     name: 'Browns Shoes',
     domain: 'brownsshoes.com',
     baseUrl: 'https://www.brownsshoes.com',
-    engine: 'shopify',
-    status: 'unverified',
+    // An SFCC storefront, but it never exposes Sites-<id>-Site, so the SFCC
+    // engine cannot resolve a site id and the grid endpoint is unreachable.
+    // The JSON-LD on its product pages is the route that actually works.
+    engine: 'jsonld',
+    status: 'verified',
     enabled: true,
     vertical: 'footwear',
+    salePaths: ['/en/sale'],
+    productLinkSelector: 'a[href*="/product"]',
+    maxProductPages: 30,
   },
   {
     id: 'urban-planet',
@@ -614,7 +682,10 @@ const RAW_CATALOGUE = [
     domain: 'suzyshier.com',
     baseUrl: 'https://www.suzyshier.com',
     engine: 'shopify',
-    status: 'unverified',
+    // `clearance` and `flash-sale` exist but are empty; these three carry the
+    // actual markdowns.
+    salePaths: ['promo', 'clothing-sale', 'extra-30-off-fall-markdowns'],
+    status: 'verified',
     enabled: true,
     vertical: 'apparel',
   },
@@ -750,10 +821,14 @@ const RAW_CATALOGUE = [
     name: 'West Coast Kids',
     domain: 'westcoastkids.ca',
     baseUrl: 'https://www.westcoastkids.ca',
-    engine: 'shopify',
-    status: 'unverified',
+    // Magento. Now on the platform engine rather than the JSON-LD crawler: its
+    // GraphQL states regular and final price separately, so before/after is the
+    // merchant's own record, and one API call replaces thirty page fetches.
+    engine: 'magento',
+    status: 'verified',
     enabled: true,
     vertical: 'baby',
+    salePaths: ['sale'],
   },
   {
     id: 'scholars-choice',
@@ -770,13 +845,14 @@ const RAW_CATALOGUE = [
     name: 'Indigo',
     domain: 'indigo.ca',
     baseUrl: 'https://www.indigo.ca',
-    engine: 'jsonld',
-    status: 'unverified',
+    // Shopify. Deliberately no salePaths: Indigo files markdowns under three
+    // dozen campaign handles (`our-big-sale-vinyl-records`) that are renamed
+    // every season, so pinning any of them buys a source with an expiry date.
+    // The engine reads /collections.json and takes only genuine markdowns.
+    engine: 'shopify',
+    status: 'verified',
     enabled: true,
     vertical: 'books',
-    salePaths: ['/en-ca/deals/'],
-    productLinkSelector: 'a.product-list__product-link',
-    maxProductPages: 30,
   },
   {
     id: 'home-depot',
@@ -844,11 +920,13 @@ const RAW_CATALOGUE = [
     name: 'Structube',
     domain: 'structube.com',
     baseUrl: 'https://www.structube.com',
-    engine: 'jsonld',
-    status: 'unverified',
-    enabled: false,
+    // Was disabled for want of a listing path. It is Magento, so there is no
+    // path to find: the store names its own sale category.
+    engine: 'magento',
+    status: 'verified',
+    enabled: true,
     vertical: 'home',
-    note: 'no sale listing path discovered yet - run retailer:probe',
+    salePaths: ['sale'],
   },
   {
     id: 'leons',

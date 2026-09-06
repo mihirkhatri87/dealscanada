@@ -172,10 +172,82 @@ describe('createShopifyAdapter', () => {
       context({ http: { fetchJson } as unknown as AdapterContext['http'] }),
     );
 
-    expect(fetchJson).toHaveBeenCalledTimes(1);
-    expect(fetchJson).toHaveBeenCalledWith(
-      expect.stringContaining('/collections/final-sale/'),
-      expect.anything(),
+    // The pinned collection is what gets asked for, and it is asked for first.
+    // Anything after it is the discovery fallback, which only runs because this
+    // store returned nothing.
+    expect(fetchJson.mock.calls[0]?.[0]).toContain('/collections/final-sale/');
+  });
+
+  it('asks the store which collections it has when the guesses find nothing', async () => {
+    const fetchJson = vi.fn(async (url: string) => {
+      if (url.includes('/collections.json')) {
+        return { data: { collections: [{ handle: 'boots' }, { handle: 'winter-clearance' }] } };
+      }
+      if (url.includes('/collections/winter-clearance/')) {
+        return {
+          data: {
+            products: [
+              {
+                id: 1,
+                title: 'Parka',
+                handle: 'parka',
+                variants: [{ id: 11, price: '99.00', compare_at_price: '249.00' }],
+              },
+            ],
+          },
+        };
+      }
+      return { data: { products: [] } };
+    });
+
+    const result = await createShopifyAdapter(config).fetch(
+      context({ http: { fetchJson } as unknown as AdapterContext['http'] }),
+    );
+
+    expect(result.deals.map((deal) => deal.title)).toEqual(['Parka']);
+    // A department handle is not a sale section and must not be crawled.
+    expect(fetchJson.mock.calls.some(([url]) => url.includes('/collections/boots/'))).toBe(false);
+    expect(result.path).toBe('products.json (discovered)');
+  });
+
+  it('requires a real markdown in a discovered collection, unlike a pinned one', async () => {
+    // `sale-klutz` is a brand section at list price. A pinned handle is someone
+    // deciding its contents are deals; a matched name is only a guess, so a
+    // product with no compare_at_price must not become a deal on its own.
+    const listPriceOnly = {
+      products: [
+        {
+          id: 2,
+          title: 'Craft Kit',
+          handle: 'craft-kit',
+          variants: [{ id: 21, price: '19.99', compare_at_price: null }],
+        },
+      ],
+    };
+
+    const fetchJson = vi.fn(async (url: string) => {
+      if (url.includes('/collections.json')) {
+        return { data: { collections: [{ handle: 'sale-klutz' }] } };
+      }
+      if (url.includes('/collections/sale-klutz/')) return { data: listPriceOnly };
+      return { data: { products: [] } };
+    });
+
+    const result = await createShopifyAdapter(config).fetch(
+      context({ http: { fetchJson } as unknown as AdapterContext['http'] }),
+    );
+
+    expect(result.deals).toEqual([]);
+  });
+
+  it('does not go looking when the configured collections already produced deals', async () => {
+    const fetchJson = vi.fn().mockResolvedValue({ data: fixture });
+    await createShopifyAdapter({ ...config, salePaths: ['sale'] }).fetch(
+      context({ http: { fetchJson } as unknown as AdapterContext['http'] }),
+    );
+
+    expect(fetchJson.mock.calls.some(([url]) => String(url).includes('/collections.json'))).toBe(
+      false,
     );
   });
 });

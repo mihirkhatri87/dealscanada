@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { runPipeline } from '@/lib/pipeline/run';
 import { register, resetRegistry, allAdapters, getAdapter } from '@/lib/sources/registry';
 import type { SourceAdapter, RawDeal } from '@/lib/sources/types';
-import { tempSqliteRepo } from '../db/helpers';
+import { tempSqliteRepo, makeMerchant } from '../db/helpers';
 import type { DealRepository } from '@/lib/db/repository';
 
 let repo: DealRepository;
@@ -311,5 +311,62 @@ describe('registry', () => {
     expect(getAdapter('findme')?.id).toBe('findme');
     expect(getAdapter('nope')).toBeUndefined();
     expect(allAdapters()).toHaveLength(1);
+  });
+});
+
+describe('runPipeline: inventing a merchant for an unseen domain', () => {
+  it('does not collide with an existing merchant that differs only by TLD', async () => {
+    // merchants.slug is UNIQUE and a slug drops the TLD, so an unseen
+    // contoso.ca derives the slug that contoso.com already holds. That single
+    // failed insert took down the writes for every deal from every source in
+    // the run, not just this one — the production symptom was
+    // "UNIQUE constraint failed: merchants.slug" and zero deals stored.
+    await repo.upsertMerchants([
+      makeMerchant({ id: 'merchant:contoso.com', slug: 'contoso', domain: 'contoso.com' }),
+    ]);
+
+    const summary = await runPipeline({
+      adapters: [
+        fakeAdapter('contoso-ca', 'healthy', [
+          rawDeal({
+            sourceId: 'contoso-1',
+            url: 'https://www.contoso.ca/product/9999',
+            merchantDomain: 'contoso.ca',
+          }),
+        ]),
+      ],
+      repo,
+    });
+
+    expect(summary.sources[0]?.outcome).toBe('ok');
+
+    const merchants = await repo.listMerchants();
+    const slugs = merchants.map((merchant) => merchant.slug);
+    expect(new Set(slugs).size).toBe(slugs.length);
+
+    // The newcomer yields. An existing slug is in URLs and must not be renamed.
+    expect(merchants.find((m) => m.domain === 'contoso.com')?.slug).toBe('contoso');
+    expect(merchants.find((m) => m.domain === 'contoso.ca')?.slug).toBe('contoso-ca');
+
+    // And the deal it arrived with is stored, rather than lost with the run.
+    expect(await repo.countDeals({})).toBeGreaterThan(0);
+  });
+
+  it('still writes the run that invented it', async () => {
+    const summary = await runPipeline({
+      adapters: [
+        fakeAdapter('shop-a', 'healthy', [
+          rawDeal({
+            sourceId: 'a-1',
+            url: 'https://www.brandnewstore.ca/p/1',
+            merchantDomain: 'brandnewstore.ca',
+          }),
+        ]),
+      ],
+      repo,
+    });
+
+    expect(summary.sources[0]?.outcome).toBe('ok');
+    expect(await repo.countDeals({})).toBeGreaterThan(0);
   });
 });

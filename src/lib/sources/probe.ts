@@ -80,7 +80,11 @@ export function detectPlatform(evidence: ProbeEvidence): ProbeResult {
     return { engine: 'wordpress', evidence: ['WordPress paths in the page'], hints };
   }
 
-  if (/Magento|mage\/|static\/version\d+\//i.test(html)) {
+  // `mage/` needs the boundary: without it the pattern matches "image/", which
+  // is in the asset URLs of practically every storefront on the web, so every
+  // unrecognised site fingerprinted as Magento and never reached the JSON-LD
+  // fallback below.
+  if (/Magento|\bmage\/|static\/version\d+\//i.test(html)) {
     return { engine: 'magento', evidence: ['Magento markers'], hints };
   }
 
