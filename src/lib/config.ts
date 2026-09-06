@@ -58,8 +58,24 @@ const envSchema = z.object({
   /** Price observations older than this are pruned, except each deal's newest. */
   PRICE_HISTORY_DAYS: positiveNumber('PRICE_HISTORY_DAYS').default('180'),
 
-  /** stocktrack.ca is a small independent site — easy to switch off entirely. */
-  STOCKTRACK_ENABLED: booleanish.default('true'),
+  /**
+   * stocktrack.ca is a small independent site, and this defaults to OFF.
+   *
+   * The paths this adapter is built around (`/clearance/{storeId}`,
+   * `/stores/{chain}`) were written in the sandbox and are not real: all four
+   * candidates return 404 against the live site, which serves a JavaScript app
+   * and fetches its data from endpoints that are not documented anywhere. The
+   * site publishes no API, no terms and no about page, carries PayPal and
+   * Coinbase donation buttons, and fingerprints browsers via /fp.php.
+   *
+   * So the adapter cannot work as written, and making it work would mean
+   * reverse-engineering a donation-funded hobby site's private endpoints to
+   * take the data that is its entire reason to exist. Left on by default it
+   * simply sends futile requests at someone else's server once stores are
+   * synced. Turning it on should be a deliberate act by someone who has
+   * confirmed real endpoints — ideally with the operator's blessing.
+   */
+  STOCKTRACK_ENABLED: booleanish.default('false'),
   STOCKTRACK_RATE_LIMIT_RPS: positiveNumber('STOCKTRACK_RATE_LIMIT_RPS').default('0.3'),
   STOCKTRACK_MAX_STORES: positiveNumber('STOCKTRACK_MAX_STORES').default('5'),
 
