@@ -378,7 +378,11 @@ async function createMerchantResolver(repo: DealRepository): Promise<MerchantRes
       return base;
     }
 
-    const tld = domain.split('.').pop()?.replace(/[^a-z0-9]/g, '') ?? '';
+    const tld =
+      domain
+        .split('.')
+        .pop()
+        ?.replace(/[^a-z0-9]/g, '') ?? '';
     const withTld = `${base}-${tld}`;
     if (tld !== '' && !takenSlugs.has(withTld)) {
       takenSlugs.add(withTld);

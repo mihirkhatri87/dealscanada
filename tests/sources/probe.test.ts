@@ -65,7 +65,9 @@ describe('platform detection', () => {
   });
 
   it('still recognises a real mage/ module path', () => {
-    expect(detectPlatform({ html: '<script src="/js/mage/apply/main.js">' }).engine).toBe('magento');
+    expect(detectPlatform({ html: '<script src="/js/mage/apply/main.js">' }).engine).toBe(
+      'magento',
+    );
   });
 
   it('offers JSON-LD as a fallback when it recognises nothing but sees structured data', () => {

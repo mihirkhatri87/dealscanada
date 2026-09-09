@@ -84,9 +84,9 @@ describe('deriveKeywords', () => {
   it('still reads a description short enough to be a definition', () => {
     // Structube's descriptions run 9 to 45 characters and are the only place
     // its product type is stated at all.
-    expect(
-      deriveKeywords({ title: 'LUCAS', description: 'rectangular coffee table' }),
-    ).toContain('table');
+    expect(deriveKeywords({ title: 'LUCAS', description: 'rectangular coffee table' })).toContain(
+      'table',
+    );
   });
 
   it('says nothing about a product it has no vocabulary for', () => {

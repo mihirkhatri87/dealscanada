@@ -33,9 +33,7 @@ const itemSchema = z
     url_suffix: z.string().nullish(),
     small_image: z.object({ url: z.string().nullish() }).passthrough().nullish(),
     short_description: z.object({ html: z.string().nullish() }).passthrough().nullish(),
-    categories: z
-      .array(z.object({ name: z.string().nullish() }).passthrough())
-      .nullish(),
+    categories: z.array(z.object({ name: z.string().nullish() }).passthrough()).nullish(),
     price_range: z
       .object({
         minimum_price: z
@@ -121,10 +119,12 @@ export function parseCategories(payload: unknown): Array<{ uid: string; urlKey: 
   const parsed = categoriesSchema.safeParse(payload);
   if (!parsed.success) return [];
 
-  return (parsed.data.data?.categoryList ?? [])
-    // An empty category is a request that will come back with nothing.
-    .filter((category) => (category.product_count ?? 1) > 0)
-    .map((category) => ({ uid: category.uid, urlKey: category.url_key ?? category.uid }));
+  return (
+    (parsed.data.data?.categoryList ?? [])
+      // An empty category is a request that will come back with nothing.
+      .filter((category) => (category.product_count ?? 1) > 0)
+      .map((category) => ({ uid: category.uid, urlKey: category.url_key ?? category.uid }))
+  );
 }
 
 function stripHtml(html: string | null | undefined): string | null {
@@ -188,8 +188,7 @@ export function parseMagentoProducts(payload: unknown, options: MagentoParseOpti
     const regular = minimum?.regular_price?.value ?? null;
     // Magento reports regular === final for anything not on promotion. Treating
     // that as a "was" would manufacture a saving out of a full-price item.
-    const priceWas =
-      regular !== null && regular !== undefined && regular > price ? regular : null;
+    const priceWas = regular !== null && regular !== undefined && regular > price ? regular : null;
 
     // Unlike a Shopify sale collection, a Magento category is just a category:
     // stores file permanent sections under `sale` all the time. Only an actual
@@ -282,9 +281,7 @@ export function createMagentoAdapter(config: RetailerConfig): SourceAdapter {
         if (collected.length >= limit) break;
 
         try {
-          const payload = await ask(
-            buildProductsQuery(category.uid, Math.min(limit, 100)),
-          );
+          const payload = await ask(buildProductsQuery(category.uid, Math.min(limit, 100)));
           const deals = parseMagentoProducts(payload, {
             baseUrl: base,
             merchantDomain: config.domain,

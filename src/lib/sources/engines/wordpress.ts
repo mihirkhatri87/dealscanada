@@ -127,7 +127,9 @@ function toAmount(raw: string): number | null {
 export function extractPrices(text: string): { now: number; was: number } | null {
   const found: Array<{ value: number; start: number; end: number }> = [];
 
-  for (const match of text.matchAll(/\$\s?(\d{1,3}(?:,\d{3})*(?:[.,]\d{2})?|\d{1,5}(?:[.,]\d{2})?)/g)) {
+  for (const match of text.matchAll(
+    /\$\s?(\d{1,3}(?:,\d{3})*(?:[.,]\d{2})?|\d{1,5}(?:[.,]\d{2})?)/g,
+  )) {
     const value = toAmount(match[1] ?? '');
     if (value === null || match.index === undefined) continue;
     found.push({ value, start: match.index, end: match.index + match[0].length });
