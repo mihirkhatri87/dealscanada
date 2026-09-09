@@ -55,7 +55,7 @@ const IMAGE_PROBE_RPS = 8;
  * asks for the largest rendition available.
  */
 export function amazonImageUrl(asin: string): string {
-  return 'https://' + IMAGE_HOST + '/images/P/' + asin + '.01._SCLZZZZZZZ_.jpg';
+  return `https://${IMAGE_HOST}/images/P/${asin}.01._SCLZZZZZZZ_.jpg`;
 }
 
 /**
