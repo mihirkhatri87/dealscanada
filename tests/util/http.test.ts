@@ -318,6 +318,73 @@ describe('identification', () => {
   });
 });
 
+describe('head', () => {
+  it('returns the headers without reading a body', async () => {
+    globalThis.fetch = mockFetch(
+      new Map([
+        [
+          'https://cdn.test/a.jpg',
+          { headers: { 'content-type': 'image/jpeg', 'content-length': '19718' } },
+        ],
+      ]),
+    );
+
+    const response = await client().head('https://cdn.test/a.jpg', { skipRobots: true });
+
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toBe('image/jpeg');
+    expect(response.headers['content-length']).toBe('19718');
+  });
+
+  it('issues a HEAD rather than a GET', async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      expect(init?.method).toBe('HEAD');
+      return { status: 200, headers: new Headers(), text: async () => '' } as Response;
+    });
+    globalThis.fetch = fetchMock as unknown as typeof globalThis.fetch;
+
+    await client().head('https://cdn.test/a.jpg', { skipRobots: true });
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it('still honours robots.txt', async () => {
+    // A HEAD is a request. Exempting it would be a hole in the one gate every
+    // outbound call in this project passes through.
+    globalThis.fetch = mockFetch(
+      new Map([['https://shop.test/robots.txt', { body: 'User-agent: *\nDisallow: /private' }]]),
+    );
+
+    await expect(client().head('https://shop.test/private/x')).rejects.toBeInstanceOf(
+      RobotsDisallowedError,
+    );
+    expect(calls).toEqual(['https://shop.test/robots.txt']);
+  });
+
+  it('writes nothing to the cache, so a later GET is not served an empty body', async () => {
+    // A HEAD has no body. Caching one would poison the next fetchText of the
+    // same URL with an empty string that looks like a successful response.
+    globalThis.fetch = mockFetch(
+      new Map([['https://cdn.test/a.txt', [{ body: '' }, { body: 'the real body' }]]]),
+    );
+
+    const http = client();
+    await http.head('https://cdn.test/a.txt', { skipRobots: true });
+    const got = await http.fetchText('https://cdn.test/a.txt', { skipRobots: true });
+
+    expect(got.data).toBe('the real body');
+    expect(got.fromCache).toBe(false);
+  });
+
+  it('does not retry, because a failed probe is an answer', async () => {
+    globalThis.fetch = mockFetch(new Map([['https://cdn.test/a.jpg', { status: 500 }]]));
+
+    const response = await client().head('https://cdn.test/a.jpg', { skipRobots: true });
+
+    expect(response.status).toBe(500);
+    expect(calls).toHaveLength(1);
+  });
+});
+
 describe('helpers', () => {
   it('parses Retry-After as seconds and as a date', () => {
     expect(parseRetryAfter('30')).toBe(30_000);

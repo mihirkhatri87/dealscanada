@@ -103,6 +103,36 @@ export class HttpClient {
     return { ...response, data };
   }
 
+  /**
+   * Headers only, no body.
+   *
+   * For asking "is there anything at this URL worth storing?" without paying to
+   * download it. Deliberately thinner than `request`: no disk cache (there is no
+   * body to cache, and writing an empty one would poison a later GET of the same
+   * URL) and no retries (a probe that fails is not an error, it is a "no").
+   *
+   * Robots still applies. A HEAD is a request like any other.
+   */
+  async head(
+    url: string,
+    options: FetchOptions = {},
+  ): Promise<{ status: number; headers: Record<string, string> }> {
+    if (!options.skipRobots && !(await this.isAllowed(url))) {
+      throw new RobotsDisallowedError(url);
+    }
+
+    await this.limiter.acquire(new URL(url).hostname);
+
+    const response = await this.rawFetch(url, {
+      method: 'HEAD',
+      timeoutMs: options.timeoutMs,
+      headers: options.headers ?? {},
+      ...(options.signal ? { signal: options.signal } : {}),
+    });
+
+    return { status: response.status, headers: response.headers };
+  }
+
   /** True when robots.txt permits our user-agent to fetch this URL. */
   async isAllowed(url: string): Promise<boolean> {
     const parsed = new URL(url);
@@ -234,6 +264,7 @@ export class HttpClient {
       headers?: Record<string, string>;
       signal?: AbortSignal;
       body?: string;
+      method?: 'GET' | 'POST' | 'HEAD';
     },
   ): Promise<{ status: number; body: string; headers: Record<string, string> }> {
     const controller = new AbortController();
@@ -245,7 +276,7 @@ export class HttpClient {
 
     try {
       const response = await fetch(url, {
-        method: options.body === undefined ? 'GET' : 'POST',
+        method: options.method ?? (options.body === undefined ? 'GET' : 'POST'),
         headers: {
           'User-Agent': this.userAgent,
           'Accept-Language': 'en-CA,en;q=0.9,fr-CA;q=0.8',
@@ -261,8 +292,10 @@ export class HttpClient {
         headers[key.toLowerCase()] = value;
       });
 
-      // A 304 carries no body; reading it would just yield an empty string.
-      const body = response.status === 304 ? '' : await response.text();
+      // Neither a 304 nor a HEAD carries a body; reading one yields '' at best
+      // and hangs on a mislabelled stream at worst.
+      const bodyless = response.status === 304 || options.method === 'HEAD';
+      const body = bodyless ? '' : await response.text();
       return { status: response.status, body, headers };
     } finally {
       clearTimeout(timeout);
