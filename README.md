@@ -48,7 +48,7 @@ binaries, so no C++ toolchain is needed on a normal Windows install.
 
 ## What it does
 
-**Aggregates** from a catalogue of 101 Canadian retailers that is data, not code:
+**Aggregates** from a catalogue of 106 Canadian retailers that is data, not code:
 the Canadian Tire banner group, Gap Inc. Canada, the Reitmans group, Best Buy,
 the long tail of Canadian Shopify stores, kids and toy shops, home, sports,
 beauty and grocery. Adding a retailer is a JSON entry.
@@ -57,7 +57,7 @@ Sixty-one of those run today, on the Shopify, SFCC, Gap Inc., Hybris and JSON-LD
 engines plus a WordPress engine for the deal blogs, and six bespoke adapters
 including composite chains for Walmart and Costco and two routes to Amazon. The
 rest wait on the Magento engine — [docs/SOURCES.md](docs/SOURCES.md#not-built-yet) lists exactly what is
-and is not shipped, so `npm run health` showing 71 sources rather than 101 is not
+and is not shipped, so `npm run health` showing 71 sources rather than 106 is not
 a surprise.
 
 **Verifies** each deal rather than repeating the claim. See below.

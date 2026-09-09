@@ -41,6 +41,7 @@ Confirmed from the retailer's own page:
 | Well.ca | **Rakuten Advertising** | well.ca/affiliates |
 | Joe Fresh | **CJ Affiliate** | joefresh.com/affiliates |
 | Best Buy Canada | own program page | [bestbuy.ca affiliate program](https://www.bestbuy.ca/en-ca/about/affiliate-program/blt82df225e80ec75e9) — apply from there; note commission is ~0.5% and new-customer only, so join for the **feed**, not the revenue |
+| Shopper Plus, 123Ink, PrimeCables | **CJ Affiliate** | [shopperplus.ca/policies/affiliate-program](https://www.shopperplus.ca/policies/affiliate-program) — one program for all three storefronts, running since November 2013. States **"Daily Data feed Available"**, 5% commission, 45-day cookie |
 
 Reported by directories rather than the retailer, so confirm on application:
 
@@ -52,6 +53,14 @@ Reported by directories rather than the retailer, so confirm on application:
 
 Applying to **AvantLink, Rakuten Advertising and CJ Affiliate** covers most of
 the list. Each is one application to the network, then one per merchant.
+
+The Shopper Plus group is the one to apply for first. Everything else here is
+blocked by bot protection, which a retailer could relax tomorrow; those three
+are blocked by their own robots.txt, which disallows the session handshake that
+every page on all three domains requires. There is no version of adapter work
+that reaches them, so the feed is not the easier route — it is the only one.
+One CJ application covers all three, and their catalogue entries already carry
+the sale paths a feed run would slot into.
 
 ---
 

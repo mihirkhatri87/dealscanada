@@ -85,6 +85,21 @@ describe('the shipped catalogue', () => {
     );
   });
 
+  it('groups the Shopper Plus storefronts into one family', () => {
+    const family = byFamily(RETAILER_CATALOGUE, 'shopperplus');
+    expect(family.map((r) => r.id)).toEqual(
+      expect.arrayContaining(['shopperplus', '123ink', 'primecables']),
+    );
+
+    // All three sit behind one session handshake that robots.txt disallows, so
+    // none of them may be flipped on individually. Enabling one and leaving the
+    // note behind is exactly the mistake this catches.
+    for (const entry of family) {
+      expect(entry.enabled, entry.id).toBe(false);
+      expect(entry.status, entry.id).toBe('blocked');
+    }
+  });
+
   it('covers every retail vertical the PRD targets', () => {
     const verticals = new Set(RETAILER_CATALOGUE.map((r) => r.vertical));
     for (const required of [

@@ -383,6 +383,98 @@ const RAW_CATALOGUE = [
     productLinkSelector: 'a.product-thumbnail__title',
     maxProductPages: 30,
   },
+  // The Shopper Plus group — shopperplus.ca, 123ink.ca and primecables.ca are
+  // one operator on one in-house platform. The giveaway is not the shared
+  // footer links: entering 123ink.ca cookieless mints its session on
+  // shopperplus.ca, so the three storefronts share a single sign-on.
+  //
+  // All three are off for the same reason, and it is not bot protection. Every
+  // page entered without a session 307s to /session/generate_auth_code and then
+  // /session/consume_auth_code, and robots.txt disallows both under
+  // `User-agent: *` on all three domains. That handshake is the only thing that
+  // sets the cookie, so there is no compliant way to hold one — and without it
+  // every URL answers 200 with a 1.6 KB "checking cookies" bounce. A crawl here
+  // would not fail loudly; it would quietly collect nothing forever.
+  //
+  // The permitted route is the feed. All three run one CJ Affiliate program
+  // that advertises a daily product feed — see docs/AFFILIATE-PROGRAMS.md.
+  //
+  // The group also runs blog.shopperplus.ca, blog.123ink.ca and
+  // blog.primecables.ca on WordPress, outside the session gate, so they look
+  // like an easy way in for the wordpress engine. They are not, and they are
+  // recorded here rather than as entries so the next person does not re-probe
+  // them: blog.123ink.ca and blog.primecables.ca both Disallow /wp-json/, which
+  // is the only endpoint that engine reads, and blog.shopperplus.ca — the one
+  // whose robots.txt permits it — has published nothing since October 2024.
+  {
+    id: 'shopperplus',
+    name: 'Shopper Plus',
+    domain: 'shopperplus.ca',
+    baseUrl: 'https://www.shopperplus.ca',
+    engine: 'jsonld',
+    status: 'blocked',
+    enabled: false,
+    family: 'shopperplus',
+    vertical: 'general',
+    // Verified against the live clearance grid rather than guessed: this
+    // selector returns 24 product links, and the pages behind them carry
+    // ProductGroup/hasVariant markup that `parseProductPage` already reads.
+    // Kept so the entry works the day a feed or a permission arrives.
+    salePaths: ['/catalog-87519-clearance'],
+    productLinkSelector: 'ul.product-list a[href*="/p-"]',
+    // All three ask for Crawl-delay: 5.
+    rateLimitRps: 0.2,
+    note: 'robots.txt disallows the /session/* endpoints that mint the cookie every page requires; served by the CJ affiliate feed instead',
+  },
+  {
+    id: '123ink',
+    name: '123Ink',
+    domain: '123ink.ca',
+    baseUrl: 'https://www.123ink.ca',
+    engine: 'jsonld',
+    status: 'blocked',
+    enabled: false,
+    family: 'shopperplus',
+    vertical: 'electronics',
+    salePaths: ['/topic-791-office-supplies-clearance'],
+    rateLimitRps: 0.2,
+    // Deliberately no productLinkSelector. Unlike Shopper Plus this storefront
+    // binds its grid with Vue, so the tile anchors carry no href for a selector
+    // to read — the only plain hrefs on a listing page are the review links.
+    // Even with the session gate lifted this one is feed-only, and a
+    // placeholder selector would hide that.
+    note: 'same session gate as shopperplus, and the product grid is Vue-rendered with no plain hrefs; served by the CJ affiliate feed instead',
+  },
+  {
+    id: 'primecables',
+    name: 'PrimeCables',
+    domain: 'primecables.ca',
+    baseUrl: 'https://www.primecables.ca',
+    engine: 'jsonld',
+    status: 'blocked',
+    enabled: false,
+    family: 'shopperplus',
+    vertical: 'electronics',
+    salePaths: ['/events/primecables-clearancesale'],
+    rateLimitRps: 0.2,
+    // Same Vue-bound grid as 123ink, with a stricter robots.txt on top: it also
+    // disallows /search and every ?page= and ?sort_by= URL, so there is no
+    // paginated route through a category even before the session gate.
+    note: 'same session gate as shopperplus, Vue-rendered grid, and robots.txt also disallows /search and ?page=; served by the CJ affiliate feed instead',
+  },
+  {
+    id: 'aosom',
+    name: 'Aosom Canada',
+    domain: 'aosom.ca',
+    baseUrl: 'https://www.aosom.ca',
+    // Not part of the Shopper Plus group despite selling into the same
+    // furniture-and-housewares aisle — Aosom is its own operator, so no family.
+    engine: 'jsonld',
+    status: 'blocked',
+    enabled: false,
+    vertical: 'home',
+    note: 'Akamai answers 403 for every path from a Canadian residential IP, robots.txt included; with no readable robots.txt there is no permission to crawl',
+  },
   {
     id: 'visions-electronics',
     name: 'Visions Electronics',
