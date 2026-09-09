@@ -105,10 +105,42 @@ describe('parsing the drops feed', () => {
     expect(deal?.title).toBe('Sony WH-1000XM5 Wireless Headphones');
   });
 
-  it('takes an image from an enclosure or an embedded tag', () => {
+  it('strips the live "- down N% ($X) to $Y from $Z" suffix', () => {
+    // The prices are parsed out of this suffix, so it has to survive extraction
+    // and be dropped only for display.
     const deals = parseCamelFeed(FEED);
-    expect(deals.find((d) => d.title.includes('Instant Pot'))?.imageUrl).toContain('/y.jpg');
-    expect(deals.find((d) => d.title.includes('WH-1000XM5'))?.imageUrl).toContain('/x.jpg');
+
+    expect(deals.find((d) => d.asin === 'B0GKTYTY3J')?.title).toBe('Zootopia 2');
+    expect(deals.find((d) => d.asin === 'B0F9LMQ5VM')?.title).toBe(
+      'Conair Handheld Steamer for Cl...ousehold Fabrics, 1100W, Black',
+    );
+  });
+
+  it('reads both prices out of the title, which is the only place they appear', () => {
+    const deal = parseCamelFeed(FEED).find((d) => d.asin === 'B0F9LMQ5VM');
+
+    expect(deal?.price).toBe(25.23);
+    expect(deal?.priceWas).toBe(31.99);
+  });
+
+  it('takes an image from an enclosure or an embedded tag when one is present', () => {
+    // Neither live feed carries either form today - see the fixture header. This
+    // pins the precedence for the day one of them does.
+    const deals = parseCamelFeed(FEED);
+    expect(deals.find((d) => d.title.includes('Instant Pot'))?.imageUrl).toContain(
+      '/img/B075CYMYK6.jpg',
+    );
+    expect(deals.find((d) => d.title.includes('WH-1000XM5'))?.imageUrl).toContain(
+      '/img/B09XS7JWHH.jpg',
+    );
+  });
+
+  it('carries no image for a real feed entry, because the feed states none', () => {
+    // The symptom that started this: every Amazon card rendered as bare merchant
+    // initials. Asserted on a verbatim entry so it stays true to the live shape.
+    const deal = parseCamelFeed(FEED).find((d) => d.asin === 'B0F9LMQ5VM');
+    expect(deal).toBeDefined();
+    expect(deal?.imageUrl).toBeNull();
   });
 
   it('returns nothing for junk rather than throwing', () => {

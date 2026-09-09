@@ -168,9 +168,20 @@ function decode(value: string): string {
     .replace(/\s+/g, ' ');
 }
 
-/** Strips the price and percentage the feed appends to every headline. */
+/**
+ * Strips the price and percentage the feed appends to every headline.
+ *
+ * The live format is "Name - down 21.13% ($6.76) to $25.23 from $31.99", which
+ * is where both prices come from - so the suffix has to survive extractPrices
+ * and be removed only for display. Leaving it on produced card titles that
+ * restated a stale price in prose right next to the parsed one.
+ *
+ * The bare "- N% drop" form below it is the older shape, kept because it costs
+ * one alternation and the feeds are not versioned.
+ */
 function cleanTitle(title: string): string {
   return title
+    .replace(/\s*[-–]\s*down\s+[\d.]+%.*$/i, '')
     .replace(/\s*[-–]\s*\d+%\s*(?:price\s*)?drop.*$/i, '')
     .replace(/\s*\((?:was|now)[^)]*\)\s*$/i, '')
     .replace(/\s{2,}/g, ' ')

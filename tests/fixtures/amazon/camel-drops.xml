@@ -1,40 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Captured from https://ca.camelcamelcamel.com/top_drops/feed on 2026-09-09.
+
+  The first four items are verbatim, including the things that surprised us: the
+  prices live in the TITLE and nowhere else, the title carries a "- down N% ($X)
+  to $Y from $Z" suffix, long names are elided mid-string by camel itself, and
+  there is no image anywhere in the feed - no enclosure, no img in the
+  description, just two "Useful URLs" links.
+
+  An earlier version of this file was written from an assumed response shape and
+  had every item carrying an enclosure or an inline img. It passed, and the
+  images it was vouching for never existed.
+
+  Items below the second marker are synthetic, and labelled as such, because they
+  cover parser branches the live feed does not happen to contain today.
+-->
 <rss version="2.0">
   <channel>
-    <title>camelcamelcamel.ca - Top Price Drops</title>
-    <link>https://ca.camelcamelcamel.com/top_drops</link>
+    <title>Top Amazon Price Drops</title>
+    <link>https://ca.camelcamelcamel.com/top_drops?</link>
+    <description>Amazon top price drops list by camelcamelcamel.com</description>
+    <language>en-us</language>
+    <pubDate>Wed, 09 Sep 2026 14:58:46 UTC</pubDate>
+    <lastBuildDate>Wed, 09 Sep 2026 14:58:46 UTC</lastBuildDate>
+    <generator>camelcamelcamel.com</generator>
+
+    <!-- ===== Verbatim from the live feed ===== -->
+
     <item>
-      <title>Sony WH-1000XM5 Wireless Headphones - 41% price drop</title>
-      <link>https://ca.camelcamelcamel.com/product/B09XS7JWHH</link>
-      <description><![CDATA[<img src="https://images-na.ssl-images-amazon.com/images/I/x.jpg" /> Was CDN$549.99, now CDN$328.00]]></description>
-      <pubDate>Sat, 05 Sep 2026 09:00:00 GMT</pubDate>
+      <title>Conair Handheld Steamer for Cl...ousehold Fabrics, 1100W, Black - down 21.13% ($6.76) to $25.23 from $31.99</title>
+      <link>https://ca.camelcamelcamel.com/product/B0F9LMQ5VM</link>
+      <description>&lt;p&gt;Useful URLs: &lt;a href="https://ca.camelcamelcamel.com/product/0TB708F99HLBMHQM52V1M/go"&gt;Amazon.com&lt;/a&gt;, &lt;a href="https://ca.camelcamelcamel.com/product/B0F9LMQ5VM?active=price_amazon"&gt;camelcamelcamel.com&lt;/a&gt;&lt;/p&gt;</description>
+      <pubDate>Wed, 09 Sep 2026 10:30:44 PDT</pubDate>
+      <guid isPermaLink="false">ffa5dd1fbf2db230ee2becf14be3fb66b5d6cb6e</guid>
     </item>
     <item>
-      <title>Instant Pot Duo Plus 6QT (was $139.99)</title>
-      <link>https://www.amazon.ca/dp/B075CYMYK6?tag=ccc-20</link>
-      <description>Price dropped from $139.99 to $89.99</description>
-      <enclosure url="https://images-na.ssl-images-amazon.com/images/I/y.jpg" type="image/jpeg" />
-      <pubDate>Sat, 05 Sep 2026 08:30:00 GMT</pubDate>
+      <title>VEVOR Water Filter System, 2.2...bon Filters, Spigot, and Stand - down 14.14% ($16.45) to $99.91 from $116.36</title>
+      <link>https://ca.camelcamelcamel.com/product/B0DM8FNFL5</link>
+      <description>&lt;p&gt;Useful URLs: &lt;a href="https://ca.camelcamelcamel.com/product/0OB802DZMI83FMNXFSLZ5/go"&gt;Amazon.com&lt;/a&gt;, &lt;a href="https://ca.camelcamelcamel.com/product/B0DM8FNFL5?active=price_amazon"&gt;camelcamelcamel.com&lt;/a&gt;&lt;/p&gt;</description>
+      <pubDate>Wed, 09 Sep 2026 10:07:38 PDT</pubDate>
+      <guid isPermaLink="false">9f42da13f3a1816143fb8bfdf7b970310879d660</guid>
     </item>
+    <item>
+      <title>Zootopia 2 - down 3.71% ($1.76) to $45.65 from $47.41</title>
+      <link>https://ca.camelcamelcamel.com/product/B0GKTYTY3J</link>
+      <description>&lt;p&gt;Useful URLs: &lt;a href="https://ca.camelcamelcamel.com/product/0XBY08GQKDTHYGTOYC3QJ/go"&gt;Amazon.com&lt;/a&gt;, &lt;a href="https://ca.camelcamelcamel.com/product/B0GKTYTY3J?active=price_amazon"&gt;camelcamelcamel.com&lt;/a&gt;&lt;/p&gt;</description>
+      <pubDate>Wed, 09 Sep 2026 09:39:11 PDT</pubDate>
+      <guid isPermaLink="false">00d4645b008bfaa45c2077f85a40b11ee7fe4696</guid>
+    </item>
+    <item>
+      <title>CyberPower CP800AVR AVR UPS Ba...ery Backup and Surge Protector - down 17.27% ($34.02) to $162.99 from $197.01</title>
+      <link>https://ca.camelcamelcamel.com/product/B00095W91Y</link>
+      <description>&lt;p&gt;Useful URLs: &lt;a href="https://ca.camelcamelcamel.com/product/1BK0W0M0J9T56W99E18YS/go"&gt;Amazon.com&lt;/a&gt;, &lt;a href="https://ca.camelcamelcamel.com/product/B00095W91Y?active=price_amazon"&gt;camelcamelcamel.com&lt;/a&gt;&lt;/p&gt;</description>
+      <pubDate>Wed, 09 Sep 2026 07:37:59 PDT</pubDate>
+      <guid isPermaLink="false">c789d348bc2759f859c5fc408cdcfa3d14f82cfe</guid>
+    </item>
+
+    <!-- ===== Synthetic below this line ===== -->
+
+    <!-- Same ASIN as the CyberPower entry above: the two feeds overlap by design. -->
+    <item>
+      <title>CyberPower CP800AVR AVR UPS - down 16.00% ($31.00) to $166.01 from $197.01</title>
+      <link>https://ca.camelcamelcamel.com/product/B00095W91Y</link>
+      <description>&lt;p&gt;Useful URLs&lt;/p&gt;</description>
+      <pubDate>Wed, 09 Sep 2026 07:20:00 PDT</pubDate>
+    </item>
+
+    <!-- No prices stated anywhere: must be dropped rather than guessed at. -->
     <item>
       <title>Kindle Paperwhite 16GB</title>
       <link>https://ca.camelcamelcamel.com/product/B09TMN58KL</link>
       <description>A great e-reader with no prices stated in this entry.</description>
     </item>
+
+    <!-- No ASIN: unmergeable with the same product at another merchant. -->
     <item>
-      <title>Mystery Item With No ASIN</title>
+      <title>Mystery Item With No ASIN - down 50.00% ($50.00) to $49.99 from $99.99</title>
       <link>https://ca.camelcamelcamel.com/search?q=mystery</link>
-      <description>Was $99.99, now $49.99</description>
+      <description>&lt;p&gt;Useful URLs&lt;/p&gt;</description>
     </item>
-    <item>
-      <title>Sony WH-1000XM5 Wireless Headphones</title>
-      <link>https://ca.camelcamelcamel.com/product/B09XS7JWHH</link>
-      <description>Was CDN$549.99, now CDN$330.00</description>
-    </item>
+
+    <!-- A price RISE. Taking min/max here would manufacture a discount. -->
     <item>
       <title>Price Went Up Item</title>
       <link>https://ca.camelcamelcamel.com/product/B08XYZ1234</link>
       <description>Now $59.99, previously $49.99</description>
+    </item>
+
+    <!-- The enclosure/img forms the parser prefers. The live feeds send neither
+         today; this pins the precedence rule for the day one of them does. -->
+    <item>
+      <title>Instant Pot Duo Plus 6QT - down 35.71% ($50.00) to $89.99 from $139.99</title>
+      <link>https://www.amazon.ca/dp/B075CYMYK6?tag=ccc-20</link>
+      <description>&lt;p&gt;Useful URLs&lt;/p&gt;</description>
+      <enclosure url="https://ca.camelcamelcamel.com/img/B075CYMYK6.jpg" type="image/jpeg" />
+      <pubDate>Wed, 09 Sep 2026 08:30:00 PDT</pubDate>
+    </item>
+    <item>
+      <title>Sony WH-1000XM5 Wireless Headphones - down 40.36% ($221.99) to $328.00 from $549.99</title>
+      <link>https://ca.camelcamelcamel.com/product/B09XS7JWHH</link>
+      <description><![CDATA[<img src="https://ca.camelcamelcamel.com/img/B09XS7JWHH.jpg" /> Was CDN$549.99, now CDN$328.00]]></description>
+      <pubDate>Wed, 09 Sep 2026 09:00:00 PDT</pubDate>
     </item>
   </channel>
 </rss>
