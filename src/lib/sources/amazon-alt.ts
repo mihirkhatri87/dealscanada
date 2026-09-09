@@ -26,6 +26,60 @@ const FEEDS = [
 /** Never fetched. Present so the guard test has something to assert against. */
 export const FORBIDDEN_HOST = 'amazon.ca';
 
+/**
+ * Amazon's image CDN. Not amazon.ca: this serves static assets, so hotlinking one
+ * is not the page scrape the guard above forbids - it is the same thing the deal
+ * card already does for the ~100 other merchant CDNs in the catalogue.
+ *
+ * Its robots.txt names only Baiduspider, Googlebot-Image, GPTBot and CCBot, and
+ * carries no wildcard group, so our agent matches no group and nothing here is
+ * disallowed. We therefore do NOT skip the robots check: letting it run costs one
+ * cached fetch, and means we stop on our own the day Amazon adds a rule that does
+ * cover us.
+ */
+const IMAGE_HOST = 'm.media-amazon.com';
+
+/**
+ * Faster than the global 1 rps default, which would spend 100 seconds probing a
+ * 100-item feed and blow the adapter's timeout. This is hyperscale CDN
+ * infrastructure serving static JPEGs, not a small site we could inconvenience.
+ */
+const IMAGE_PROBE_RPS = 8;
+
+/**
+ * The product image for an ASIN.
+ *
+ * The /images/P/ path is keyed by ASIN rather than by the internal image id that
+ * every other Amazon image URL carries, which is what makes it the only image we
+ * can name without an API key or a product-page fetch. The _SCLZZZZZZZ_ transform
+ * asks for the largest rendition available.
+ */
+export function amazonImageUrl(asin: string): string {
+  return `https://${IMAGE_HOST}/images/P/${asin}.01._SCLZZZZZZZ_.jpg`;
+}
+
+/**
+ * Anything smaller than this is the placeholder, not a photograph.
+ *
+ * An ASIN with no image answers 200 with a 43-byte transparent GIF rather than a
+ * 404, so the status code cannot be the test. Stored unchecked, those rows would
+ * claim an image that paints nothing - and the API hands that claim to every
+ * consumer, not only to the card that happens to degrade gracefully.
+ */
+const PLACEHOLDER_MAX_BYTES = 1000;
+
+export function isRealImage(status: number, headers: Record<string, string>): boolean {
+  if (status !== 200) return false;
+
+  const type = (headers['content-type'] ?? '').toLowerCase();
+  if (!type.startsWith('image/')) return false;
+  // The placeholder is the only GIF this path serves; real renditions are JPEG.
+  if (type.startsWith('image/gif')) return false;
+
+  const bytes = Number(headers['content-length']);
+  return Number.isFinite(bytes) ? bytes > PLACEHOLDER_MAX_BYTES : true;
+}
+
 export function parseCamelFeed(xml: string): RawDeal[] {
   const deals: RawDeal[] = [];
   const seen = new Set<string>();
@@ -168,9 +222,20 @@ function decode(value: string): string {
     .replace(/\s+/g, ' ');
 }
 
-/** Strips the price and percentage the feed appends to every headline. */
+/**
+ * Strips the price and percentage the feed appends to every headline.
+ *
+ * The live format is "Name - down 21.13% ($6.76) to $25.23 from $31.99", which
+ * is where both prices come from - so the suffix has to survive extractPrices
+ * and be removed only for display. Leaving it on produced card titles that
+ * restated a stale price in prose right next to the parsed one.
+ *
+ * The bare "- N% drop" form below it is the older shape, kept because it costs
+ * one alternation and the feeds are not versioned.
+ */
 function cleanTitle(title: string): string {
   return title
+    .replace(/\s*[-–]\s*down\s+[\d.]+%.*$/i, '')
     .replace(/\s*[-–]\s*\d+%\s*(?:price\s*)?drop.*$/i, '')
     .replace(/\s*\((?:was|now)[^)]*\)\s*$/i, '')
     .replace(/\s{2,}/g, ' ')
@@ -219,6 +284,48 @@ export const amazonAltAdapter: SourceAdapter = {
       };
     }
 
-    return { deals: unique.slice(0, limit), path: 'camelcamelcamel' };
+    const selected = unique.slice(0, limit);
+    await attachImages(selected, context);
+
+    return { deals: selected, path: 'camelcamelcamel' };
   },
 };
+
+/**
+ * Fills in the image the feed does not carry.
+ *
+ * The live feeds ship no images at all - no enclosure, no img in the description,
+ * just two "Useful URLs" links - so every Amazon card rendered as bare merchant
+ * initials. The ASIN we already parsed is enough to name the image directly, so
+ * the fallback costs one HEAD per deal and no product-page fetch.
+ *
+ * Best-effort throughout: a probe that fails leaves imageUrl null, which is
+ * precisely where the card already was. An image is not worth failing a run over.
+ */
+async function attachImages(deals: RawDeal[], context: AdapterContext): Promise<void> {
+  const pending = deals.filter(
+    (deal): deal is RawDeal & { asin: string } =>
+      !deal.imageUrl && typeof deal.asin === 'string' && deal.asin !== '',
+  );
+  if (pending.length === 0) return;
+
+  context.http.setDomainRate(IMAGE_HOST, IMAGE_PROBE_RPS);
+
+  // The limiter spaces these per host however many we start at once, so there is
+  // no separate concurrency pool to write here.
+  await Promise.all(
+    pending.map(async (deal) => {
+      const url = amazonImageUrl(deal.asin);
+      try {
+        const { status, headers } = await context.http.head(url);
+        if (isRealImage(status, headers)) deal.imageUrl = url;
+      } catch {
+        // Robots refusal, timeout, CDN hiccup: every one of them means "no
+        // image", not "no deal".
+      }
+    }),
+  );
+
+  const resolved = deals.filter((deal) => deal.imageUrl).length;
+  context.log(`images: ${resolved}/${deals.length} resolved`);
+}

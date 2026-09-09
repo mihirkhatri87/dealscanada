@@ -60,7 +60,14 @@ describe('the project never scrapes amazon.ca', () => {
 
       await adapter
         .fetch({
-          http: { fetchText: record, fetchJson: record, setDomainRate: vi.fn() },
+          http: {
+            fetchText: record,
+            fetchJson: record,
+            // HEAD is a request like any other. Omitting it here would let an
+            // adapter reach amazon.ca by a method this guard never watched.
+            head: record,
+            setDomainRate: vi.fn(),
+          },
           log: vi.fn(),
           limit: 1,
         } as never)
@@ -70,6 +77,38 @@ describe('the project never scrapes amazon.ca', () => {
     expect(requested.length).toBeGreaterThan(0);
     for (const url of requested) {
       expect(url, `${url} must not be requested`).not.toMatch(/(^|\/\/|\.)amazon\.(ca|com)\//i);
+    }
+  });
+
+  it('permits the static image CDN, and only for image paths', async () => {
+    // m.media-amazon.com is a separate registrable domain serving static assets,
+    // so hotlinking a product image is not the page scrape the terms forbid.
+    // Spelled out here because the guard above passes it silently, and a silent
+    // exemption is one nobody can review.
+    const requested: string[] = [];
+    const record = vi.fn(async (url: string) => {
+      requested.push(url);
+      throw new Error('blocked by the policy test');
+    });
+
+    for (const adapter of allAdapters()) {
+      if (!adapter.enabled().enabled) continue;
+
+      await adapter
+        .fetch({
+          http: { fetchText: record, fetchJson: record, head: record, setDomainRate: vi.fn() },
+          log: vi.fn(),
+          limit: 1,
+        } as never)
+        .catch(() => undefined);
+    }
+
+    for (const url of requested) {
+      const { hostname, pathname } = new URL(url);
+      if (!/amazon/i.test(hostname)) continue;
+
+      expect(hostname, `${url} is not an approved Amazon host`).toBe('m.media-amazon.com');
+      expect(pathname, `${url} is not an image path`).toMatch(/^\/images\//);
     }
   });
 });
