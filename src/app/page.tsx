@@ -120,7 +120,7 @@ export default async function HomePage({
             <DealGrid deals={deals} />
             <Pagination page={page} total={total} pageSize={PAGE_SIZE} />
           </>
-        ) : (
+        ) : isFiltered ? (
           <EmptyState
             title="No deals match those filters"
             message="Try removing a filter, lowering the minimum discount, or clearing the store selection."
@@ -129,6 +129,16 @@ export default async function HomePage({
                 Clear all filters
               </Link>
             }
+          />
+        ) : (
+          /* Nothing is filtered, so blaming the filters would be a lie. An
+             unfiltered empty page means no source has returned anything
+             recently — which is a real state worth naming, not a fault to
+             paper over with older listings whose prices and sizes have
+             probably gone. */
+          <EmptyState
+            title={`Nothing has been confirmed in the last ${env.DEAL_FRESHNESS_DAYS} days`}
+            message="A deal stays listed only while a source keeps returning it, so an empty page means the last few checks came back with nothing — not that there is nothing on sale. Showing what we saw last week instead would mean showing prices and sizes that have almost certainly changed."
           />
         )}
       </section>
