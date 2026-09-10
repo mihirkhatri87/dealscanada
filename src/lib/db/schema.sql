@@ -147,6 +147,9 @@ CREATE INDEX IF NOT EXISTS idx_deals_coupon ON deals (status, coupon_code);
 CREATE INDEX IF NOT EXISTS idx_deals_product_key ON deals (product_key, status);
 CREATE INDEX IF NOT EXISTS idx_deals_verdict ON deals (status, verdict);
 CREATE INDEX IF NOT EXISTS idx_deals_expires ON deals (status, expires_at);
+-- Read-path freshness: listings hide anything no source has re-confirmed
+-- recently, so this is on the hot path of every query. See DEAL_FRESHNESS_DAYS.
+CREATE INDEX IF NOT EXISTS idx_deals_last_seen ON deals (status, last_seen_at);
 
 -- Secondary dedupe key: merchant + normalized title tokens + price bucket.
 CREATE INDEX IF NOT EXISTS idx_deals_fingerprint ON deals (merchant_id, title, price_now);

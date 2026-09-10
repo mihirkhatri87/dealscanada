@@ -59,6 +59,22 @@ const envSchema = z.object({
   PRICE_HISTORY_DAYS: positiveNumber('PRICE_HISTORY_DAYS').default('180'),
 
   /**
+   * How recently a source must have re-confirmed a deal for it to be listed.
+   *
+   * `status` alone cannot carry this. It is a write-time property: a row stays
+   * 'active' until a run with at least one working source retires it, so a
+   * stretch of blocked scrapes leaves the whole catalogue reading as live -
+   * exactly when we are least entitled to claim anything about it. The listing
+   * therefore checks `last_seen_at` at read time as well, and an empty page
+   * after three days of failed scrapes is the correct answer rather than a
+   * page of deals whose sizes sold out on Tuesday.
+   *
+   * Matches DEAD_AFTER_HOURS (72h) by default, so the reaper and the listing
+   * agree on where the line is. Set to a large number to disable in effect.
+   */
+  DEAL_FRESHNESS_DAYS: positiveNumber('DEAL_FRESHNESS_DAYS').default('3'),
+
+  /**
    * stocktrack.ca is a small independent site, and this defaults to OFF.
    *
    * The paths this adapter is built around (`/clearance/{storeId}`,

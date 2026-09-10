@@ -302,6 +302,67 @@ export function defineContractSuite(backend: Backend): void {
       });
     });
 
+    /**
+     * The read-path freshness window.
+     *
+     * Both engines must hide the same rows. The window is a second, independent
+     * guarantee alongside `status`: the reaper only retires deals during a run
+     * where a source worked, so a stretch of blocked scrapes leaves everything
+     * reading 'active' - which is exactly when the site knows least about
+     * whether a deal, or the sizes recorded against it, still exists.
+     */
+    describe('deals: freshness window', () => {
+      const daysAgo = (days: number): string =>
+        new Date(Date.now() - days * 86_400_000).toISOString();
+
+      beforeEach(async () => {
+        await repo.upsertMerchants([makeMerchant({ id: 'm-f', slug: 'fresh-co', domain: 'f.ca' })]);
+        // Ageing a row means writing it at an earlier observation time, exactly
+        // as an older run would have: last_seen_at is the write path's to set.
+        await repo.upsertDeals(
+          [makeDeal({ sourceId: 'f1', slug: 'stale', merchantId: 'm-f', category: 'clothing' })],
+          daysAgo(4),
+        );
+        await repo.upsertDeals(
+          [makeDeal({ sourceId: 'f2', slug: 'fresh', merchantId: 'm-f', category: 'clothing' })],
+          daysAgo(1),
+        );
+      });
+
+      it('lists only what a source has re-confirmed recently', async () => {
+        const { deals, total } = await repo.queryDeals({});
+        expect(deals.map((d) => d.slug)).toEqual(['fresh']);
+        expect(total).toBe(1);
+      });
+
+      it('hides the stale row even though its status is still active', async () => {
+        const stale = await repo.getDealBySlug('stale');
+        expect(stale?.status).toBe('active');
+        expect((await repo.queryDeals({})).deals.map((d) => d.slug)).not.toContain('stale');
+      });
+
+      it('keeps the stale row reachable by its own URL', async () => {
+        // A link shared last week should explain itself rather than 404, so the
+        // detail path deliberately does not apply the window.
+        expect((await repo.getDealBySlug('stale'))?.slug).toBe('stale');
+      });
+
+      it('counts facets on the same window as the listing they label', async () => {
+        const clothing = (await repo.facets('category')).find((f) => f.value === 'clothing');
+        expect(clothing?.count).toBe(1);
+      });
+
+      it('shows everything again when the window is switched off', async () => {
+        const { total } = await repo.queryDeals({ seenWithinDays: 0 });
+        expect(total).toBe(2);
+      });
+
+      it('counts on the same window as it lists', async () => {
+        expect(await repo.countDeals({})).toBe(1);
+        expect(await repo.countDeals({ seenWithinDays: 0 })).toBe(2);
+      });
+    });
+
     describe('price history', () => {
       it('appends only when the price actually changed', async () => {
         const deal = makeDeal({ sourceId: 'ph-1' });

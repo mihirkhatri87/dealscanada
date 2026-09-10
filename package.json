@@ -22,6 +22,7 @@
     "seed": "tsx scripts/seed.ts",
     "scrape": "tsx scripts/scrape.ts",
     "health": "tsx scripts/health.ts",
+    "reap": "tsx scripts/reap.ts",
     "worker": "tsx scripts/worker.ts",
     "stores:sync": "tsx scripts/stores-sync.ts",
     "retailer:probe": "tsx scripts/retailer-probe.ts",

@@ -14,6 +14,7 @@ import {
   relativeTime,
   showsPriceWas,
 } from '@/lib/format';
+import { freshnessCutoff } from '@/lib/db/query-builder';
 import { applyAffiliateTemplate } from '@/lib/util/url';
 import { VerdictBadge } from '@/components/VerdictBadge';
 import { CouponCode } from '@/components/CouponCode';
@@ -60,6 +61,14 @@ export default async function DealPage({ params }: { params: Promise<{ slug: str
   const outbound = applyAffiliateTemplate(deal.url, null);
   const flagged = deal.verdict === 'inflated-anchor';
 
+  // Listings hide anything unconfirmed for this long; this page deliberately
+  // does not, so that a shared link explains itself rather than 404ing. Saying
+  // which side of the line it falls on is the price of showing it at all.
+  // ISO-8601 UTC compares correctly as text, which is why timestamps are stored
+  // that way — see the note at the top of schema.sql.
+  const cutoff = freshnessCutoff();
+  const unconfirmed = cutoff !== null && deal.lastSeenAt < cutoff;
+
   return (
     <main className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-6">
       <nav className="text-xs text-fg-muted" aria-label="Breadcrumb">
@@ -86,6 +95,15 @@ export default async function DealPage({ params }: { params: Promise<{ slug: str
           demonstrate the interface and the verification engine — the price is not real and the link
           does not lead to a live product. Run{' '}
           <code className="font-mono text-xs">npm run scrape</code> to load actual deals.
+        </p>
+      )}
+
+      {unconfirmed && (
+        <p className="rounded border border-warn/40 bg-warn-subtle px-3 py-2 text-sm text-warn">
+          <strong className="font-semibold">We have not seen this deal recently.</strong> No source
+          has returned it since {relativeTime(deal.lastSeenAt)}, so it is hidden from the deal
+          listings and everything below — the price, the stock status and the sizes — describes how
+          it looked then, not now. It may well be gone.
         </p>
       )}
 
@@ -233,6 +251,10 @@ export default async function DealPage({ params }: { params: Promise<{ slug: str
                   {deal.inStock ? 'In stock' : 'Sold out'}
                 </dd>
               </div>
+              <div className="flex justify-between gap-2">
+                <dt>Last checked</dt>
+                <dd className={unconfirmed ? 'text-warn' : ''}>{relativeTime(deal.lastSeenAt)}</dd>
+              </div>
               {expires && (
                 <div className="flex justify-between gap-2">
                   <dt>Expiry</dt>
@@ -247,7 +269,17 @@ export default async function DealPage({ params }: { params: Promise<{ slug: str
               )}
               {deal.sizesAvailable && deal.sizesAvailable.length > 0 && (
                 <div className="flex justify-between gap-2">
-                  <dt>Sizes</dt>
+                  {/* Sizes decay faster than anything else here: a size sells
+                      out without the price moving or the listing vanishing, so
+                      an undated list reads as a promise the retailer never
+                      made. Stamping it makes this a report of what we saw
+                      rather than an assertion about what is in stock now. */}
+                  <dt>
+                    Sizes{' '}
+                    <span className="text-fg-subtle">
+                      when seen {relativeTime(deal.lastSeenAt)}
+                    </span>
+                  </dt>
                   <dd className="text-right">{deal.sizesAvailable.join(', ')}</dd>
                 </div>
               )}
