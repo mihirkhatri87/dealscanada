@@ -171,7 +171,7 @@ suite against both, so that claim is tested rather than asserted.
 | `npm run stores:sync -- --postal=M5V3L9` | Nearby stores for local clearance |
 | `npm run retailer:probe -- https://store.ca` | Detect a store's platform, emit a catalogue entry |
 | `npm run assistant:eval` / `assistant:usage` | Assistant quality and spend |
-| `npm test` / `test:coverage` | 805 tests, no network |
+| `npm test` / `test:coverage` | 808 tests, no network |
 
 ---
 

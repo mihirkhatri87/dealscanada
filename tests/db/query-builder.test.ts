@@ -1,7 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { buildDealQuery, freshnessCutoff } from '@/lib/db/query-builder';
-import { makeDeal, makeMerchant, tempSqliteRepo } from './helpers';
-import type { DealRepository } from '@/lib/db/repository';
 
 /**
  * The read-path freshness window.
@@ -14,7 +12,11 @@ import type { DealRepository } from '@/lib/db/repository';
  *
  * The window is therefore a second, independent guarantee: the listing shows
  * only what a source actually returned recently, whether or not the reaper has
- * run. These tests inject the clock rather than relying on wall time.
+ * run.
+ *
+ * These are the clause-shape tests, which inject the clock rather than relying
+ * on wall time. What the window actually hides is in tests/db/contract-suite.ts,
+ * so both engines are held to it.
  */
 
 const NOW = new Date('2026-03-01T12:00:00.000Z');
@@ -61,71 +63,5 @@ describe('buildDealQuery freshness clause', () => {
     expect(where).toContain('d.last_seen_at >= $2');
     expect(where).toContain('d.category IN ($3)');
     expect(params).toEqual(['active', daysAgo(2), 'clothing']);
-  });
-});
-
-describe('freshness against a real repository', () => {
-  let repo: DealRepository;
-  let cleanup: () => Promise<void>;
-
-  beforeEach(async () => {
-    const ctx = tempSqliteRepo();
-    repo = ctx.repo;
-    cleanup = ctx.cleanup;
-    await repo.migrate();
-    await repo.upsertMerchants([makeMerchant({ id: 'm-1', slug: 'store', domain: 'store.ca' })]);
-  });
-
-  afterEach(async () => {
-    await cleanup();
-  });
-
-  /** Real-clock relative: the read path reads wall time, not an injected NOW. */
-  const realDaysAgo = (days: number): string =>
-    new Date(Date.now() - days * 86_400_000).toISOString();
-
-  it('hides a still-active deal no source has re-confirmed inside the window', async () => {
-    // Never reaped — status is 'active' — but four days unseen. This is the
-    // case that put sold-out sizes on the site: the reaper had not run, so
-    // nothing had retired it.
-    await repo.upsertDeals(
-      [makeDeal({ sourceId: 'stale', slug: 'stale', merchantId: 'm-1' })],
-      realDaysAgo(4),
-    );
-    await repo.upsertDeals(
-      [makeDeal({ sourceId: 'fresh', slug: 'fresh', merchantId: 'm-1' })],
-      realDaysAgo(1),
-    );
-
-    const { deals, total } = await repo.queryDeals({});
-    expect(deals.map((deal) => deal.slug)).toEqual(['fresh']);
-    expect(total).toBe(1);
-  });
-
-  it('leaves the stale deal reachable by its own URL', async () => {
-    // A link shared last week should explain itself rather than 404, so the
-    // detail page deliberately does not go through the window.
-    await repo.upsertDeals(
-      [makeDeal({ sourceId: 'stale', slug: 'stale', merchantId: 'm-1' })],
-      realDaysAgo(4),
-    );
-
-    const deal = await repo.getDealBySlug('stale');
-    expect(deal?.slug).toBe('stale');
-    expect(deal?.status).toBe('active');
-  });
-
-  it('counts facets on the same window as the listing they label', async () => {
-    await repo.upsertDeals(
-      [makeDeal({ sourceId: 'stale', slug: 'stale', merchantId: 'm-1', category: 'clothing' })],
-      realDaysAgo(4),
-    );
-    await repo.upsertDeals(
-      [makeDeal({ sourceId: 'fresh', slug: 'fresh', merchantId: 'm-1', category: 'clothing' })],
-      realDaysAgo(1),
-    );
-
-    const clothing = (await repo.facets('category')).find((f) => f.value === 'clothing');
-    expect(clothing?.count).toBe(1);
   });
 });
