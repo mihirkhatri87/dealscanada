@@ -167,10 +167,11 @@ suite against both, so that claim is tested rather than asserted.
 | `npm run scrape` | Ingest; `--dry-run`, `--source=`, `--family=`, `--limit=`, `--verbose` |
 | `npm run health` | Per-source reachability table — **the artifact worth sending back** |
 | `npm run worker` | Scheduled scraping; `--schedule=`, `--now` |
+| `npm run reap` | Retire expired and unseen deals without scraping; `--dry-run`, `--dead-after-hours=` |
 | `npm run stores:sync -- --postal=M5V3L9` | Nearby stores for local clearance |
 | `npm run retailer:probe -- https://store.ca` | Detect a store's platform, emit a catalogue entry |
 | `npm run assistant:eval` / `assistant:usage` | Assistant quality and spend |
-| `npm test` / `test:coverage` | 702 tests, no network |
+| `npm test` / `test:coverage` | 805 tests, no network |
 
 ---
 

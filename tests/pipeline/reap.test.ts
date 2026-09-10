@@ -95,6 +95,22 @@ describe('unseen deals', () => {
     expect(deals.map((deal) => deal.slug)).toEqual(['fresh']);
   });
 
+  it('revives a retired deal the next time a source returns it', async () => {
+    // This is what makes retirement safe to run on a hunch, and what
+    // `npm run reap` leans on: retiring a live deal costs one scrape, not a
+    // lost row. Absence is a guess, so it has to be a cheap one to be wrong
+    // about.
+    await repo.upsertDeals(
+      [makeDeal({ sourceId: 'back', slug: 'back', merchantId: 'm-1' })],
+      hoursAgo(100),
+    );
+    await reap({ repo, now: NOW, deadAfterHours: 72 });
+    expect((await repo.getDealBySlug('back'))?.status).toBe('dead');
+
+    await repo.upsertDeals([makeDeal({ sourceId: 'back', slug: 'back', merchantId: 'm-1' })]);
+    expect((await repo.getDealBySlug('back'))?.status).toBe('active');
+  });
+
   it('is generous by default, because a gap is likelier a blocked scrape than an ended sale', async () => {
     await repo.upsertDeals(
       [makeDeal({ sourceId: 'a', slug: 'a', merchantId: 'm-1' })],
