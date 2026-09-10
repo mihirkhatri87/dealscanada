@@ -86,7 +86,12 @@ describe('unseen deals', () => {
     const summary = await reap({ repo, now: NOW, deadAfterHours: 72 });
     expect(summary.dead).toBe(1);
 
-    const { deals } = await repo.queryDeals({});
+    // seenWithinDays: 0 turns off the read-path freshness window, which is a
+    // second, independent mechanism with its own wall-clock basis (this suite
+    // runs against a fixed NOW, so every row here is months stale to it). What
+    // is under test is the status the reaper wrote; the window is covered in
+    // tests/db/query-builder.test.ts.
+    const { deals } = await repo.queryDeals({ seenWithinDays: 0 });
     expect(deals.map((deal) => deal.slug)).toEqual(['fresh']);
   });
 

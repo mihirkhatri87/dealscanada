@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { splitStatements, translateSchema, ADDITIVE_COLUMNS } from './dialect';
-import { boundingBox, buildDealQuery } from './query-builder';
+import { boundingBox, buildDealQuery, freshnessCutoff } from './query-builder';
 import { haversineKm } from '../util/geo';
 import { mapDealWithRelations, summarizeUsage, toDealParams } from './sqlite';
 import type {
@@ -352,6 +352,9 @@ export class PostgresDealRepository implements DealRepository {
       brand: 'd.brand',
     }[field];
 
+    // Same freshness cutoff as the listing these counts label; see
+    // freshnessCutoff in query-builder.ts.
+    const seenSince = freshnessCutoff();
     const rows = await this.sql.unsafe(
       `SELECT ${column} AS value,
               COALESCE(${field === 'merchant' ? 'm.name' : column}, '') AS label,
@@ -359,9 +362,10 @@ export class PostgresDealRepository implements DealRepository {
        FROM deals d
        LEFT JOIN merchants m ON m.id = d.merchant_id
        WHERE d.status = 'active' AND ${column} IS NOT NULL AND ${column} <> ''
+         AND (CAST($1 AS TEXT) IS NULL OR d.last_seen_at >= CAST($1 AS TEXT))
        GROUP BY ${column}${field === 'merchant' ? ', m.name' : ''}
        ORDER BY n DESC`,
-      [] as never[],
+      [seenSince] as never[],
     );
 
     return rows.map((row) => {

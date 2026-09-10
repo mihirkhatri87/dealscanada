@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { splitStatements, ADDITIVE_COLUMNS } from './dialect';
-import { boundingBox, buildDealQuery } from './query-builder';
+import { boundingBox, buildDealQuery, freshnessCutoff } from './query-builder';
 import { haversineKm } from '../util/geo';
 import type {
   AssistantUsageInput,
@@ -397,6 +397,9 @@ export class SqliteDealRepository implements DealRepository {
       brand: 'd.brand',
     }[field];
 
+    // Same freshness cutoff as the listing these counts label; see
+    // freshnessCutoff in query-builder.ts.
+    const seenSince = freshnessCutoff();
     const rows = this.db
       .prepare(
         `SELECT ${column} AS value,
@@ -405,10 +408,11 @@ export class SqliteDealRepository implements DealRepository {
          FROM deals d
          LEFT JOIN merchants m ON m.id = d.merchant_id
          WHERE d.status = 'active' AND ${column} IS NOT NULL AND ${column} <> ''
+           AND (? IS NULL OR d.last_seen_at >= ?)
          GROUP BY ${column}
          ORDER BY n DESC`,
       )
-      .all() as Row[];
+      .all(seenSince, seenSince) as Row[];
 
     return rows.map((row) => ({
       value: String(row['value']),

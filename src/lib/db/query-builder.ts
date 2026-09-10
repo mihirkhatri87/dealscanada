@@ -1,5 +1,6 @@
 import type { Dialect } from './dialect';
 import type { DealQuery, DealSort } from './types';
+import { env } from '../config';
 
 /**
  * Builds the deal query once, for both dialects.
@@ -31,7 +32,11 @@ const SORTS: Record<DealSort, string> = {
   expiring: "COALESCE(d.expires_at, '9999-12-31') ASC",
 };
 
-export function buildDealQuery(query: DealQuery, dialect: Dialect): BuiltQuery {
+export function buildDealQuery(
+  query: DealQuery,
+  dialect: Dialect,
+  now: Date = new Date(),
+): BuiltQuery {
   const params: unknown[] = [];
   const clauses: string[] = [];
 
@@ -46,6 +51,22 @@ export function buildDealQuery(query: DealQuery, dialect: Dialect): BuiltQuery {
   // must not pollute listings.
   const statuses = query.statuses?.length ? query.statuses : ['active'];
   clauses.push(`d.status IN (${inList(statuses)})`);
+
+  // Freshness, enforced here rather than left to `status`.
+  //
+  // `status` is written by the reaper, and the reaper only retires a deal during
+  // a run where at least one source actually worked. So a stretch of blocked
+  // scrapes leaves every row reading 'active' - precisely when we know least
+  // about whether those deals, or the sizes we recorded for them, still exist.
+  //
+  // Checking last_seen_at at read time makes the listing say only what a source
+  // has recently confirmed, whether or not the reaper has run. Direct links are
+  // unaffected: getDealBySlug does not come through here, so a shared link still
+  // resolves and explains itself.
+  const seenSince = freshnessCutoff(query.seenWithinDays, now);
+  if (seenSince !== null) {
+    clauses.push(`d.last_seen_at >= ${ph(seenSince)}`);
+  }
 
   if (query.categories?.length) {
     clauses.push(`d.category IN (${inList(query.categories)})`);
@@ -136,6 +157,22 @@ export function buildDealQuery(query: DealQuery, dialect: Dialect): BuiltQuery {
   const orderBy = `${sort}, d.id ASC`;
 
   return { where: clauses.join(' AND '), params, orderBy };
+}
+
+/**
+ * The moment before which a deal counts as unconfirmed, as an ISO timestamp.
+ *
+ * Exported so the facet counts use the identical cutoff to the listing they
+ * label - a sidebar reading "Clothing (412)" above twelve results is its own
+ * kind of dishonesty.
+ *
+ * Returns null when the filter is off (days <= 0), which is for diagnostics
+ * that need to see every row.
+ */
+export function freshnessCutoff(days?: number, now: Date = new Date()): string | null {
+  const window = days ?? env.DEAL_FRESHNESS_DAYS;
+  if (window <= 0) return null;
+  return new Date(now.getTime() - window * 86_400_000).toISOString();
 }
 
 /**

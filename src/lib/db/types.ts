@@ -190,6 +190,14 @@ export interface DealQuery {
   /** Filter by ingesting source, e.g. ['seed'] to count sample rows. */
   sources?: string[];
   statuses?: DealStatus[];
+  /**
+   * Hide deals no source has re-confirmed within this many days.
+   *
+   * Omitted -> the configured default (DEAL_FRESHNESS_DAYS, 3). 0 -> no filter
+   * at all, which is for diagnostics that need to see every row and not for
+   * anything a visitor looks at.
+   */
+  seenWithinDays?: number;
   sort?: DealSort;
   limit?: number;
   offset?: number;
